@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Claira</title>
+  <style>
+    html, body {
+      background: #555555 !important;
+      margin: 0;
+      min-height: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="src/styles.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;600;700&family=Questrial&family=Roboto+Condensed:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    textarea.detail-field::placeholder {
+      color: rgba(255, 255, 255, 0.52);
+      opacity: 1;
+    }
+    input.chat-input::placeholder,
+    input.search-input::placeholder {
+      color: rgba(255, 255, 255, 0.62);
+      opacity: 1;
+    }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/three@0.160.1/build/three.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+window.Claira = window.Claira || {};
+
+window.Claira.QUESTIONS = [
+  { id:'emotion',   text:"Comment vous sentez-vous\nen ce moment ?",      sub:"Il n'y a pas de mauvaise réponse.", options:[{l:"Débordé·e"},{l:"Anxieux·se"},{l:"Triste"},{l:"Épuisé·e"},{l:"Perdu·e"},{l:"Tendu·e"}] },
+  { id:'duration',  text:"Depuis combien de\ntemps ressentez-vous ça ?", sub:null, options:[{l:"Quelques jours"},{l:"Quelques semaines"},{l:"Plusieurs mois"},{l:"Depuis longtemps"}] },
+  { id:'impact',    text:"Est-ce que cela impacte\nvotre quotidien ?",    sub:null, options:[{l:"Oui, beaucoup"},{l:"Un peu"},{l:"Pas vraiment"}] },
+  { id:'goal',      text:"Ce que vous cherchez\navant tout ?",          sub:null, options:[{l:"Comprendre"},{l:"Me sentir mieux"},{l:"Traverser une période"},{l:"Travailler en profondeur"}] },
+  { id:'constraint',text:"Avez-vous des contraintes\nparticulières ?",    sub:null, options:[{l:"Budget serré"},{l:"Peu de temps"},{l:"En ligne"},{l:"Pas de contrainte"}] },
+  { id:'style',     text:"Vous préférez quelqu'un\nqui…",              sub:null, options:[{l:"M'écoute"},{l:"M'aide à agir"},{l:"Explore en profondeur"},{l:"Peu importe"}] },
+];
+
+window.Claira.TEST_ANSWERS = {
+  emotion: 'Anxieux·se',
+  duration: 'Plusieurs mois',
+  impact: 'Oui, beaucoup',
+  goal: 'Me sentir mieux',
+  constraint: 'Peu de temps',
+  style: "M'aide à agir",
+};
+
+window.Claira.THERAPIES = [
+  { id:'tcc',       name:"Thérapie cognitive\net comportementale", short:"TCC",       tagline:"Pensées · Comportements · Résultats", desc:"Aide à identifier et modifier les schémas qui alimentent le mal-être. Orientée résultats, concrète.",    benefits:["Outils pratiques dès le début","Efficace sur anxiété et dépression","Résultats en quelques séances"],          constraints:["Engagement actif requis","Moins orientée passé"],                        duration:"12–20 séances", hue:"260" },
+  { id:'humaniste', name:"Thérapie\nhumaniste",                    short:"Humaniste", tagline:"Écoute · Présent · Croissance",       desc:"Centrée sur vous, votre ressenti, votre potentiel. Vous êtes expert·e de votre propre vie, le thérapeute vous accompagne.", benefits:["Espace de parole bienveillant","Renforce l'estime de soi","Aucune rigidité"],              constraints:["Progrès parfois plus lents","Moins adapté aux crises"],                   duration:"Variable",       hue:"175" },
+  { id:'emdr',      name:"EMDR",                                   short:"EMDR",      tagline:"Trauma · Mémoire · Libération",       desc:"Stimulations bilatérales pour traiter des souvenirs douloureux. Très efficace sur les traumatismes.",    benefits:["Efficace sur traumatismes","Résultats rapides","Moins de mots, plus de ressenti"], constraints:["Peut être intense","Praticien certifié nécessaire"],                    duration:"6–12 séances",   hue:"310" },
+  { id:'act',       name:"Thérapie\nd’acceptation\net d’engagement", short:"ACT",     tagline:"Valeurs · Acceptation · Action",     desc:"Aide à faire de la place à ce que vous ressentez, tout en avançant vers ce qui compte pour vous au quotidien.", benefits:["Utile quand on tourne en rond","Travail sur les valeurs","Approche souple et concrète"], constraints:["Demande de l’implication","Moins centrée sur l’analyse du passé"], duration:"8-16 séances", hue:"205" },
+  { id:'systemique',name:"Thérapie\nsystémique",                   short:"Systémique",tagline:"Liens · Famille · Dynamiques",      desc:"Regarde les difficultés dans leur contexte relationnel pour mieux comprendre ce qui se rejoue avec les autres.", benefits:["Pertinente pour les relations","Aide à prendre du recul","Travail sur les interactions"], constraints:["Parfois moins directe","Peut bousculer les habitudes familiales"], duration:"Variable", hue:"28" },
+  { id:'psychodynamique',name:"Thérapie\npsychodynamique",         short:"Psychodynamique",tagline:"Histoire · Sens · Inconscient", desc:"Permet d’explorer en profondeur ce qui se répète, pour mieux relier le présent à votre histoire et retrouver du mouvement.", benefits:["Travail en profondeur","Aide à mieux se comprendre","Donne du sens aux répétitions"], constraints:["Souvent plus long","Moins orientée outils immédiats"], duration:"Plusieurs mois", hue:"336" },
+];
+
+const therapistPhoto = (set, id) => `https://randomuser.me/api/portraits/${set}/${id}.jpg`;
+
+window.Claira.THERAPISTS = [
+  { id:1, therapy:"tcc", name:"Sophie Marchand", title:"Psychologue clinicienne", specialty:"TCC · Anxiété · Burnout", price:70, distance:"1.2 km", online:true, score:96, matchReason:"Approche TCC, disponible en ligne", initials:"SM", photo:therapistPhoto('women', 44), hue:"260", years:9, bio:"Sophie accompagne les personnes confrontées à l'anxiété, au burnout et aux ruminations. Elle propose une TCC structurée, progressive et très concrète.", approach:"Première séance libre : on clarifie ce qui vous amène, puis on choisit des objectifs simples et mesurables.", session:["Accueil et mise en confiance","Analyse des situations difficiles","Objectifs concrets","Exercices entre les séances"], reviews:[{author:"Alice R.", text:"Des outils clairs sans pression.", stars:5},{author:"Théo M.", text:"J'ai vite compris mes schémas.", stars:5}] },
+  { id:2, therapy:"tcc", name:"Nadia Kerrou", title:"Psychologue TCC", specialty:"TCC · Phobies · Attaques de panique", price:68, distance:"1.8 km", online:true, score:93, matchReason:"TCC orientée anxiété et exposition progressive", initials:"NK", photo:therapistPhoto('women', 68), hue:"260", years:11, bio:"Nadia aide à apprivoiser les peurs, les évitements et les crises de panique avec une méthode graduelle et rassurante.", approach:"On avance pas à pas, avec des exercices adaptés à votre rythme et jamais imposés brutalement.", session:["Carte des peurs","Psychoéducation","Exposition graduée","Plan d'autonomie"], reviews:[{author:"Mina C.", text:"Très douce et très cadrante.", stars:5}] },
+  { id:3, therapy:"tcc", name:"Camille Arnaud", title:"Psychothérapeute", specialty:"TCC · Sommeil · Stress professionnel", price:62, distance:"2.1 km", online:false, score:89, matchReason:"Outils pratiques pour stress, sommeil et charge mentale", initials:"CA", photo:therapistPhoto('women', 32), hue:"260", years:8, bio:"Camille travaille avec les personnes qui se sentent sous tension permanente, notamment dans le travail et le sommeil.", approach:"La séance alterne compréhension des déclencheurs, outils concrets et ajustements réalistes du quotidien.", session:["Point sur le sommeil","Repérage des pensées","Routines utiles","Suivi des progrès"], reviews:[{author:"Jonas P.", text:"Simple, concret, efficace.", stars:5}] },
+  { id:4, therapy:"tcc", name:"Romain Delattre", title:"Psychologue clinicien", specialty:"TCC · Dépression · Estime de soi", price:75, distance:"3.0 km", online:true, score:91, matchReason:"TCC pour reprendre appui quand l'élan baisse", initials:"RD", photo:therapistPhoto('men', 37), hue:"260", years:13, bio:"Romain accompagne les épisodes dépressifs, la perte d'élan et l'autocritique avec une approche active et bienveillante.", approach:"On identifie ce qui entretient la souffrance, puis on remet du mouvement à travers de petits pas tenables.", session:["Évaluation de l'humeur","Activation comportementale","Travail des pensées","Prévention des rechutes"], reviews:[{author:"Clara V.", text:"Je me suis sentie comprise et guidée.", stars:5}] },
+  { id:5, therapy:"tcc", name:"Élise Fournier", title:"Psychologue", specialty:"TCC · TOC · Perfectionnisme", price:78, distance:"4.2 km", online:true, score:87, matchReason:"TCC adaptée aux pensées intrusives et au contrôle", initials:"EF", photo:therapistPhoto('women', 12), hue:"260", years:10, bio:"Élise aide à travailler les compulsions, les pensées intrusives et les exigences trop fortes envers soi-même.", approach:"Les séances construisent un cadre clair pour comprendre les boucles et tester de nouvelles réponses.", session:["Analyse des compulsions","Hiérarchie d'exposition","Tolérance à l'incertitude","Bilan régulier"], reviews:[{author:"Hugo L.", text:"Très pédagogique, jamais jugeante.", stars:5}] },
+  { id:6, therapy:"humaniste", name:"Laurent Bessière", title:"Psychothérapeute", specialty:"Humaniste · Relations · Identité", price:65, distance:"2.8 km", online:false, score:88, matchReason:"Transitions de vie, approche douce", initials:"LB", photo:therapistPhoto('men', 52), hue:"175", years:14, bio:"Laurent travaille sur les transitions de vie et les relations difficiles. Son approche humaniste crée un espace de liberté totale.", approach:"Chaque séance suit votre rythme : mieux vous comprendre, sans jugement.", session:["Espace libre de parole","Exploration des ressentis","Liens avec votre histoire","Confiance en soi"], reviews:[{author:"Camille L.", text:"Quelqu'un qui m'écoute vraiment.", stars:5}] },
+  { id:7, therapy:"humaniste", name:"Awa Benali", title:"Psychopraticienne", specialty:"Humaniste · Estime de soi · Émotions", price:60, distance:"1.5 km", online:true, score:92, matchReason:"Écoute profonde et travail sur la confiance", initials:"AB", photo:therapistPhoto('women', 55), hue:"175", years:7, bio:"Awa accompagne les personnes qui doutent d'elles-mêmes ou ont du mal à accueillir leurs émotions.", approach:"Elle propose un cadre chaleureux pour remettre des mots sur ce qui se vit intérieurement.", session:["Accueil du vécu","Clarification des besoins","Ressources personnelles","Ancrage émotionnel"], reviews:[{author:"Sarah D.", text:"Un espace très apaisant.", stars:5}] },
+  { id:8, therapy:"humaniste", name:"Hélène Moreau", title:"Psychologue humaniste", specialty:"Humaniste · Deuil · Séparation", price:72, distance:"3.4 km", online:true, score:90, matchReason:"Accompagnement des pertes et passages de vie", initials:"HM", photo:therapistPhoto('women', 28), hue:"175", years:16, bio:"Hélène accompagne les périodes de deuil, de rupture ou de changement profond avec une présence stable et sensible.", approach:"La séance laisse une place importante au rythme émotionnel et à ce qui a besoin d'être reconnu.", session:["Récit de la situation","Accueil de la douleur","Repères de soutien","Cheminement personnel"], reviews:[{author:"Nora T.", text:"Beaucoup de délicatesse.", stars:5}] },
+  { id:9, therapy:"humaniste", name:"Mathieu Serrano", title:"Psychothérapeute", specialty:"Humaniste · Sens · Reconversion", price:67, distance:"2.0 km", online:false, score:86, matchReason:"Questionnement existentiel et choix de vie", initials:"MS", photo:therapistPhoto('men', 29), hue:"175", years:9, bio:"Mathieu travaille avec les personnes qui cherchent du sens, une direction ou une manière plus juste d'habiter leur vie.", approach:"Il aide à écouter les signaux internes sans précipiter de décision.", session:["Exploration du moment","Valeurs personnelles","Blocages actuels","Pistes d'action"], reviews:[{author:"Léo B.", text:"M'a aidé à y voir plus clair.", stars:4}] },
+  { id:10, therapy:"humaniste", name:"Claire Vignal", title:"Psychologue", specialty:"Humaniste · Hypersensibilité · Relations", price:70, distance:"4.1 km", online:true, score:84, matchReason:"Approche douce pour émotions intenses", initials:"CV", photo:therapistPhoto('women', 21), hue:"175", years:12, bio:"Claire reçoit des personnes hypersensibles ou très sollicitées émotionnellement, souvent épuisées par leurs relations.", approach:"Le travail vise à retrouver une sécurité intérieure et des limites plus ajustées.", session:["Ressenti corporel","Besoins relationnels","Limites personnelles","Ressources d'apaisement"], reviews:[{author:"Emma S.", text:"Je me suis sentie moins seule.", stars:5}] },
+  { id:11, therapy:"emdr", name:"Inès Touati", title:"Psychologue · EMDR", specialty:"EMDR · Trauma · Stress post-traumatique", price:80, distance:"3.5 km", online:true, score:81, matchReason:"EMDR, si une expérience difficile est en cause", initials:"IT", photo:therapistPhoto('women', 79), hue:"310", years:7, bio:"Inès est spécialisée dans les traumatismes. Elle combine EMDR et thérapie narrative.", approach:"Les premières séances évaluent ensemble si l'EMDR est adapté.", session:["Évaluation initiale","Préparation","Traitement","Intégration"], reviews:[{author:"Marc V.", text:"Des résultats que je n'espérais plus.", stars:5},{author:"Sarah B.", text:"Très professionnelle, travail en profondeur.", stars:4}] },
+  { id:12, therapy:"emdr", name:"Julien Caron", title:"Psychologue EMDR", specialty:"EMDR · Accidents · Souvenirs intrusifs", price:82, distance:"2.6 km", online:false, score:88, matchReason:"EMDR centré sur souvenirs envahissants", initials:"JC", photo:therapistPhoto('men', 41), hue:"310", years:10, bio:"Julien accompagne les souvenirs qui reviennent malgré soi après un accident, une agression ou un choc émotionnel.", approach:"Il prend le temps de stabiliser avant tout retraitement, pour que la personne garde un sentiment de contrôle.", session:["Histoire du trauma","Stabilisation","Mouvements bilatéraux","Bilan d'intégration"], reviews:[{author:"M. A.", text:"Cadre très sécurisant.", stars:5}] },
+  { id:13, therapy:"emdr", name:"Myriam Cohen", title:"Psychothérapeute EMDR", specialty:"EMDR · Enfance · Attachement", price:76, distance:"1.9 km", online:true, score:90, matchReason:"EMDR et blessures anciennes", initials:"MC", photo:therapistPhoto('women', 63), hue:"310", years:15, bio:"Myriam travaille avec les empreintes anciennes, les relations d'attachement et les souvenirs émotionnels difficiles.", approach:"Elle associe préparation, sécurité émotionnelle et retraitement progressif.", session:["Repères de sécurité","Ciblage des souvenirs","Retraitement EMDR","Ressources futures"], reviews:[{author:"Julie K.", text:"Très respectueuse du rythme.", stars:5}] },
+  { id:14, therapy:"emdr", name:"Thomas Nguyen", title:"Psychologue clinicien", specialty:"EMDR · Anxiété traumatique · Corps", price:85, distance:"5.0 km", online:true, score:83, matchReason:"EMDR avec attention aux sensations corporelles", initials:"TN", photo:therapistPhoto('men', 11), hue:"310", years:8, bio:"Thomas aide à travailler les réactions corporelles liées au stress traumatique: sursauts, tension, évitement ou hypervigilance.", approach:"Le travail commence par comprendre comment le corps signale le danger, puis par restaurer des appuis.", session:["Évaluation clinique","Ancrage corporel","Stimulation bilatérale","Retour au calme"], reviews:[{author:"Anaïs J.", text:"Très clair dans ses explications.", stars:4}] },
+  { id:15, therapy:"emdr", name:"Salomé Girard", title:"Psychologue · EMDR enfants/adultes", specialty:"EMDR · Deuil traumatique · Blocages", price:78, distance:"3.7 km", online:false, score:86, matchReason:"EMDR pour événements difficiles et blocages persistants", initials:"SG", photo:therapistPhoto('women', 36), hue:"310", years:9, bio:"Salomé accompagne les événements qui restent figés, notamment après un deuil brutal ou une période de grande peur.", approach:"Elle construit d'abord un espace stable, puis avance vers les souvenirs avec prudence.", session:["Alliance thérapeutique","Préparation","Retraitement ciblé","Intégration émotionnelle"], reviews:[{author:"Karim E.", text:"J'ai retrouvé du calme.", stars:5}] },
+  { id:16, therapy:"act", name:"Manon Leclerc", title:"Psychologue ACT", specialty:"ACT · Valeurs · Anxiété", price:70, distance:"1.6 km", online:true, score:94, matchReason:"ACT pour avancer malgré l'anxiété", initials:"ML", photo:therapistPhoto('women', 47), hue:"205", years:8, bio:"Manon aide les personnes anxieuses à retrouver de la liberté d'action sans attendre que toutes les pensées disparaissent.", approach:"On apprend à faire de la place aux émotions tout en revenant vers ce qui compte.", session:["Valeurs importantes","Défusion des pensées","Actions engagées","Exercices d'acceptation"], reviews:[{author:"Pauline G.", text:"Très concret et apaisant.", stars:5}] },
+  { id:17, therapy:"act", name:"Idriss Hamon", title:"Psychothérapeute ACT", specialty:"ACT · Rumination · Évitement", price:66, distance:"2.3 km", online:true, score:89, matchReason:"ACT pour sortir des boucles mentales", initials:"IH", photo:therapistPhoto('men', 62), hue:"205", years:6, bio:"Idriss accompagne les personnes qui tournent en rond dans leur tête et repoussent ce qui compte par peur de mal faire.", approach:"Le travail relie observation des pensées et petits engagements concrets.", session:["Cartographie des évitements","Défusion cognitive","Choix de valeurs","Micro-actions"], reviews:[{author:"Diane F.", text:"J'ai repris des décisions.", stars:5}] },
+  { id:18, therapy:"act", name:"Julie Fernandez", title:"Psychologue", specialty:"ACT · Douleur chronique · Adaptation", price:74, distance:"4.5 km", online:true, score:85, matchReason:"ACT pour vivre avec une contrainte durable", initials:"JF", photo:therapistPhoto('women', 8), hue:"205", years:12, bio:"Julie travaille avec les personnes qui doivent composer avec une douleur, une fatigue ou une contrainte durable.", approach:"Elle aide à distinguer ce qui peut changer de ce qui demande un ajustement profond.", session:["Clarification de la lutte","Acceptation active","Rythme réaliste","Valeurs préservées"], reviews:[{author:"Olivier R.", text:"Moins de lutte, plus de vie.", stars:5}] },
+  { id:19, therapy:"act", name:"Baptiste Robin", title:"Psychologue ACT", specialty:"ACT · Perfectionnisme · Travail", price:69, distance:"2.9 km", online:false, score:87, matchReason:"ACT pour pression interne et exigence", initials:"BR", photo:therapistPhoto('men', 24), hue:"205", years:7, bio:"Baptiste accompagne les personnes très exigeantes avec elles-mêmes, souvent prises entre performance et épuisement.", approach:"Il travaille la relation aux pensées d'obligation et la reprise d'actions choisies.", session:["Repérage des règles internes","Souplesse psychologique","Valeurs professionnelles","Actions test"], reviews:[{author:"Élodie H.", text:"J'ai desserré l'étau.", stars:5}] },
+  { id:20, therapy:"act", name:"Samira Vidal", title:"Psychologue clinicienne", specialty:"ACT · Dépression · Reprise d'élan", price:72, distance:"3.2 km", online:true, score:91, matchReason:"ACT pour retrouver du mouvement", initials:"SV", photo:therapistPhoto('women', 70), hue:"205", years:10, bio:"Samira aide à remettre de l'élan quand la tristesse, la peur ou l'épuisement réduisent le champ des possibles.", approach:"Les séances cherchent des actions petites mais reliées à ce qui donne du sens.", session:["Valeurs de vie","Obstacles internes","Actions graduées","Bilan d'élan"], reviews:[{author:"Nicolas M.", text:"Très humaine et précise.", stars:5}] },
+  { id:21, therapy:"systemique", name:"Gabriel Perrin", title:"Thérapeute systémique", specialty:"Thérapie systémique · Couple · Famille", price:78, distance:"2.4 km", online:false, score:90, matchReason:"Approche systémique pour dynamiques relationnelles", initials:"GP", photo:therapistPhoto('men', 48), hue:"28", years:13, bio:"Gabriel accompagne les couples et familles qui répètent les mêmes conflits sans parvenir à en sortir seuls.", approach:"Il observe les interactions plutôt que de chercher un responsable, pour ouvrir d'autres manières de répondre.", session:["Lecture des interactions","Place de chacun","Cycles relationnels","Nouveaux essais"], reviews:[{author:"Amandine P.", text:"On a enfin compris notre boucle.", stars:5}] },
+  { id:22, therapy:"systemique", name:"Maëlle Dumas", title:"Psychologue systémicienne", specialty:"Systémique · Parents · Adolescents", price:70, distance:"1.1 km", online:true, score:88, matchReason:"Systémique familiale et communication", initials:"MD", photo:therapistPhoto('women', 26), hue:"28", years:9, bio:"Maëlle travaille avec les familles en tension, notamment lorsque la communication se ferme ou devient explosive.", approach:"Elle aide chacun à retrouver une place plus respirable dans le système familial.", session:["Demande familiale","Rôles et attentes","Communication","Ajustements concrets"], reviews:[{author:"Sonia L.", text:"Très aidante avec notre ado.", stars:5}] },
+  { id:23, therapy:"systemique", name:"Omar Lenoir", title:"Psychothérapeute", specialty:"Systémique · Relations · Travail", price:64, distance:"3.6 km", online:true, score:84, matchReason:"Dynamiques relationnelles au travail", initials:"OL", photo:therapistPhoto('men', 71), hue:"28", years:8, bio:"Omar aide à comprendre les places prises dans les groupes, les conflits professionnels et les relations qui enferment.", approach:"Le travail met en lumière les règles implicites et les marges de manœuvre possibles.", session:["Contexte relationnel","Alliances et tensions","Frontières","Stratégies d'interaction"], reviews:[{author:"Maya B.", text:"J'ai repris ma place.", stars:4}] },
+  { id:24, therapy:"systemique", name:"Flora Millet", title:"Thérapeute familiale", specialty:"Systémique · Fratrie · Séparation", price:73, distance:"4.8 km", online:false, score:82, matchReason:"Systémique pour familles recomposées et séparations", initials:"FM", photo:therapistPhoto('women', 41), hue:"28", years:11, bio:"Flora accompagne les familles recomposées, les séparations et les tensions de fratrie avec une approche pragmatique.", approach:"Elle cherche des accords relationnels réalistes plutôt qu'un idéal impossible.", session:["Carte familiale","Points de friction","Accords pratiques","Rituels de communication"], reviews:[{author:"Claire N.", text:"Très concrète et calme.", stars:5}] },
+  { id:25, therapy:"systemique", name:"Antoine Ravel", title:"Psychologue systémique", specialty:"Systémique · Couple · Attachement", price:82, distance:"2.7 km", online:true, score:86, matchReason:"Lecture des cycles de couple et attachement", initials:"AR", photo:therapistPhoto('men', 17), hue:"28", years:15, bio:"Antoine travaille avec les couples pris dans des cycles de poursuite, retrait, reproche ou silence.", approach:"Il aide à comprendre ce qui se joue sous les disputes pour recréer du dialogue.", session:["Cycle du couple","Besoins cachés","Dialogue guidé","Nouveaux repères"], reviews:[{author:"Lina O.", text:"On se parle autrement.", stars:5}] },
+  { id:26, therapy:"psychodynamique", name:"Jeanne Valette", title:"Psychologue clinicienne", specialty:"Psychodynamique · Histoire · Répétitions", price:75, distance:"1.4 km", online:true, score:89, matchReason:"Travail psychodynamique en profondeur", initials:"JV", photo:therapistPhoto('women', 64), hue:"336", years:12, bio:"Jeanne accompagne les personnes qui sentent qu'un même scénario se répète dans leurs relations ou leurs choix.", approach:"Le travail relie le présent à l'histoire personnelle, sans forcer d'interprétation.", session:["Motif de consultation","Associations libres","Liens avec l'histoire","Élaboration progressive"], reviews:[{author:"Léa W.", text:"Fin et très respectueux.", stars:5}] },
+  { id:27, therapy:"psychodynamique", name:"Victor Masson", title:"Psychanalyste", specialty:"Psychodynamique · Inconscient · Angoisse", price:68, distance:"3.1 km", online:false, score:84, matchReason:"Approche psychodynamique pour comprendre le sens", initials:"VM", photo:therapistPhoto('men', 55), hue:"336", years:18, bio:"Victor reçoit les personnes qui souhaitent comprendre ce que leurs symptômes racontent au-delà de l'urgence du moment.", approach:"La parole libre permet de repérer peu à peu les conflits internes et les défenses.", session:["Parole libre","Repérage des affects","Hypothèses de sens","Travail au long cours"], reviews:[{author:"Bastien C.", text:"Un vrai travail de fond.", stars:5}] },
+  { id:28, therapy:"psychodynamique", name:"Lina Chevalier", title:"Psychologue psychodynamique", specialty:"Psychodynamique · Attachement · Identité", price:72, distance:"2.2 km", online:true, score:87, matchReason:"Exploration de l'identité et des liens", initials:"LC", photo:therapistPhoto('women', 73), hue:"336", years:9, bio:"Lina accompagne les questionnements d'identité, les liens ambivalents et la peur de ne pas être à sa place.", approach:"Elle propose un cadre stable pour mettre en mots ce qui reste confus ou contradictoire.", session:["Demande actuelle","Histoire relationnelle","Émotions ambivalentes","Mise en sens"], reviews:[{author:"Nina E.", text:"Je comprends mieux mes réactions.", stars:5}] },
+  { id:29, therapy:"psychodynamique", name:"Adrien Weil", title:"Psychologue clinicien", specialty:"Psychodynamique · Deuil · Dépression", price:80, distance:"5.3 km", online:true, score:83, matchReason:"Travail du deuil et de la perte de sens", initials:"AW", photo:therapistPhoto('men', 9), hue:"336", years:14, bio:"Adrien accompagne les pertes, les épisodes dépressifs et les moments où l'histoire semble peser fortement sur le présent.", approach:"Il aide à traverser la douleur tout en comprenant ce qu'elle réactive.", session:["Accueil de la perte","Histoire personnelle","Répétitions affectives","Symbolisation"], reviews:[{author:"Yasmine A.", text:"Présence très solide.", stars:5}] },
+  { id:30, therapy:"psychodynamique", name:"Morgane Tessier", title:"Psychothérapeute", specialty:"Psychodynamique · Relations · Schémas", price:66, distance:"2.5 km", online:false, score:85, matchReason:"Comprendre les schémas relationnels persistants", initials:"MT", photo:therapistPhoto('women', 15), hue:"336", years:10, bio:"Morgane travaille avec les personnes qui veulent comprendre pourquoi elles répètent certains liens, choix ou réactions.", approach:"Le cadre soutient une exploration patiente, avec attention aux émotions et aux mots qui reviennent.", session:["Situation présente","Schémas relationnels","Échos du passé","Nouveaux appuis"], reviews:[{author:"Gaël R.", text:"Ça m'aide à relier les choses.", stars:4}] },
+];
+
+function getCompatibilityTone(score) {
+  if (score >= 92) {
+    return {
+      text: 'rgba(122, 245, 198, 0.98)',
+      soft: 'rgba(122, 245, 198, 0.16)',
+      bg: 'rgba(122, 245, 198, 0.08)',
+      ring: 'rgba(122, 245, 198, 0.30)',
+      label: 'Très bon',
+    };
+  }
+  if (score >= 84) {
+    return {
+      text: 'rgba(116, 227, 234, 0.98)',
+      soft: 'rgba(116, 227, 234, 0.15)',
+      bg: 'rgba(116, 227, 234, 0.08)',
+      ring: 'rgba(116, 227, 234, 0.26)',
+      label: 'Bon',
+    };
+  }
+  if (score >= 76) {
+    return {
+      text: 'rgba(150, 196, 255, 0.98)',
+      soft: 'rgba(150, 196, 255, 0.14)',
+      bg: 'rgba(150, 196, 255, 0.08)',
+      ring: 'rgba(150, 196, 255, 0.24)',
+      label: 'Pertinent',
+    };
+  }
+  return {
+    text: 'rgba(205, 213, 229, 0.92)',
+    soft: 'rgba(205, 213, 229, 0.12)',
+    bg: 'rgba(205, 213, 229, 0.07)',
+    ring: 'rgba(205, 213, 229, 0.18)',
+    label: 'À explorer',
+  };
+}
+
+window.Claira.getInsight = function getInsight(answers) {
+  const e = answers.emotion || '';
+  const impact = answers.impact || '';
+  const duration = answers.duration || '';
+
+  if (e==="Anxieux·se"||e==="Tendu·e") return {
+    label: "De l'anxiété qui prend de la place",
+    text: "L'anxiété chronique s'auto-alimente : les pensées s'emballent, le corps suit. Ce n'est pas un manque de volonté, c'est un cycle qui s'est installé, probablement progressivement. La bonne nouvelle : c'est quelque chose de vraiment travaillable.",
+    process: "La TCC donne des outils concrets pour identifier et interrompre ces spirales. Pas besoin de tout comprendre d'un coup. Beaucoup de personnes voient une différence significative en 8 à 12 séances. La première étape, c'est simplement une conversation exploratoire, sans engagement.",
+    therapy:'tcc'
+  };
+  if (e==="Épuisé·e"||e==="Débordé·e") return {
+    label: "Un épuisement qui mérite attention",
+    text: "Ce que vous décrivez ressemble à un épuisement des ressources, pas seulement à de la fatigue. Quand on donne beaucoup sans pouvoir recharger, le corps et l'esprit finissent par envoyer des signaux forts. C'est un signe à prendre au sérieux, pas à minimiser.",
+    process: "Avant de chercher des solutions, il y a souvent besoin d'un espace pour nommer ce qui se passe. Un thérapeute peut vous aider à identifier ce qui vous vide, comprendre pourquoi, et trouver progressivement un équilibre qui vous ressemble. Ce n'est pas un luxe, c'est une étape concrète.",
+    therapy:'tcc'
+  };
+  if (e==="Triste") return {
+    label: "Une tristesse qui s'installe",
+    text: "La tristesse persistante, ce n'est pas juste « avoir le cafard ». Elle peut signaler un deuil, une perte de sens, un besoin profond de reconnexion à soi. Elle mérite d'être entendue, pas gérée ou mise de côté.",
+    process: "Une thérapie centrée sur l'écoute peut faire beaucoup : pas pour vous expliquer ce que vous ressentez, mais pour vous aider à vous l'approprier. Souvent, être vraiment entendu·e par quelqu'un de formé suffit à déclencher quelque chose d'important.",
+    therapy:'humaniste'
+  };
+  if (e==="Perdu·e") return {
+    label: "Un besoin de repères et de sens",
+    text: "Se sentir perdu·e, c'est souvent le signe d'une transition : quelque chose change, ou doit changer. Ce n'est pas un problème à résoudre mais un état à traverser. Et on traverse mieux cela quand on n'est pas seul·e.",
+    process: "Un accompagnement thérapeutique peut vous aider à démêler ce qui se joue, retrouver vos propres repères et avancer à votre rythme. Pas de réponses toutes faites, juste un espace pour explorer.",
+    therapy:'humaniste'
+  };
+  return {
+    label: "Quelque chose mérite d'être exploré",
+    text: "Ce que vous vivez est réel et mérite d'être pris au sérieux. Même sans pouvoir tout nommer précisément, ressentir le besoin d'en parler est en soi un signal important.",
+    process: "La première séance est souvent une exploration libre, sans structure imposée, simplement l'occasion de voir si le courant passe. C'est sans engagement, et souvent plus simple que ce qu'on imagine.",
+    therapy:'humaniste'
+  };
+};
+
+window.Claira.GROQ_API_KEY = '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';
+
+window.Claira.generateAIInsight = async function generateAIInsight(answers) {
+  const fallback = { ...window.Claira.getInsight(answers), summary: null };
+  const key = window.Claira.GROQ_API_KEY;
+  if (!key) return fallback;
+
+  const labels = { emotion:'Émotion', duration:'Durée', impact:'Impact quotidien', goal:'Objectif', constraint:'Contraintes', style:'Style de thérapeute' };
+  const answersText = Object.entries(answers).map(([k, v]) => `- ${labels[k] || k} : ${v}`).join('\n');
+
+  const prompt = `Tu es Claira, une application d'aide à la compréhension et d'orientation thérapeutique. Un utilisateur vient de répondre à un questionnaire. Voici ses réponses :\n${answersText}\n\nGénère un résumé descriptif, sobre et utile en JSON avec exactement ces 4 champs :\n- "label" : titre court (5-8 mots max), descriptif, sans promesse de soutien, sans formulation à la première personne\n- "summary" : 2-3 phrases qui décrivent ce que la personne vit, en utilisant "vous". Ton clair et analytique, pas consolateur. Entoure 2-3 mots ou expressions clés de **double astérisques** (ex: "vous vous sentez **épuisé·e** depuis **plusieurs mois**")\n- "text" : 2-3 phrases sur ce que cela peut évoquer psychologiquement, nuancé et non diagnostique\n- "process" : 2-3 phrases sur comment la thérapie peut aider à comprendre, clarifier ou travailler ces mécanismes, de façon concrète\n\nContraintes strictes : n'écris jamais à la première personne ("je", "nous", "Claira"). Évite les formules de soutien personnifié comme "je vous soutiens", "je suis là", "je comprends", "vous n'êtes pas seul". Ne donne pas l'impression que l'application parle comme une personne aidante : elle produit un point de compréhension.\n\nRéponds UNIQUEMENT avec le JSON valide, rien d'autre.`;
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 600,
+        temperature: 0.7,
+      })
+    });
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content || '';
+    const jsonStr = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(jsonStr);
+    const isPersonified = (value) => /\b(je|j'|nous|Claira)\b|je\s+(te|vous)|je\s+suis\s+là|je\s+comprends|soutiens?|vous\s+n['’]êtes\s+pas\s+seul/i.test(String(value || ''));
+    return {
+      label:   parsed.label && !isPersonified(parsed.label) ? parsed.label : fallback.label,
+      summary: parsed.summary && !isPersonified(parsed.summary) ? parsed.summary : null,
+      text:    parsed.text && !isPersonified(parsed.text) ? parsed.text : fallback.text,
+      process: parsed.process && !isPersonified(parsed.process) ? parsed.process : fallback.process,
+      therapy: fallback.therapy,
+    };
+  } catch (e) {
+    return fallback;
+  }
+};
+
+(() => {
+  const { useState, useEffect, useRef } = React;
+
+  const THREE_BACKGROUND_SETTINGS = {
+    dpr: 1.0,
+    timeScale: 0.5,
+    waveSpeed: 1.0,
+    waveHeight: 1.0,
+    wave1Freq: 4.8,
+    wave1Amp: 0.038,
+    wave2Freq: 0.3,
+    wave2Amp: -0.09,
+    wave3FreqX: -0.6,
+    wave3FreqZ: -0.7,
+    wave3Amp: 0.12,
+    noiseAmount: 0.004,
+    foldingOffset: 9.291,
+    stepBase: 0.146,
+    glowIntensity: 0.0085,
+    glowSpread: 5.1,
+  };
+
+  const THREE_VERTEX_SHADER = `
+    void main() {
+      gl_Position = vec4(position, 1.0);
+    }
+  `;
+
+  const THREE_FRAGMENT_SHADER = `
+    precision highp float;
+    uniform vec3 iResolution;
+    uniform float iTime;
+    uniform float uTimeScale;
+    uniform float uWaveSpeed;
+    uniform float uWaveHeight;
+    uniform float uWave1Freq;
+    uniform float uWave1Amp;
+    uniform float uWave2Freq;
+    uniform float uWave2Amp;
+    uniform float uWave3FreqX;
+    uniform float uWave3FreqZ;
+    uniform float uWave3Amp;
+    uniform float uNoiseAmount;
+    uniform float uFoldingOffset;
+    uniform float uStepBase;
+    uniform float uGlowIntensity;
+    uniform float uGlowSpread;
+    uniform float uWaveYOffset;
+
+    float generateFineNoise(vec2 p) {
+      vec3 p3 = fract(vec3(p.xyx) * 8.6231);
+      p3 += dot(p3, p3.yzx + 67.92);
+      return fract((p3.x + p3.y) * p3.z);
+    }
+
+    void main() {
+      vec2 fragCoord = gl_FragCoord.xy;
+      vec2 uv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+      vec3 rayDir = normalize(vec3(uv, 1.0));
+      vec4 finalColor = vec4(0.0);
+      float totalDistance = 0.0;
+      float timeElapsed = iTime * uTimeScale;
+      float pixelNoise = generateFineNoise(fragCoord) * uNoiseAmount;
+
+      for (int i = 0; i < 38; i++) {
+        vec3 currentPos = rayDir * totalDistance;
+        currentPos.z -= 2.0;
+        float wTime = timeElapsed * uWaveSpeed;
+        float waveHeight = (
+          sin(currentPos.x * uWave1Freq + wTime) * uWave1Amp +
+          sin(currentPos.z * uWave2Freq - wTime * 0.6) * uWave2Amp +
+          sin((currentPos.x * uWave3FreqX) - (currentPos.z * uWave3FreqZ) + (wTime * 1.6)) * uWave3Amp
+        ) * uWaveHeight + uWaveYOffset;
+        float distToWave = abs(currentPos.y - waveHeight);
+        currentPos /= uFoldingOffset;
+        float stepSize = min(distToWave - 0.080, pixelNoise) + uStepBase;
+        totalDistance += stepSize;
+        float patternX = sin(currentPos.x + cos(currentPos.y) * cos(currentPos.z));
+        float patternY = sin(currentPos.z + sin(currentPos.y) * cos(currentPos.x + timeElapsed));
+        float basePattern = smoothstep(0.5, 0.7, patternX * patternY);
+        float blendFactor = 0.15 / (distToWave * distToWave + 0.01);
+        float mixedPattern = mix(basePattern, 1.0, blendFactor);
+        float glowIntensity = uGlowIntensity / (uGlowSpread + stepSize);
+        float distanceFade = smoothstep(36.5, 7.3, totalDistance);
+        vec3 paletteColor = 1.0 + cos(totalDistance * 3.0 + vec3(0.0, 1.0, 2.0));
+        finalColor.rgb += glowIntensity * mixedPattern * distanceFade * paletteColor;
+      }
+
+      float dither = (generateFineNoise(fragCoord + vec2(12.34, 56.78)) - 0.5) / 128.0;
+      finalColor.rgb += vec3(dither);
+      finalColor.rgb = mix(finalColor.rgb, finalColor.rgb * vec3(0.42, 0.68, 1.32) + vec3(0.0, 0.028, 0.070), 0.58);
+      gl_FragColor = vec4(finalColor.rgb, 1.0);
+    }
+  `;
+
+  function ShaderCanvas({ opacity = 1, waveYOffset = 0, waveTransitionEase = 0.055 }) {
+    const ref = useRef(null);
+    const targetOffsetRef = useRef(waveYOffset);
+    const transitionEaseRef = useRef(waveTransitionEase);
+    useEffect(() => { targetOffsetRef.current = waveYOffset; }, [waveYOffset]);
+    useEffect(() => { transitionEaseRef.current = waveTransitionEase; }, [waveTransitionEase]);
+    useEffect(() => {
+      const canvas = ref.current;
+      const THREE_NS = window.THREE;
+      if (!canvas || !THREE_NS) return;
+      const settings = THREE_BACKGROUND_SETTINGS;
+      const scene = new THREE_NS.Scene();
+      const camera = new THREE_NS.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const renderer = new THREE_NS.WebGLRenderer({ canvas, antialias:false });
+      renderer.setPixelRatio(settings.dpr);
+      const uniforms = {
+        iTime: { value:0 },
+        iResolution: { value:new THREE_NS.Vector3() },
+        uTimeScale: { value:settings.timeScale },
+        uWaveSpeed: { value:settings.waveSpeed },
+        uWaveHeight: { value:settings.waveHeight },
+        uWave1Freq: { value:settings.wave1Freq },
+        uWave1Amp: { value:settings.wave1Amp },
+        uWave2Freq: { value:settings.wave2Freq },
+        uWave2Amp: { value:settings.wave2Amp },
+        uWave3FreqX: { value:settings.wave3FreqX },
+        uWave3FreqZ: { value:settings.wave3FreqZ },
+        uWave3Amp: { value:settings.wave3Amp },
+        uNoiseAmount: { value:settings.noiseAmount },
+        uFoldingOffset: { value:settings.foldingOffset },
+        uStepBase: { value:settings.stepBase },
+        uGlowIntensity: { value:settings.glowIntensity },
+        uGlowSpread: { value:settings.glowSpread },
+        uWaveYOffset: { value:targetOffsetRef.current },
+      };
+      const material = new THREE_NS.ShaderMaterial({
+        vertexShader:THREE_VERTEX_SHADER,
+        fragmentShader:THREE_FRAGMENT_SHADER,
+        uniforms,
+      });
+      const geometry = new THREE_NS.PlaneGeometry(2, 2);
+      const mesh = new THREE_NS.Mesh(geometry, material);
+      const clock = new THREE_NS.Clock();
+      scene.add(mesh);
+      const updateResolution = () => {
+        const width = canvas.clientWidth || window.innerWidth;
+        const height = canvas.clientHeight || window.innerHeight;
+        renderer.setSize(width, height, false);
+        const pixelRatio = renderer.getPixelRatio();
+        uniforms.iResolution.value.set(width * pixelRatio, height * pixelRatio, 1);
+      };
+      let raf;
+      const animate = () => {
+        uniforms.iTime.value = clock.getElapsedTime();
+        uniforms.uWaveYOffset.value += (targetOffsetRef.current - uniforms.uWaveYOffset.value) * transitionEaseRef.current;
+        renderer.render(scene, camera);
+        raf = requestAnimationFrame(animate);
+      };
+      updateResolution();
+      window.addEventListener('resize', updateResolution);
+      raf = requestAnimationFrame(animate);
+      return () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', updateResolution);
+        geometry.dispose();
+        material.dispose();
+        renderer.dispose();
+      };
+    }, []);
+    return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity, transition:'opacity 0.35s ease', pointerEvents:'none' }}/>;
+  }
+
+  function MicButton({ onResult, listening, setListening }) {
+    const recRef = useRef(null);
+    const toggle = () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { alert("Reconnaissance vocale non disponible sur ce navigateur."); return; }
+      if (listening) { recRef.current?.stop(); setListening(false); return; }
+      const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=false;
+      rec.onresult = e => { onResult(e.results[0][0].transcript); setListening(false); };
+      rec.onerror = rec.onend = () => setListening(false);
+      recRef.current = rec; rec.start(); setListening(true);
+    };
+    return (
+      <button onClick={toggle} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background: listening ? 'rgba(120,80,255,0.8)' : 'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s', animation: listening ? 'micRing 1s ease-out infinite' : 'none' }}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="6" y="1" width="6" height="10" rx="3" fill="white" opacity={listening ? 1 : 0.75}/>
+          <path d="M3 9a6 6 0 0 0 12 0" stroke="white" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity={listening ? 1 : 0.75}/>
+          <line x1="9" y1="15" x2="9" y2="17" stroke="white" strokeWidth="1.6" strokeLinecap="round" opacity={listening ? 1 : 0.75}/>
+        </svg>
+      </button>
+    );
+  }
+
+  function AppHeader({ onBack, title, navIcon = 'back' }) {
+    return (
+      <div style={{ height:56, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 20px', flexShrink:0, position:'relative', zIndex:10 }}>
+        {onBack ? (
+          <button onClick={onBack} style={{ width:32, height:32, borderRadius:8, background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.72)', transition:'opacity 0.2s' }}
+            onMouseEnter={e=>e.currentTarget.style.opacity='0.82'}
+            onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+            {navIcon === 'close' ? (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M5 5l8 8M13 5l-8 8" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4L6 9l5 5" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            )}
+          </button>
+        ) : (
+          <div style={{ width:36 }}></div>
+        )}
+        <div style={{ fontFamily: title ? 'Questrial, sans-serif' : 'Abhaya Libre, serif', fontSize: title ? 16 : 22, color:'rgba(255,255,255,0.92)', letterSpacing:title ? '0.01em' : '0.04em', fontWeight: title ? 400 : 600, textAlign:'center', flex:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title || 'Claira'}</div>
+        <button onClick={() => window.Claira.launchTestDiagnostic?.()} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <span style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.55)' }}>?</span>
+        </button>
+      </div>
+    );
+  }
+
+  function StatusBar() {
+    const [t] = useState(() => { const d=new Date(); return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`; });
+    return (
+      <div style={{ height:44, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 28px', flexShrink:0, position:'relative', zIndex:10 }}>
+        <span style={{ fontSize:15, fontWeight:600, color:'rgba(255,255,255,0.75)' }}>{t}</span>
+        <div style={{ display:'flex', gap:5, alignItems:'center', opacity:0.6 }}>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="white"><rect x="0" y="3" width="2" height="8" rx="1"/><rect x="3.5" y="2" width="2" height="9" rx="1"/><rect x="7" y="0" width="2" height="11" rx="1"/><rect x="10.5" y="0" width="2" height="11" rx="1"/></svg>
+          <div style={{ width:20, height:10, borderRadius:3, border:'1.5px solid white', display:'flex', alignItems:'center', padding:'1.5px' }}><div style={{ flex:1, height:'100%', background:'white', borderRadius:1.5 }}></div></div>
+        </div>
+      </div>
+    );
+  }
+
+  function BackBtn({ onBack }) {
+    return (
+      <button onClick={onBack} style={{ background:'rgba(255,255,255,0.07)', border:'none', borderRadius:100, cursor:'pointer', display:'flex', alignItems:'center', gap:5, color:'rgba(255,255,255,0.70)', fontSize:15, fontFamily:'Questrial, sans-serif', fontWeight:600, padding:'12px 16px', minHeight:48, flexShrink:0, transition:'background 0.2s' }}
+        onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.12)'}
+        onMouseLeave={e=>e.currentTarget.style.background='rgba(255,255,255,0.07)'}>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Retour
+      </button>
+    );
+  }
+
+  function MainTabBar({ active, onHome, onTherapies, onBooking }) {
+    const items = [
+      {
+        id:'home',
+        label:'Accueil',
+        onClick:onHome,
+        icon:(
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M3.5 7.8 9 3l5.5 4.8v6.2H11v-3.7H7V14H3.5V7.8Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+          </svg>
+        ),
+      },
+      {
+        id:'therapies',
+        label:'Thérapies',
+        onClick:onTherapies,
+        icon:(
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M4 4.5h10M4 9h10M4 13.5h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        ),
+      },
+      {
+        id:'booking',
+        label:'Prendre un RDV',
+        onClick:onBooking,
+        icon:(
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <rect x="3" y="4.5" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+            <path d="M6 2.8v3M12 2.8v3M3 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        ),
+      },
+    ];
+    return (
+      <div style={{ position:'absolute', left:16, right:16, bottom:16, zIndex:30, padding:'5px', display:'flex', gap:5, borderRadius:32, background:'rgba(12,13,22,0.82)', border:'1px solid rgba(255,255,255,0.08)', backdropFilter:'blur(18px)', WebkitBackdropFilter:'blur(18px)', boxShadow:'0 20px 50px rgba(0,0,0,0.35)' }}>
+        {items.map(item => {
+          const isActive = active === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={item.onClick}
+              style={{
+                flex:1,
+                minHeight:52,
+                padding:'8px 8px',
+                border:'none',
+                borderRadius:24,
+                background:isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                color:isActive ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.66)',
+                display:'flex',
+                flexDirection:'column',
+                alignItems:'center',
+                justifyContent:'center',
+                gap:3,
+                cursor:'pointer',
+                fontFamily:'Questrial, sans-serif',
+                transition:'all 0.2s',
+              }}
+            >
+              {item.icon}
+              <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.01em', textAlign:'center', lineHeight:1.1 }}>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  Object.assign(window.Claira, { ShaderCanvas, MicButton, AppHeader, StatusBar, BackBtn, MainTabBar });
+})();
+
+(() => {
+  const { useState, useEffect, useMemo } = React;
+  const { QUESTIONS, THERAPIES, THERAPISTS, getInsight, generateAIInsight } = window.Claira;
+  const { MicButton, AppHeader, StatusBar, BackBtn, MainTabBar } = window.Claira;
+
+  function HomeScreen({ onStart, onLater = () => {} }) {
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
+        <AppHeader />
+        <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'20px 28px 36px' }}>
+          <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'flex-start', paddingTop:'clamp(36px, 7vh, 72px)' }}>
+            <div className="fade-up" style={{ animationDelay:'0.1s', marginBottom:20 }}>
+              <h1 style={{ fontFamily:'DM Serif Display, serif', fontSize:42, color:'rgba(255,255,255,0.95)', fontWeight:400, lineHeight:1.15, letterSpacing:'-0.5px' }}>
+                Tu n'as pas à tout<br/><em style={{ fontStyle:'italic', color:'rgba(160,200,255,0.95)' }}>porter seul·e.</em>
+              </h1>
+            </div>
+            <p className="fade-up" style={{ animationDelay:'0.25s', fontSize:16, lineHeight:1.7, color:'rgba(255,255,255,0.78)', fontWeight:400, marginBottom:28, maxWidth:300, textWrap:'pretty', fontFamily:'Questrial, sans-serif' }}>
+              En quelques minutes, Claira vous aide à mettre des mots sur ce que vous vivez et à trouver le bon accompagnement.
+            </p>
+            <p className="fade-up" style={{ animationDelay:'0.38s', fontSize:13, color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.04em' }}>Anonyme · 5 minutes</p>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <button className="fade-up" onClick={onStart} style={{ animationDelay:'0.55s', width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', border:'1px solid rgba(255,255,255,0.20)', borderRadius:100, fontSize:17, fontWeight:600, color:'#0b0b14', fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.02em', transition:'all 0.2s' }}
+              onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>
+              Faire le point en 5 minutes →
+            </button>
+            <button className="fade-up" onClick={onLater} style={{ animationDelay:'0.63s', width:'100%', minHeight:60, padding:'16px 24px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:600, color:'rgba(255,255,255,0.78)', fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.02em', transition:'all 0.2s' }}
+              onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>
+              Plus tard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function DashboardScreen({ answers, bookedAppointment, onStartAssessment, onOpenSummary, onGoTherapies, onGoBooking }) {
+    const answerCount = Object.keys(answers).length;
+    const isComplete = answerCount === QUESTIONS.length;
+    const hasProgress = answerCount > 0;
+    const insight = hasProgress ? getInsight(answers) : null;
+    const primaryLabel = !hasProgress
+      ? 'Faire le point maintenant'
+      : isComplete
+        ? 'Mettre à jour mon point'
+        : 'Compléter mon point';
+
+    const featuredTherapists = ['tcc', 'humaniste', 'emdr']
+      .map(therapy => THERAPISTS.find(th => th.therapy === therapy))
+      .filter(Boolean);
+    const bookedTherapist = bookedAppointment ? THERAPISTS.find(t => t.id === bookedAppointment.therapistId) : null;
+    const recommendedTherapy = insight ? THERAPIES.find(t => t.id === insight.therapy) : null;
+    const recommendationIntro = recommendedTherapy
+      ? `Recommandation de thérapie : ${recommendedTherapy.short}.`
+      : null;
+    const recommendationSummary = recommendedTherapy
+      ? ({
+          tcc: "Une approche concrète pour retrouver des repères et apaiser ce qui déborde.",
+          humaniste: "Une approche d’écoute pour déposer ce que vous vivez et avancer à votre rythme.",
+          emdr: "Une approche utile pour travailler ce qui reste bloqué après une expérience difficile.",
+          act: "Une approche pour faire de la place à ce que vous ressentez et avancer plus clairement.",
+          systemique: "Une approche pour mieux comprendre ce qui se joue dans vos liens et vos équilibres.",
+          psychodynamique: "Une approche plus approfondie pour relier le présent à votre histoire."
+        }[recommendedTherapy.id] || recommendedTherapy.desc)
+      : null;
+
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
+        <AppHeader title="Accueil" />
+        <div style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 24px 126px' }}>
+          {bookedAppointment && (
+            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgba(73,202,166,0.08)', border:'1px solid rgba(73,202,166,0.18)', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)', boxShadow:'0 18px 40px rgba(0,0,0,0.14)', marginBottom:22 }}>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:12, marginBottom:12 }}>
+                <div style={{ width:38, height:38, borderRadius:14, background:'rgba(73,202,166,0.16)', border:'1px solid rgba(73,202,166,0.22)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <rect x="3.2" y="4.5" width="11.6" height="9.3" rx="2.2" stroke="rgba(122,245,198,0.92)" strokeWidth="1.4"/>
+                    <path d="M6 2.8v3M12 2.8v3M3.2 8h11.6" stroke="rgba(122,245,198,0.92)" strokeWidth="1.4" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.92)', marginBottom:4 }}>
+                    Votre rendez-vous est confirmé
+                  </div>
+                  <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.72)', margin:0, textWrap:'pretty' }}>
+                    {bookedAppointment.when} avec {bookedAppointment.name}
+                  </p>
+                </div>
+              </div>
+              <button onClick={onGoBooking} style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, fontSize:15, fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                Voir mes rendez-vous
+              </button>
+            </div>
+          )}
+          <div style={{ padding:'18px 18px 20px', borderRadius:24, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)', boxShadow:'0 18px 40px rgba(0,0,0,0.18)', marginBottom:22 }}>
+            <img
+              src="assets/seul.png"
+              alt="Illustration d'accompagnement"
+              style={{
+                width:92,
+                height:'auto',
+                display:'block',
+                marginBottom:10,
+                filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.22))'
+              }}
+            />
+            <div style={{ fontFamily:'Questrial, sans-serif', fontSize:21, lineHeight:1.12, color:'rgba(255,255,255,0.95)', fontWeight:700, marginBottom:10 }}>
+              {hasProgress ? insight.label : "Quelques minutes pour mieux vous orienter"}
+            </div>
+            <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.70)', textWrap:'pretty', marginBottom:14 }}>
+              {hasProgress
+                ? <><strong style={{ color:'rgba(255,255,255,0.92)', fontWeight:700 }}>{recommendationIntro}</strong> {recommendationSummary}</>
+                : "Claira vous aide à poser des mots sur ce que vous vivez, puis à repérer une approche thérapeutique et un rendez-vous adapté à votre besoin."}
+            </p>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <button onClick={onStartAssessment} style={{ width:'100%', minHeight:60, padding:'16px 20px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:16, fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                {primaryLabel}
+              </button>
+              {isComplete && (
+                <button onClick={onOpenSummary} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.82)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:15, fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                  Revoir mon résumé
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', marginBottom:22 }}>
+              <div style={{ fontFamily:'Questrial, sans-serif', fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.90)', marginBottom:14 }}>Nos thérapeutes disponibles en visio</div>
+              <div style={{ position:'relative', height:78, width:162, margin:'0 auto 12px' }}>
+                {featuredTherapists.map((th, idx) => {
+                  const positions = [
+                    { left:0, top:6, z:1, rotate:'-6deg' },
+                    { left:48, top:2, z:2, rotate:'-1deg' },
+                    { left:96, top:6, z:3, rotate:'5deg' },
+                  ];
+                  const pos = positions[idx] || positions[1];
+                  return (
+                    <div
+                      key={th.id}
+                      style={{
+                        position:'absolute',
+                        left:pos.left,
+                        top:pos.top,
+                        zIndex:pos.z,
+                        width:66,
+                        height:66,
+                        borderRadius:20,
+                        overflow:'hidden',
+                        border:'2px solid rgba(255,255,255,0.16)',
+                        boxShadow:'0 14px 28px rgba(0,0,0,0.22)',
+                        transform:`rotate(${pos.rotate})`,
+                        background:'rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      <img src={th.photo} alt={th.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                    </div>
+                  );
+                })}
+              </div>
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.66)', margin:'0 0 16px', textWrap:'pretty' }}>
+                Des professionnels disponibles en ligne, pour échanger plus facilement depuis chez vous.
+              </p>
+              <button onClick={onGoBooking} style={{ width:'100%', minHeight:52, padding:'14px 18px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, fontSize:15, fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                Prendre un RDV
+              </button>
+            </div>
+
+            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', marginBottom:22 }}>
+              <img
+                src="assets/Therapie.png"
+                alt="Illustration des thérapies"
+                style={{
+                  width:94,
+                  height:'auto',
+                  display:'block',
+                  marginBottom:10,
+                  filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.20))'
+                }}
+              />
+              <div style={{ fontFamily:'Questrial, sans-serif', fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.90)', marginBottom:10 }}>Des thérapies adaptées</div>
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.66)', margin:'0 0 16px', textWrap:'pretty' }}>
+                Chaque approche répond à des besoins différents. Les découvrir aide à choisir un cadre plus juste pour avancer.
+              </p>
+              <button onClick={onGoTherapies} style={{ width:'100%', minHeight:52, padding:'14px 18px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, fontSize:15, fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                Découvrir toutes les thérapies
+              </button>
+            </div>
+
+            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontFamily:'Questrial, sans-serif', fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.90)', marginBottom:20 }}>Parcours de soin</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:14, marginBottom:18 }}>
+                {[
+                  {
+                    step:'01',
+                    title:'Faire le point',
+                    text:"Mettre des mots sur ce que vous vivez et clarifier ce dont vous avez besoin aujourd’hui.",
+                    active:true,
+                  },
+                  {
+                    step:'02',
+                    title:'Comparer les approches',
+                    text:"Comprendre les types de thérapie pour voir ce qui vous parle le plus.",
+                    active:true,
+                  },
+                  {
+                    step:'03',
+                    title:'Choisir un thérapeute',
+                    text:"Repérer une personne, poser vos questions et réserver quand vous vous sentez prêt·e.",
+                    active:false,
+                  },
+                ].map((item, i, arr) => (
+                  <div key={item.step} style={{ display:'grid', gridTemplateColumns:'48px 1fr', gap:16, alignItems:'start', position:'relative' }}>
+                    <div style={{ position:'relative', display:'flex', justifyContent:'center', minHeight:'100%' }}>
+                      <div style={{ width:32, height:32, borderRadius:999, background:item.active ? 'rgba(73,202,166,0.18)' : 'rgba(255,255,255,0.08)', border:`1px solid ${item.active ? 'rgba(73,202,166,0.28)' : 'rgba(255,255,255,0.10)'}`, color:item.active ? '#74e3eafc' : 'rgba(255,255,255,0.52)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Questrial, sans-serif', fontSize:11, fontWeight:700, letterSpacing:'0.04em', flexShrink:0 }}>
+                        {item.step}
+                      </div>
+                      {i < arr.length - 1 && (
+                        <div style={{ position:'absolute', left:'50%', transform:'translateX(-50%)', top:32, bottom:-14, width:1, background:item.active ? 'linear-gradient(to bottom, rgba(73,202,166,0.30), rgba(255,255,255,0.10))' : 'rgba(255,255,255,0.10)' }}></div>
+                      )}
+                    </div>
+                    <div style={{ paddingTop:2 }}>
+                      <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.88)', marginBottom:5 }}>
+                        {item.title}
+                      </div>
+                      <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.62)', margin:0, textWrap:'pretty' }}>
+                        {item.text}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {bookedAppointment ? (
+                  <div style={{ padding:'14px 14px 0', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+                      <div style={{ width:8, height:8, borderRadius:'50%', background:'#49caa6', boxShadow:'0 0 0 3px rgba(73,202,166,0.2)', flexShrink:0 }}></div>
+                      <div style={{ fontFamily:'Questrial, sans-serif', fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'#49caa6' }}>Rendez-vous confirmé</div>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                      {bookedTherapist && bookedTherapist.photo
+                        ? <img src={bookedTherapist.photo} alt={bookedTherapist.name} style={{ width:44, height:44, borderRadius:14, objectFit:'cover', flexShrink:0, border:'1px solid rgba(255,255,255,0.10)' }} />
+                        : <div style={{ width:44, height:44, borderRadius:14, background:`hsla(${bookedTherapist ? bookedTherapist.hue : 260},55%,42%,0.22)`, border:`1px solid hsla(${bookedTherapist ? bookedTherapist.hue : 260},55%,55%,0.18)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:`hsl(${bookedTherapist ? bookedTherapist.hue : 260},60%,70%)` }}>{bookedAppointment.name.split(' ').map(function(n){return n[0];}).join('').slice(0,2)}</div>
+                      }
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.88)', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{bookedAppointment.name}</div>
+                        <div style={{ fontFamily:'Questrial, sans-serif', fontSize:13, color:'rgba(255,255,255,0.52)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{bookedAppointment.when}</div>
+                      </div>
+                      <button onClick={onGoBooking} style={{ flexShrink:0, background:'rgba(73,202,166,0.10)', border:'1px solid rgba(73,202,166,0.25)', borderRadius:100, padding:'6px 14px', fontFamily:'Questrial, sans-serif', fontSize:12, fontWeight:700, color:'#49caa6', cursor:'pointer', transition:'all 0.2s' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(73,202,166,0.18)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(73,202,166,0.10)'; }}>Voir</button>
+                    </div>
+                  </div>
+              ) : (
+                <div style={{ display:'flex', alignItems:'flex-start', gap:12, padding:'14px 14px 0', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ width:34, height:34, borderRadius:12, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                      <rect x="3.5" y="4.5" width="11" height="9" rx="2" stroke="rgba(255,255,255,0.52)" strokeWidth="1.4"/>
+                      <path d="M6 2.8v2.4M12 2.8v2.4M3.5 8h11" stroke="rgba(255,255,255,0.52)" strokeWidth="1.4" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.72)', marginBottom:4 }}>
+                      Vous n'avez pas de rendez-vous en cours
+                    </div>
+                    <p style={{ fontFamily:'Questrial, sans-serif', fontSize:13, lineHeight:1.65, color:'rgba(255,255,255,0.48)', margin:0 }}>
+                      Quand vous serez prêt·e, vous pourrez choisir un thérapeute puis réserver un créneau adapté.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function ChatScreen({ step, answers, onAnswer, onEditStep }) {
+    const q = QUESTIONS[step];
+    const tokens = useMemo(() => {
+      const result = [];
+      q.text.split('\n').forEach((line, li, arr) => {
+        line.split(' ').filter(w=>w).forEach(w => result.push({ type:'word', text:w }));
+        if (li < arr.length - 1) result.push({ type:'br' });
+      });
+      return result;
+    }, [q.text]);
+    const totalWords = tokens.filter(t=>t.type==='word').length;
+    const [phase, setPhase]     = useState('writing');
+    const [wordIdx, setWordIdx] = useState(0);
+    const [chosen, setChosen]   = useState(null);
+    const [inputVal, setInputVal] = useState('');
+    const [listening, setListening] = useState(false);
+    useEffect(() => { setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal(''); }, [step]);
+    useEffect(() => {
+      if (phase !== 'writing') return;
+      if (wordIdx >= totalWords) { const t = setTimeout(() => setPhase('rising'), 140); return () => clearTimeout(t); }
+      const delay = wordIdx === 0 ? 250 : 85;
+      const t = setTimeout(() => setWordIdx(i => i + 1), delay);
+      return () => clearTimeout(t);
+    }, [phase, wordIdx, totalWords]);
+    useEffect(() => { if (phase !== 'rising') return; const t = setTimeout(() => setPhase('options'), 90); return () => clearTimeout(t); }, [phase]);
+    useEffect(() => { if (phase !== 'chosen') return; const t = setTimeout(() => setPhase('exiting'), 320); return () => clearTimeout(t); }, [phase]);
+    useEffect(() => { if (phase !== 'exiting') return; const t = setTimeout(() => onAnswer(chosen), 480); return () => clearTimeout(t); }, [phase, chosen, onAnswer]);
+
+    const handleChose = (val) => { if (phase !== 'options') return; setChosen(val); setPhase('chosen'); };
+    const handleText = (val) => { if(val.trim()) handleChose(val.trim()); };
+    const questionUp      = phase === 'rising' || phase === 'options' || phase === 'chosen' || phase === 'exiting';
+    const questionOpacity = phase === 'exiting' ? 0 : 1;
+    const questionShift   = phase === 'exiting' ? '-40px' : '0px';
+    let wCount = 0;
+    const renderedText = tokens.map((tok, i) => {
+      if (tok.type === 'br') return <br key={i}/>;
+      const idx = wCount++;
+      return <span key={i} style={{ display:'inline', opacity: idx < wordIdx ? 1 : 0, transition:'opacity 0.22s ease' }}>{tok.text}{' '}</span>;
+    });
+
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
+        <AppHeader onBack={step > 0 ? () => onEditStep(step - 1) : null} />
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:6, padding:'0 0 14px', flexShrink:0 }}>
+          {QUESTIONS.map((_,i) => (
+            <div key={i} style={{ width:i===step?18:6, height:6, borderRadius:3, background:i===step?'rgba(255,255,255,0.55)':i<step?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.12)', transition:'all 0.35s cubic-bezier(.22,1,.36,1)' }}></div>
+          ))}
+        </div>
+        <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
+          <div key={step} style={{ position:'absolute', left:28, right:28, top:questionUp ? '12%' : '42%', transform:`translateY(${questionUp ? questionShift : '-50%'})`, opacity:questionOpacity, transition: phase === 'writing' ? 'none' : 'top 0.62s cubic-bezier(.22,1,.36,1), transform 0.48s ease, opacity 0.38s ease' }}>
+            <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:34, color:'rgba(255,255,255,0.95)', fontWeight:400, lineHeight:1.22, letterSpacing:'-0.2px' }}>{renderedText}</h2>
+          </div>
+          {(phase === 'options' || phase === 'chosen') && (
+            <div style={{ position:'absolute', bottom:14, left:24, right:24 }}>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
+                {q.options.map((opt, i) => {
+                  const isSel = chosen === opt.l;
+                  const isOther = chosen && !isSel;
+                  return (
+                    <button key={i} onClick={() => handleChose(opt.l)} style={{ padding:'13px 22px', background:isSel ? 'rgba(60,180,160,0.22)' : 'rgba(255,255,255,0.11)', border:`1.5px solid ${isSel ? 'rgba(80,210,185,0.45)' : 'rgba(255,255,255,0.15)'}`, borderRadius:100, fontSize:16, color:isSel ? 'rgba(180,240,225,0.95)' : 'rgba(255,255,255,0.84)', fontFamily:'Questrial, sans-serif', cursor:'pointer', opacity:isOther ? 0 : 1, transform:isOther ? 'scale(0.92)' : 'scale(1)', transition:'opacity 0.22s ease, transform 0.22s ease, background 0.18s, border-color 0.18s', animation:`chipIn 0.32s cubic-bezier(.22,1,.36,1) ${i*0.025}s both`, pointerEvents: phase === 'chosen' ? 'none' : 'auto' }}>{opt.l}</button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center', opacity:phase === 'options' ? 1 : 0, transition:'opacity 0.3s ease', pointerEvents:phase === 'options' ? 'auto' : 'none' }}>
+          <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46 }}>
+            <input className="chat-input" value={inputVal} onChange={e=>setInputVal(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleText(inputVal); } }} placeholder="Ou écrivez votre réponse…" style={{ flex:1, background:'transparent', border:'none', fontSize:14, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif' }}/>
+            {inputVal.trim() && (
+              <button onClick={() => handleText(inputVal)} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            )}
+          </div>
+          <MicButton onResult={handleText} listening={listening} setListening={setListening}/>
+        </div>
+      </div>
+    );
+  }
+
+  function InsightScreen({ answers, insight, onContinue, onRestart, onBack }) {
+    const [extraNote, setExtraNote] = useState('');
+    const [showExtraNote, setShowExtraNote] = useState(false);
+    const renderSummary = () => {
+      const mark = (key, text) => (
+        <strong key={key} style={{ fontWeight:700, fontStyle:'italic', color:'#49caa6fa' }}>
+          {text}
+        </strong>
+      );
+
+      const goalPhrase = {
+        'Comprendre': 'comprendre ce qui se joue',
+        'Me sentir mieux': 'vous sentir mieux',
+        'Traverser une période': 'traverser cette période',
+        'Travailler en profondeur': 'travailler en profondeur',
+      };
+
+      const stylePhrase = {
+        "M'écoute": "quelqu'un qui vous écoute vraiment",
+        "M'aide à agir": "quelqu'un qui vous aide à passer à l'action",
+        "Explore en profondeur": "quelqu'un qui explore en profondeur avec vous",
+        "Peu importe": "quelqu'un avec qui le courant passe",
+      };
+
+      const impactClause = {
+        'Oui, beaucoup': 'et cela se répercute clairement sur votre quotidien',
+        'Un peu': 'et cela commence à se répercuter sur votre quotidien',
+        'Pas vraiment': 'sans trop déborder sur votre quotidien',
+      };
+
+      const intro = answers.emotion
+        ? <>En ce moment, vous vous sentez {mark('emotion', answers.emotion)}</>
+        : <>En ce moment, quelque chose pèse un peu plus que d&apos;habitude</>;
+
+      const duration = answers.duration
+        ? <> depuis {mark('duration', answers.duration)}</>
+        : null;
+
+      const impact = answers.impact
+        ? <> {impactClause[answers.impact] || 'et cela a un impact sur votre quotidien'}</>
+        : null;
+
+      const goal = answers.goal ? (goalPhrase[answers.goal] || answers.goal.toLowerCase()) : 'du soutien';
+      const constraint = answers.constraint
+        ? {
+            'Budget serré': 'dans un cadre abordable',
+            'Peu de temps': 'avec peu de temps',
+            'En ligne': 'plutôt en ligne',
+            'Pas de contrainte': '',
+          }[answers.constraint] || ''
+        : '';
+      const style = answers.style ? stylePhrase[answers.style] : "quelqu'un de rassurant";
+      const goalNode = answers.goal ? mark('goal', answers.goal) : goal;
+      const styleNode = answers.style ? mark('style', answers.style) : style;
+
+      return (
+        <span>
+          {intro}
+          {duration}
+          {impact}.
+          <br />
+          Vous cherchez surtout {goalNode}{constraint ? `, ${constraint}` : ''} et souhaitez {styleNode}.
+        </span>
+      );
+    };
+
+    const StickyHeader = () => (
+      <div style={{ position:'sticky', top:0, zIndex:20 }}>
+        <div style={{ position:'relative', height:56, overflow:'hidden', background:'transparent', borderBottom:'1px solid transparent' }}>
+          <div style={{ position:'relative', zIndex:1 }}>
+            <AppHeader onBack={onBack} navIcon="close" title="Mon résumé" />
+          </div>
+        </div>
+      </div>
+    );
+
+    if (!insight) {
+      const shimmerStyle = (w, h, delay='0s') => ({
+        width:w, height:h, borderRadius:10, flexShrink:0,
+        background:'linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.05) 100%)',
+        backgroundSize:'200% 100%',
+        animation:`shimmer 1.8s ease-in-out ${delay} infinite`,
+      });
+      return (
+        <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0 }}>
+          <StickyHeader />
+          <div style={{ flex:1, overflowY:'auto', padding:'32px 22px 30px', display:'flex', flexDirection:'column', gap:20 }}>
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:4 }}>
+              <div style={{ ...shimmerStyle(105, 118), borderRadius:22, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 16px 34px rgba(0,0,0,0.16)' }}>
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true" style={{ filter:'drop-shadow(0 0 10px rgba(255,255,255,0.12))' }}>
+                  <path d="M15 3.5l2.8 8.1 8.2 2.9-8.2 2.8L15 25.5l-2.8-8.2L4 14.5l8.2-2.9L15 3.5Z" fill="rgba(255,255,255,0.55)"/>
+                  <path d="M22.5 2.8l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9.9-2.5Z" fill="rgba(255,255,255,0.35)"/>
+                </svg>
+              </div>
+            </div>
+            <div style={shimmerStyle('72%', 30)}></div>
+            <div style={shimmerStyle('100%', 16, '0.15s')}></div>
+            <div style={shimmerStyle('90%',  16, '0.25s')}></div>
+            <div style={shimmerStyle('78%',  16, '0.35s')}></div>
+            <div style={shimmerStyle('50%',  16, '0.45s')}></div>
+          </div>
+        </div>
+      );
+    }
+
+    const renderAISummary = (text) => {
+      if (!text) return renderSummary();
+      const parts = text.split(/\*\*(.+?)\*\*/g);
+      return parts.map((part, i) =>
+        i % 2 === 1
+          ? <strong key={i} style={{ fontWeight:700, fontStyle:'italic', color:'#49caa6fa' }}>{part}</strong>
+          : part
+      );
+    };
+
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, fontFamily:'Questrial, sans-serif' }}>
+        <StickyHeader />
+        <div style={{ flex:1, minHeight:0, overflowY:'auto', padding:'6px 22px 30px', animation:'fadeIn 0.7s ease both' }}>
+          <div className="fade-up" style={{ marginBottom:30, paddingTop:8 }}>
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:18 }}>
+              <img
+                src="assets/Aide.png"
+                alt="Illustration d'aide personnalisée"
+                style={{
+                  width:138,
+                  height:'auto',
+                  display:'block',
+                  filter:'drop-shadow(0 16px 30px rgba(0,0,0,0.22))',
+                  transform:'translateY(-2px)',
+                }}
+              />
+            </div>
+            <h2 style={{ fontFamily:'DM Serif Display, serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:400, lineHeight:1.15, marginBottom:18, letterSpacing:'-0.3px' }}>{insight.label}</h2>
+            <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.82)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>
+              {renderAISummary(insight.summary)}
+            </p>
+          </div>
+
+          <div className="fade-up" style={{ animationDelay:'0.16s', marginBottom:30 }}>
+            {!showExtraNote ? (
+              <button
+                onClick={() => setShowExtraNote(true)}
+                style={{
+                  width:'100%',
+                  minHeight:64,
+                  padding:'17px 20px',
+                  background:'rgba(255,255,255,0.06)',
+                  color:'rgba(255,255,255,0.88)',
+                  border:'1px solid rgba(255,255,255,0.10)',
+                  borderRadius:22,
+                  fontSize:17,
+                  fontWeight:600,
+                  fontFamily:'Questrial, sans-serif',
+                  cursor:'pointer',
+                  display:'flex',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  gap:10,
+                  letterSpacing:'0.01em',
+                  transition:'all 0.2s',
+                }}
+              >
+                <span style={{ width:22, height:22, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.25)', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:16, lineHeight:1 }}>+</span>
+                Ajouter quelque chose
+              </button>
+            ) : (
+              <textarea
+                className="detail-field"
+                value={extraNote}
+                onChange={e=>setExtraNote(e.target.value)}
+                placeholder={"Si vous le souhaitez, ajoutez ce que vous ressentez, du contexte, un événement particulier..."}
+                rows={4}
+                style={{
+                  width:'100%',
+                  resize:'none',
+                  borderRadius:22,
+                  border:'1px solid rgba(255,255,255,0.09)',
+                  background:'rgba(255,255,255,0.06)',
+                  color:'rgba(255,255,255,0.92)',
+                  fontFamily:'Questrial, sans-serif',
+                  fontSize:17,
+                  lineHeight:1.75,
+                  padding:'18px 18px',
+                  outline:'none',
+                }}
+              />
+            )}
+          </div>
+
+          <div className="fade-up" style={{ animationDelay:'0.24s', marginBottom:30 }}>
+            <h3 style={{ fontFamily:'DM Serif Display, serif', fontSize:24, color:'rgba(255,255,255,0.96)', fontWeight:400, lineHeight:1.1, marginBottom:12 }}>Ce que cela évoque</h3>
+            <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.72)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>{insight.text}</p>
+          </div>
+
+          <div className="fade-up" style={{ animationDelay:'0.32s', marginBottom:28 }}>
+            <div style={{ fontSize:24, color:'rgba(255,255,255,0.96)', fontFamily:'DM Serif Display, serif', fontWeight:400, lineHeight:1.1, marginBottom:16 }}>Ce qui peut vous aider</div>
+            <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.72)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>{insight.process}</p>
+          </div>
+
+          <div className="fade-up" style={{ animationDelay:'0.4s', paddingTop:8 }}>
+            <button onClick={onContinue} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.02em' }} onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>Voir les approches adaptées →</button>
+            <button onClick={onRestart} style={{ width:'100%', minHeight:64, marginTop:10, padding:'17px 24px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.80)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.02em' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>Refaire le diagnostic</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function TherapiesScreen({ insight, onContinue, onBack, onAskQuestions, bottomInset = 0, onDetailStateChange }) {
+    const [selectedId, setSelectedId] = useState(null);
+    const th = THERAPIES.find(t => t.id === selectedId) || null;
+    const isRec = th ? (insight ? th.id === insight.therapy : false) : false;
+    const orderedTherapies = insight
+      ? [...THERAPIES].sort((a, b) => (b.id === insight.therapy) - (a.id === insight.therapy))
+      : THERAPIES;
+    const handleBack = () => {
+      if (selectedId) setSelectedId(null);
+      else onBack && onBack();
+    };
+    useEffect(() => { onDetailStateChange && onDetailStateChange(!!selectedId); }, [selectedId, onDetailStateChange]);
+
+    const SummaryCard = ({ item, recommended, onClick }) => (
+      <button
+        onClick={onClick}
+        className="fade-up"
+        style={{
+          width:'100%',
+          background: recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.045)',
+          border: recommended ? '1.5px solid rgba(73,202,166,0.45)' : '1px solid rgba(255,255,255,0.08)',
+          borderRadius:24,
+          padding:16,
+          boxShadow: recommended ? '0 0 0 4px rgba(73,202,166,0.07), 0 18px 40px rgba(0,0,0,0.22)' : '0 18px 40px rgba(0,0,0,0.18)',
+          backdropFilter:'blur(16px)',
+          WebkitBackdropFilter:'blur(16px)',
+          cursor:'pointer',
+          textAlign:'left',
+          fontFamily:'Questrial, sans-serif',
+          transition:'all 0.2s',
+          animationDelay:'0.04s'
+        }}
+        onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'rgba(255,255,255,0.055)'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.60)' : 'rgba(255,255,255,0.10)'; }}
+        onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.45)' : 'rgba(255,255,255,0.08)'; }}
+      >
+        <div style={{ display:'flex', justifyContent:'space-between', gap:12, alignItems:'flex-start', marginBottom:10 }}>
+          <div style={{ flex:1 }}>
+            {recommended && (
+              <div style={{ display:'inline-block', marginBottom:12, color:'#49caa6fa', fontSize:10, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>Recommandé</div>
+            )}
+            <h3 style={{ fontFamily:'Questrial, sans-serif', fontSize:22, lineHeight:1.08, color:'rgba(255,255,255,0.94)', fontWeight:700, marginBottom:8 }}>{item.name.replace(/\n+/g, ' ')}</h3>
+            <div style={{ fontSize:13, color:'rgba(255,255,255,0.52)', lineHeight:1.45 }}>{item.tagline}</div>
+          </div>
+        </div>
+        <p style={{ fontSize:14, lineHeight:1.65, color:'rgba(255,255,255,0.68)', marginBottom:14, textWrap:'pretty' }}>{item.desc}</p>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10 }}>
+          <div style={{ fontSize:12, color:'rgba(255,255,255,0.62)', fontFamily:'Questrial, sans-serif' }}>{item.duration}</div>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, fontSize:13, color:'rgba(255,255,255,0.86)', fontWeight:700, fontFamily:'Questrial, sans-serif' }}>
+            En savoir plus
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M4.5 2.5 9 7l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </button>
+    );
+
+    const DetailView = ({ item, recommended }) => (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden', position:'relative' }}>
+        <div style={{ flex:1, overflowY:'auto', padding:'0 24px 124px', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain' }}>
+          <div style={{ paddingTop:18, paddingBottom:20 }}>
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:18 }}>
+              <img
+                src="assets/Détail.png"
+                alt="Illustration de détail"
+                style={{
+                  width:150,
+                  height:'auto',
+                  display:'block',
+                  filter:'drop-shadow(0 18px 30px rgba(0,0,0,0.24))',
+                  transform:'translateY(-2px)',
+                }}
+              />
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
+              <div style={{ width:10, height:10, borderRadius:'50%', background:`hsl(${item.hue},70%,65%)`, boxShadow:`0 0 0 6px hsla(${item.hue},70%,65%,0.12)` }}></div>
+              <div style={{ fontSize:12, textTransform:'uppercase', letterSpacing:'0.08em', color:'rgba(255,255,255,0.42)', fontFamily:'Questrial, sans-serif' }}>{item.tagline}</div>
+            </div>
+            <h3 style={{ fontFamily:'DM Serif Display, serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:400, lineHeight:1.08, marginBottom:14, maxWidth:320, textWrap:'pretty', letterSpacing:'-0.3px' }}>{item.name}</h3>
+            <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.84)', textWrap:'pretty', marginBottom:22, maxWidth:340 }}>
+              {item.desc} Elle s&apos;inscrit dans une démarche progressive, adaptée à ton rythme, avec un cadre clair et rassurant.
+            </p>
+
+            <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:28 }}>
+              {[item.short, item.duration, ...item.tagline.split('·').map(s => s.trim())].filter(Boolean).slice(0, 4).map((chip, i) => (
+                <div key={i} style={{ padding:'7px 11px', borderRadius:999, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.82)', fontSize:12, fontWeight:700, fontFamily:'Questrial, sans-serif', letterSpacing:'0.01em', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
+                  {chip}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:'flex', flexDirection:'column', gap:26 }}>
+              <section style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+                  <div style={{ width:22, height:22, borderRadius:7, background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M5.5 1.5v8M1.5 5.5h8" stroke="rgba(255,255,255,0.72)" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                  </div>
+                  <div style={{ fontFamily:'DM Serif Display, serif', fontSize:21, fontWeight:400, color:'rgba(255,255,255,0.96)', lineHeight:1.1 }}>La démarche</div>
+                </div>
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.70)', textWrap:'pretty', margin:0 }}>
+                  On commence par comprendre ce qui vous pèse, puis on avance pas à pas. La thérapie vous aide à mettre du sens, à repérer les mécanismes qui reviennent et à retrouver plus de marge de manœuvre dans le quotidien.
+                </p>
+              </section>
+
+              <section style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+                  <div style={{ width:22, height:22, borderRadius:7, background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M5.5 2v3.5l2 1.3" stroke="rgba(255,255,255,0.72)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/><circle cx="5.5" cy="5.5" r="4" stroke="rgba(255,255,255,0.45)" strokeWidth="1.1"/></svg>
+                  </div>
+                  <div style={{ fontFamily:'DM Serif Display, serif', fontSize:21, fontWeight:400, color:'rgba(255,255,255,0.96)', lineHeight:1.1 }}>Le temps d'accompagnement</div>
+                </div>
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.70)', textWrap:'pretty', margin:0 }}>
+                  Le rythme dépend de ce que tu traverses. Certaines approches se travaillent sur quelques séances, d&apos;autres s&apos;inscrivent sur plusieurs mois. L&apos;idée n&apos;est pas d&apos;aller vite, mais d&apos;aller juste.
+                </p>
+              </section>
+
+              <section style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+                  <div style={{ width:22, height:22, borderRadius:7, background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M2 7.2h7M3 4.5h5M4.2 2h2.6" stroke="rgba(255,255,255,0.72)" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                  </div>
+                  <div style={{ fontFamily:'DM Serif Display, serif', fontSize:21, fontWeight:400, color:'rgba(255,255,255,0.96)', lineHeight:1.1 }}>Les outils</div>
+                </div>
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.70)', textWrap:'pretty', margin:0 }}>
+                  Selon l&apos;approche, vous pouvez vous appuyer sur des exercices concrets, des temps d&apos;échange, des repères pour mieux observer ce que vous ressentez, ou des outils pour agir entre les séances.
+                </p>
+              </section>
+
+              <section style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+                  <div style={{ width:22, height:22, borderRadius:7, background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M5.5 1.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" stroke="rgba(255,255,255,0.72)" strokeWidth="1.1"/><path d="M5.5 3.2v2.9" stroke="rgba(255,255,255,0.72)" strokeWidth="1.4" strokeLinecap="round"/><circle cx="5.5" cy="7.6" r=".6" fill="rgba(255,255,255,0.72)"/></svg>
+                  </div>
+                  <div style={{ fontFamily:'DM Serif Display, serif', fontSize:21, fontWeight:400, color:'rgba(255,255,255,0.96)', lineHeight:1.1 }}>À garder en tête</div>
+                </div>
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.70)', textWrap:'pretty', margin:0 }}>
+                  <strong style={{ color:'rgba(255,255,255,0.92)' }}>{item.constraints[0]}</strong>. L&apos;important est de trouver un cadre où vous vous sentez suffisamment en confiance pour parler, explorer et ajuster à votre rythme.
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+        <div style={{ position:'absolute', left:0, right:0, bottom:0, zIndex:10, padding:'0 24px 28px', pointerEvents:'none' }}>
+          <button onClick={onContinue} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.82)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.38)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.02em', pointerEvents:'auto', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.82)'; e.currentTarget.style.transform='translateY(0)'; }}>Trouver un thérapeute →</button>
+        </div>
+      </div>
+    );
+
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
+        <AppHeader onBack={selectedId ? handleBack : undefined} title={selectedId ? 'Détail' : 'Thérapies'} />
+        {!selectedId ? (
+          <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden' }}>
+            <div style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'12px 24px 132px', display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ paddingBottom:6 }}>
+                <p style={{ fontSize:16, lineHeight:1.7, color:'rgba(255,255,255,0.62)', fontFamily:'Questrial, sans-serif', textWrap:'pretty' }}>Trouver la bonne approche aide à avancer dans un cadre qui vous correspond.</p>
+              </div>
+              <div style={{ position:'sticky', top:0, zIndex:4, padding:'2px 0 12px', marginBottom:2, background:'transparent' }}>
+                <button
+                  onClick={onAskQuestions}
+                  style={{
+                    width:'100%',
+                    minHeight:56,
+                    padding:'14px 18px',
+                    background:'rgba(255,255,255,0.12)',
+                    color:'rgba(255,255,255,0.92)',
+                    border:'1px solid rgba(255,255,255,0.12)',
+                    borderRadius:100,
+                    fontSize:15,
+                    fontWeight:700,
+                    fontFamily:'Questrial, sans-serif',
+                    cursor:'pointer',
+                    letterSpacing:'0.01em',
+                    backdropFilter:'blur(14px)',
+                    WebkitBackdropFilter:'blur(14px)',
+                    display:'inline-flex',
+                    alignItems:'center',
+                    justifyContent:'center',
+                    gap:10,
+                  }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <path d="M4 4.5h10v7H8l-3 2v-2H4v-7Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+                  </svg>
+                  Poser une question sur une thérapie
+                </button>
+              </div>
+              {orderedTherapies.map((item, i) => (
+                <SummaryCard
+                  key={item.id}
+                  item={item}
+                  recommended={insight ? item.id === insight.therapy : false}
+                  onClick={() => setSelectedId(item.id)}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <DetailView item={th} recommended={isRec} />
+        )}
+      </div>
+    );
+  }
+
+  function MatchingScreen({ insight, onSelect, onBack, titleOverride, bottomInset = 0 }) {
+    const therapyLabel = insight ? (THERAPIES.find(t => t.id === insight.therapy)?.short || '') : '';
+    const compactBookingView = titleOverride === 'Prendre un RDV';
+    const [locationQuery, setLocationQuery] = useState('Autour de moi');
+    const [contextFilters, setContextFilters] = useState(() => ({
+      therapy: insight?.therapy || null,
+    }));
+    const [mode, setMode] = useState('list');
+    const [filterOpen, setFilterOpen] = useState(false);
+    const [sortBy, setSortBy] = useState('compatibility');
+
+    useEffect(() => {
+      setContextFilters({
+        therapy: insight?.therapy || null,
+      });
+    }, [insight]);
+
+    const therapyMatches = (therapist, therapyId) => {
+      if (!therapyId) return true;
+      if (therapist.therapy === therapyId) return true;
+      if (therapyId === 'tcc') return /TCC|cognitive|comportementale/i.test(`${therapist.specialty} ${therapist.matchReason}`);
+      if (therapyId === 'humaniste') return /Humaniste|écoute|relations|identité/i.test(`${therapist.specialty} ${therapist.matchReason}`);
+      if (therapyId === 'emdr') return /EMDR|trauma/i.test(`${therapist.title} ${therapist.specialty} ${therapist.matchReason}`);
+      if (therapyId === 'act') return /ACT|acceptation|engagement/i.test(`${therapist.specialty} ${therapist.matchReason}`);
+      if (therapyId === 'systemique') return /systémique|relations|famille/i.test(`${therapist.specialty} ${therapist.matchReason}`);
+      if (therapyId === 'psychodynamique') return /psychodynamique|histoire|sens/i.test(`${therapist.specialty} ${therapist.matchReason}`);
+      return true;
+    };
+
+    const filteredTherapists = [...THERAPISTS].filter(th => {
+      if (contextFilters.therapy && !therapyMatches(th, contextFilters.therapy)) return false;
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === 'compatibility') return b.score - a.score;
+      if (sortBy === 'price') return a.price - b.price;
+      return parseFloat(a.distance) - parseFloat(b.distance);
+    });
+    const mapTherapists = [...filteredTherapists]
+      .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+      .slice(0, 5);
+
+    const mapPins = [
+      { id:1, left:'22%', top:'28%' },
+      { id:2, left:'36%', top:'54%' },
+      { id:3, left:'56%', top:'70%' },
+    ];
+
+    const sortLabel = { compatibility:'Compatibilité', price:'Prix', distance:'Distance' }[sortBy];
+    const activeContextTags = [
+      { key:'sort', label:sortLabel, isSort:true },
+      contextFilters.therapy ? { key:'therapy', label:THERAPIES.find(t => t.id === contextFilters.therapy)?.short || 'Approche' } : null,
+    ].filter(Boolean);
+
+    const MapPanel = () => (
+      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+        <div style={{ position:'relative', height:compactBookingView ? 548 : 468, borderRadius:28, overflow:'hidden', border:'1px solid rgba(255,255,255,0.08)', background:'linear-gradient(180deg, rgba(14,18,31,0.98) 0%, rgba(9,13,24,1) 100%)', boxShadow:'0 24px 60px rgba(0,0,0,0.28)' }}>
+          <div style={{ position:'absolute', inset:0, backgroundImage:'url(\"assets/maps.png\")', backgroundSize:'cover', backgroundPosition:'center center', backgroundRepeat:'no-repeat' }}></div>
+          <div style={{ position:'absolute', inset:0, pointerEvents:'none', background:'linear-gradient(180deg, rgba(5,8,14,0.04) 0%, rgba(5,8,14,0.12) 22%, rgba(5,8,14,0.24) 100%)' }}></div>
+          {mapTherapists.map((th, idx) => {
+            const tone = getCompatibilityTone(th.score);
+            const pinPosition = mapPins.find(pin => pin.id === th.id) || { left:`${16 + (idx * 18) % 58}%`, top:`${18 + (idx * 19) % 54}%` };
+            return (
+              <button
+                key={th.id}
+                onClick={() => onSelect(th)}
+                title={th.name}
+                style={{
+                  position:'absolute',
+                  left:pinPosition.left,
+                  top:pinPosition.top,
+                  transform:'translate(-50%, -50%)',
+                  width:68,
+                  height:74,
+                  border:'none',
+                  background:'transparent',
+                  fontFamily:'Questrial, sans-serif',
+                  fontSize:12,
+                  fontWeight:700,
+                  cursor:'pointer',
+                }}
+              >
+                <div style={{ width:48, height:48, margin:'0 auto', borderRadius:'50%', border:`1px solid ${tone.ring}`, background:`linear-gradient(160deg, rgba(18, 23, 38, 0.98), rgba(28, 32, 46, 0.96))`, boxShadow:`0 14px 24px rgba(0,0,0,0.34), 0 0 0 7px ${tone.soft}`, color:tone.text, display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)', overflow:'hidden' }}>
+                  <img src={th.photo} alt={th.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                </div>
+                <div style={{ marginTop:6, display:'inline-flex', alignItems:'center', justifyContent:'center', gap:4, padding:'4px 8px', borderRadius:999, background:'rgba(8,12,20,0.88)', border:`1px solid ${tone.ring}`, color:tone.text, boxShadow:`0 10px 20px rgba(0,0,0,0.24)` }}>
+                  <span style={{ fontSize:11, fontWeight:700 }}>{th.score}%</span>
+                </div>
+              </button>
+            );
+          })}
+          <div style={{ position:'absolute', left:'60%', top:'57%', transform:'translate(-50%,-50%)', width:12, height:12, borderRadius:'50%', background:'rgba(255,255,255,0.96)', boxShadow:'0 0 0 10px rgba(255,255,255,0.10), 0 0 0 20px rgba(73,202,166,0.08)' }}></div>
+          <div style={{ position:'absolute', left:'60%', bottom:14, transform:'translateX(-50%)', fontSize:11, color:'rgba(255,255,255,0.52)', fontFamily:'Questrial, sans-serif', padding:'5px 10px', borderRadius:999, background:'rgba(9,13,22,0.70)', border:'1px solid rgba(255,255,255,0.06)', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)' }}>Ta position</div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
+        {!compactBookingView && <AppHeader onBack={onBack} title={titleOverride || `Thérapeutes${therapyLabel ? ` · ${therapyLabel}` : ''}`} />}
+        <div style={{ padding:compactBookingView ? '6px 24px 10px' : '4px 24px 10px', flexShrink:0, position:'relative' }}>
+          <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:10 }}>
+            <div style={{ flex:1, display:'flex', alignItems:'center', gap:10, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:18, padding:'0 14px', minHeight:52, backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.5" stroke="rgba(255,255,255,0.66)" strokeWidth="1.4"/>
+                <path d="M10.5 10.5L14 14" stroke="rgba(255,255,255,0.66)" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+              <input
+                className="search-input"
+                value={locationQuery}
+                onChange={e=>setLocationQuery(e.target.value)}
+                placeholder="Autour de moi, une adresse, une ville…"
+                style={{ flex:1, background:'transparent', border:'none', outline:'none', color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', fontSize:15 }}
+              />
+              <button
+                onClick={() => setLocationQuery('Ma position')}
+                style={{ width:34, height:34, borderRadius:12, border:'none', background:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.82)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+                title="Utiliser ma position"
+              >
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M9 1.8V4M9 14v2.2M1.8 9H4M14 9h2.2M9 5.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6Z" stroke="rgba(255,255,255,0.72)" strokeWidth="1.4" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={() => setFilterOpen(v => !v)}
+              style={{ width:52, height:52, borderRadius:18, border:'1px solid rgba(255,255,255,0.08)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.78)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}
+              title="Filtres"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M3 4.5h12M6 9h6M8 13.5h2" stroke="rgba(255,255,255,0.72)" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div style={{ display:'flex', justifyContent:'center', padding:'0 0 2px', flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding:'4px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:999, width:'fit-content', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
+              <button onClick={() => setMode('list')} style={{ minHeight:36, padding:'8px 14px', borderRadius:999, border:'none', background:mode === 'list' ? 'rgba(255,255,255,0.14)' : 'transparent', color:mode === 'list' ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.58)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, cursor:'pointer' }}>Liste</button>
+              <button onClick={() => setMode('map')} style={{ minHeight:36, padding:'8px 14px', borderRadius:999, border:'none', background:mode === 'map' ? 'rgba(255,255,255,0.14)' : 'transparent', color:mode === 'map' ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.58)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, cursor:'pointer' }}>Carte</button>
+            </div>
+          </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:8, paddingTop:10 }}>
+            {activeContextTags.map(tag => (
+              <button
+                key={tag.key}
+                onClick={() => tag.isSort ? setFilterOpen(o => !o) : setContextFilters(prev => ({ ...prev, therapy:null }))}
+                style={{
+                  minHeight:34,
+                  padding:'8px 12px',
+                  borderRadius:999,
+                  border:'1px solid rgba(255,255,255,0.18)',
+                  background:'rgba(255,255,255,0.08)',
+                  color:'rgba(255,255,255,0.88)',
+                  fontFamily:'Questrial, sans-serif',
+                  fontSize:12,
+                  fontWeight:700,
+                  display:'inline-flex',
+                  alignItems:'center',
+                  gap:8,
+                  cursor:'pointer',
+                }}
+                title={tag.isSort ? 'Changer le tri' : 'Retirer ce filtre'}
+              >
+                <span>{tag.label}</span>
+                {!tag.isSort && <span style={{ fontSize:13, lineHeight:1 }}>×</span>}
+              </button>
+            ))}
+          </div>
+          {filterOpen && (
+            <div style={{ position:'absolute', right:24, top:64, zIndex:20, width:200, background:'rgba(14,14,22,0.92)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:18, padding:10, backdropFilter:'blur(16px)', WebkitBackdropFilter:'blur(16px)', boxShadow:'0 20px 40px rgba(0,0,0,0.28)' }}>
+              <div style={{ fontSize:11, color:'rgba(255,255,255,0.34)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase', padding:'4px 12px 6px' }}>Trier par</div>
+              {[
+                ['compatibility', 'Compatibilité'],
+                ['distance', 'Distance'],
+                ['price', 'Prix'],
+              ].map(([key, label]) => {
+                const active = sortBy === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => { setSortBy(key); setFilterOpen(false); }}
+                    style={{
+                      width:'100%',
+                      minHeight:42,
+                      padding:'10px 12px',
+                      borderRadius:12,
+                      border:'none',
+                      background:active ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      color:active ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.66)',
+                      fontFamily:'Questrial, sans-serif',
+                      fontSize:13,
+                      fontWeight:700,
+                      textAlign:'left',
+                      cursor:'pointer',
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+              <div style={{ height:8 }}></div>
+              <div style={{ fontSize:11, color:'rgba(255,255,255,0.34)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase', padding:'4px 12px 6px' }}>Filtres</div>
+              {[
+                [null, 'Toutes'],
+                ...THERAPIES.map(item => [item.id, item.short || item.name.replace(/\n+/g, ' ')]),
+              ].map(([key, label]) => {
+                const active = contextFilters.therapy === key;
+                return (
+                  <button
+                    key={key || 'all'}
+                    onClick={() => { setContextFilters(prev => ({ ...prev, therapy:key })); setFilterOpen(false); }}
+                    style={{
+                      width:'100%',
+                      minHeight:42,
+                      padding:'10px 12px',
+                      borderRadius:12,
+                      border:'none',
+                      background:active ? 'rgba(255,255,255,0.12)' : 'transparent',
+                      color:active ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.66)',
+                      fontFamily:'Questrial, sans-serif',
+                      fontSize:13,
+                      fontWeight:700,
+                      textAlign:'left',
+                      cursor:'pointer',
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:`0 24px ${bottomInset + 46}px` }}>
+          {mode === 'map' ? <MapPanel /> : (
+            <div style={{ display:'flex', flexDirection:'column' }}>
+              {filteredTherapists.map((th, i) => {
+                const tone = getCompatibilityTone(th.score);
+                const recommended = !!insight && i === 0;
+                return (
+                  <button
+                    key={th.id}
+                    onClick={() => onSelect(th)}
+                    className="fade-up"
+                    style={{
+                      animationDelay:`${i*0.06}s`,
+                      width:'100%',
+                      background: recommended ? 'rgba(73,202,166,0.07)' : 'transparent',
+                      border: recommended ? '1.5px solid rgba(73,202,166,0.45)' : 'none',
+                      borderTop: recommended ? '1.5px solid rgba(73,202,166,0.45)' : '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: recommended ? 24 : 0,
+                      padding:16,
+                      marginLeft:0,
+                      marginRight:0,
+                      marginBottom: recommended ? 12 : 0,
+                      boxShadow: recommended ? '0 0 0 4px rgba(73,202,166,0.07), 0 18px 40px rgba(0,0,0,0.22)' : 'none',
+                      backdropFilter: recommended ? 'blur(16px)' : 'none',
+                      WebkitBackdropFilter: recommended ? 'blur(16px)' : 'none',
+                      cursor:'pointer',
+                      textAlign:'left',
+                      fontFamily:'Questrial, sans-serif',
+                      transition:'all 0.2s',
+                      position:'relative',
+                    }}
+                    onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'transparent'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.60)' : 'rgba(255,255,255,0.07)'; }}
+                    onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'transparent'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.45)' : 'rgba(255,255,255,0.07)'; }}
+                  >
+                    {recommended && (
+                      <div style={{ position:'absolute', left:74, top:14, color:'#49caa6fa', fontSize:10, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>Recommandé</div>
+                    )}
+                    <div style={{ display:'grid', gridTemplateColumns:'48px minmax(0,1fr) max-content', gap:10, alignItems:'start' }}>
+                      <div style={{ width:48, height:48, borderRadius:15, background:'rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', border:'1px solid rgba(255,255,255,0.05)', overflow:'hidden' }}>
+                        <img src={th.photo} alt={th.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                      </div>
+                      <div style={{ minWidth:0, paddingTop:recommended ? 22 : 0 }}>
+                        <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.94)', lineHeight:1.2, marginBottom:3 }}>{th.name}</div>
+                        <div style={{ fontSize:12, color:'rgba(255,255,255,0.52)', lineHeight:1.35, marginBottom:6 }}>{th.title}</div>
+                        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:8 }}>
+                          <span style={{ fontSize:12, color:'rgba(255,255,255,0.58)' }}>{th.price}€/séance</span>
+                          <span style={{ width:4, height:4, borderRadius:'50%', background:'rgba(255,255,255,0.25)' }}></span>
+                          <span style={{ fontSize:12, color:'rgba(255,255,255,0.58)' }}>{th.distance}</span>
+                          {th.online && <>
+                            <span style={{ width:4, height:4, borderRadius:'50%', background:'rgba(255,255,255,0.25)' }}></span>
+                            <span style={{ fontSize:12, color:'rgba(255,255,255,0.58)' }}>En ligne</span>
+                          </>}
+                        </div>
+                      </div>
+                      <div style={{ fontSize:15, fontWeight:700, color:tone.text, flexShrink:0, paddingTop:2, whiteSpace:'nowrap', textAlign:'right' }}>
+                        {th.score}%
+                        <div style={{ fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.38)', letterSpacing:'0.02em' }}>compatibilité</div>
+                      </div>
+                      <p style={{ gridColumn:'1 / -1', fontSize:13, lineHeight:1.55, color:'rgba(255,255,255,0.60)', textWrap:'pretty', marginTop:2 }}>
+                        {th.matchReason} · {th.specialty}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function TherapyQuestionsScreen({ onBack }) {
+    const prompts = [
+      "Est-ce que cette approche peut m'aider rapidement ?",
+      "Comment se passe une première séance ?",
+      "Est-ce que c'est adapté si je ne sais pas trop ce que je ressens ?",
+    ];
+    const [input, setInput] = useState('');
+    const [listening, setListening] = useState(false);
+    const [asked, setAsked] = useState(false);
+    const handleText = (val) => {
+      if (!val.trim()) return;
+      setInput(val.trim());
+      setAsked(true);
+    };
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
+        <AppHeader onBack={onBack} title="Questions" />
+        <div style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 24px 18px', display:'flex', flexDirection:'column', gap:14 }}>
+          <div style={{ alignSelf:'flex-start', maxWidth:'86%', background:'rgba(73,202,166,0.12)', border:'1px solid rgba(73,202,166,0.12)', color:'rgba(255,255,255,0.86)', borderRadius:'22px 22px 22px 8px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
+            Je peux t&apos;aider à clarifier une approche, comprendre une première séance ou comparer plusieurs thérapies.
+          </div>
+          <div style={{ alignSelf:'flex-end', maxWidth:'86%', background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.92)', borderRadius:'22px 22px 8px 22px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
+            Peux-tu m&apos;expliquer la différence entre les approches ?
+          </div>
+          <div style={{ alignSelf:'flex-start', maxWidth:'88%', background:'rgba(73,202,166,0.13)', border:'1px solid rgba(73,202,166,0.12)', color:'rgba(255,255,255,0.86)', borderRadius:'22px 22px 22px 8px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.7 }}>
+            Oui. Certaines approches sont plus concrètes, avec des outils pour agir au quotidien. D&apos;autres explorent davantage ton histoire, tes relations ou ce qui se répète. Le bon repère, c&apos;est surtout ce dont tu as besoin maintenant: comprendre, apaiser, agir, ou travailler en profondeur.
+          </div>
+          {asked && (
+            <>
+              <div style={{ alignSelf:'flex-end', maxWidth:'86%', background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.92)', borderRadius:'22px 22px 8px 22px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
+                {input}
+              </div>
+              <div style={{ alignSelf:'flex-start', maxWidth:'88%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.78)', borderRadius:'22px 22px 22px 8px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.7 }}>
+                Une première séance peut servir à poser cette question tranquillement, sans avoir à tout formuler parfaitement. Le thérapeute t&apos;aide à mettre de l&apos;ordre dans ce que tu ressens et à voir si son cadre te convient.
+              </div>
+            </>
+          )}
+          <div style={{ display:'flex', flexDirection:'column', gap:8, paddingTop:4 }}>
+            {prompts.map((p, i) => (
+              <button key={i} onClick={()=>handleText(p)} style={{ width:'100%', textAlign:'left', minHeight:48, padding:'12px 15px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.78)', border:'1px solid rgba(255,255,255,0.075)', borderRadius:18, fontSize:14, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer' }}>{p}</button>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center' }}>
+          <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46 }}>
+            <input
+              className="chat-input"
+              value={input}
+              onChange={e=>setInput(e.target.value)}
+              onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleText(input); }}}
+              placeholder="Votre question…"
+              style={{ flex:1, background:'transparent', border:'none', fontSize:14, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif', outline:'none' }}
+            />
+            {input.trim() && (
+              <button onClick={() => handleText(input)} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            )}
+          </div>
+          <MicButton onResult={handleText} listening={listening} setListening={setListening}/>
+        </div>
+      </div>
+    );
+  }
+
+  function TherapistScreen({ therapist:th, onBook, onBack }) {
+    const [tab, setTab] = useState('bio');
+    const tone = getCompatibilityTone(th.score);
+    const introBullets = [
+      { icon:'check-circle', text:'Approche concrète si tu veux avancer sans te sentir perdu·e.' },
+      { icon:'route', text:'Cadre souple, adapté à un rythme de suivi réaliste.' },
+      { icon:'shield-alt', text:'Espace pensé pour sécuriser le premier pas et poser les bases.' },
+    ];
+    const approachSteps = [
+      { icon:'handshake', title:'Première rencontre', text:'On clarifie ce que tu traverses et ce que tu attends, sans pression.' },
+      { icon:'map-signs', title:'Cadrage', text:'On choisit ensemble un cap simple, concret et compatible avec ton quotidien.' },
+      { icon:'tools', title:'Outils', text:'Selon le besoin, on met en place des repères pratiques, des exercices ou un travail plus exploratoire.' },
+      { icon:'leaf', title:'Tempo', text:'Le rythme reste ajusté à toi: on avance sans forcer, avec des points d’appui réguliers.' },
+    ];
+    const reviewHighlights = [
+      { icon:'heart', text:"Quelqu'un de rassurant et très clair dans ses explications." },
+      { icon:'comment-dots', text:'Un accompagnement qui donne des repères sans alourdir.' },
+      { icon:'calendar-check', text:'Des rendez-vous faciles à intégrer dans la vie réelle.' },
+    ];
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, overflow:'hidden' }}>
+        <AppHeader onBack={onBack} title="Profil" />
+        <div style={{ flex:1, overflowY:'auto' }}>
+          <div style={{ padding:'18px 24px 20px' }}>
+            <div style={{ display:'flex', gap:20, alignItems:'center', marginBottom:22 }}>
+              <div style={{ width:64, height:64, borderRadius:12, background:'rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', border:'1px solid rgba(255,255,255,0.08)', flexShrink:0, overflow:'hidden' }}>
+                <img src={th.photo} alt={th.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+              </div>
+              <div style={{ minWidth:0 }}>
+                <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:21, color:'rgba(255,255,255,0.94)', fontWeight:700, marginBottom:4, letterSpacing:'0.01em' }}>{th.name}</h2>
+                <div style={{ marginTop:8, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                  <span style={{ display:'inline-flex', alignItems:'center', gap:6, color:tone.text, fontSize:12, fontWeight:700, fontFamily:'Questrial, sans-serif' }}>
+                    {th.score}% de compatibilité avec tes besoins
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:4, marginBottom:24, marginTop:8 }}>
+              {[
+                ['bio','Profil','user'],
+                ['approach','Approche','route'],
+                ['reviews','Avis','comment-dots'],
+              ].map(([id,label,icon])=>(
+                <button key={id} onClick={()=>setTab(id)} style={{ flex:1, minHeight:48, padding:'12px 14px', background:tab===id?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.05)', color:tab===id?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.42)', border:`1px solid ${tab===id?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.06)'}`, borderRadius:100, fontSize:13, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" style={{ flexShrink:0 }}>
+                    {icon === 'user' && <path d="M9 8.2a2.8 2.8 0 1 0 0-5.6 2.8 2.8 0 0 0 0 5.6Zm4.8 5.3c0-2.4-2.1-4-4.8-4s-4.8 1.6-4.8 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>}
+                    {icon === 'route' && <>
+                      <path d="M4 14c2.5 0 2.5-10 5-10s2.5 10 5 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      <circle cx="4" cy="14" r="1" fill="currentColor"/>
+                      <circle cx="14" cy="14" r="1" fill="currentColor"/>
+                    </>}
+                    {icon === 'comment-dots' && <>
+                      <path d="M4 4h10v6H9.5L7 12V10H4V4Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <circle cx="7" cy="7" r="0.7" fill="currentColor"/>
+                      <circle cx="9" cy="7" r="0.7" fill="currentColor"/>
+                      <circle cx="11" cy="7" r="0.7" fill="currentColor"/>
+                    </>}
+                  </svg>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+            {tab==='bio' && <div className="fade-in">
+              <p style={{ fontSize:17, lineHeight:1.8, color:'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', marginBottom:18, textWrap:'pretty' }}>{th.bio}</p>
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', color:'rgba(255,255,255,0.36)', marginBottom:10, fontFamily:'Questrial, sans-serif' }}>Ce que ça peut t'apporter</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                  {introBullets.map((item, i) => (
+                    <div key={i} style={{ display:'flex', gap:10, alignItems:'flex-start' }}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ flexShrink:0, marginTop:4, color:tone.text }}>
+                          {item.icon === 'check-circle' && <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Zm3 5-3.5 4-2-2.2" stroke="rgba(255,255,255,0.78)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>}
+                          {item.icon === 'route' && <path d="M3 12c2.6 0 2.6-8 5.2-8S10.8 12 13 12" stroke="rgba(255,255,255,0.78)" strokeWidth="1.4" strokeLinecap="round"/>}
+                          {item.icon === 'shield-alt' && <path d="M8 1.8 13 3.8v3.2c0 3.1-2.1 5.8-5 7-2.9-1.2-5-3.9-5-7V3.8L8 1.8Z" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinejoin="round"/>}
+                      </svg>
+                      <p style={{ fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.62)', fontFamily:'Questrial, sans-serif', paddingTop:1 }}>{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', color:'rgba(255,255,255,0.36)', marginBottom:8, fontFamily:'Questrial, sans-serif' }}>Spécialités</div>
+              <p style={{ fontSize:14, color:'rgba(255,255,255,0.60)', lineHeight:1.7, fontFamily:'Questrial, sans-serif' }}>{th.specialty}</p>
+            </div>}
+            {tab==='approach' && <div className="fade-in">
+              <p style={{ fontSize:17, lineHeight:1.8, color:'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', marginBottom:18, textWrap:'pretty' }}>{th.approach}</p>
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', color:'rgba(255,255,255,0.36)', marginBottom:10, fontFamily:'Questrial, sans-serif' }}>Déroulé du suivi</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                  {approachSteps.map((step, i) => (
+                    <div key={i} style={{ display:'flex', gap:10, alignItems:'flex-start' }}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ flexShrink:0, marginTop:4, color:tone.text }}>
+                          {step.icon === 'handshake' && <path d="M2.5 8.5 5 11l2-2 2 2 2-2 2-2.5" stroke="rgba(255,255,255,0.78)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>}
+                          {step.icon === 'map-signs' && <path d="M5 2v11M5 4.5h5l1.5-1.5H13v4H11.5L10 5H5" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>}
+                          {step.icon === 'tools' && <path d="M3 11 10.5 3.5l2 2L5 13H3v-2ZM10.8 3.2l1.9-1.9 2 2-1.9 1.9" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>}
+                          {step.icon === 'leaf' && <>
+                            <path d="M12.5 3.5c-4.4 0-8 2.8-8 6.2 0 1.6 1.2 2.8 2.9 2.8 3.5 0 6.6-3.2 6.6-7.2 0-1.7-0.6-1.8-1.5-1.8Z" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinejoin="round"/>
+                            <path d="M5 11.8c1.5-1.9 3.8-3.7 6.6-5.3" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinecap="round"/>
+                          </>}
+                      </svg>
+                      <div>
+                        <div style={{ fontSize:14, color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', fontWeight:700, marginBottom:3 }}>{step.title}</div>
+                        <p style={{ fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.62)', fontFamily:'Questrial, sans-serif' }}>{step.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>}
+            {tab==='reviews' && <div className="fade-in">
+              <div style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', color:'rgba(255,255,255,0.36)', marginBottom:10, fontFamily:'Questrial, sans-serif' }}>Ce que les personnes retiennent</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:14 }}>
+                {reviewHighlights.map((item, i) => (
+                    <div key={i} style={{ display:'flex', gap:10, alignItems:'flex-start' }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ flexShrink:0, marginTop:4, color:tone.text }}>
+                        {item.icon === 'heart' && <path d="M8 13.5 2.4 7.8A3.3 3.3 0 0 1 7 3.2l1 1 1-1a3.3 3.3 0 0 1 4.6 4.6L8 13.5Z" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinejoin="round"/>}
+                        {item.icon === 'comment-dots' && <>
+                          <path d="M3.5 3.5h9v5h-4L6 10.5V8.5h-2.5v-5Z" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinejoin="round"/>
+                          <circle cx="6" cy="6" r="0.7" fill="rgba(255,255,255,0.78)"/>
+                          <circle cx="8" cy="6" r="0.7" fill="rgba(255,255,255,0.78)"/>
+                          <circle cx="10" cy="6" r="0.7" fill="rgba(255,255,255,0.78)"/>
+                        </>}
+                        {item.icon === 'calendar-check' && <path d="M4 2.8V4M12 2.8V4M3.5 5h9v7h-9V5Zm2.1 3.5 1.1 1.1 2-2" stroke="rgba(255,255,255,0.78)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>}
+                    </svg>
+                    <p style={{ fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.62)', fontFamily:'Questrial, sans-serif' }}>{item.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {th.reviews.map((r,i)=>(<div key={i} style={{ display:'flex', gap:12, alignItems:'flex-start' }}><svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ flexShrink:0, marginTop:3, color:'rgba(255,255,255,0.80)' }}><path d="M3 4.5h10v7H7l-3 2v-2H3v-7Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/></svg><div style={{ flex:1, minWidth:0 }}><div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:12, marginBottom:4 }}><span style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif' }}>{r.author}</span><span style={{ fontSize:12, color:tone.text, fontFamily:'Questrial, sans-serif', whiteSpace:'nowrap', marginLeft:'auto', textAlign:'right', minWidth:56 }}>{'★'.repeat(r.stars)}</span></div><p style={{ fontSize:14, color:'rgba(255,255,255,0.52)', lineHeight:1.65, fontFamily:'Questrial, sans-serif' }}>{r.text}</p></div></div>))}
+              </div>
+            </div>}
+            <div style={{ height:190 }}></div>
+          </div>
+        </div>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'14px 24px 28px', background:'linear-gradient(to top, #0b0b14 65%, transparent)' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <button onClick={onBook} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.02em' }} onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>Programmer une visio</button>
+            <button onClick={onBook} style={{ width:'100%', minHeight:58, padding:'15px 24px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.82)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:16, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.01em' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>Prendre un rendez-vous en cabinet</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function BookingScreen({ therapist:th, onBack, onRestart, onConfirmBooking }) {
+    const schedule = [
+      { id:'2026-04-28', label:'Lun 28 avr', weekday:'Lun', day:'28', month:'avr', times:['10h00', '14h30', '17h30'] },
+      { id:'2026-04-29', label:'Mar 29 avr', weekday:'Mar', day:'29', month:'avr', times:['9h00', '11h30', '16h00'] },
+      { id:'2026-04-30', label:'Mer 30 avr', weekday:'Mer', day:'30', month:'avr', times:['11h30', '15h00'] },
+      { id:'2026-05-02', label:'Ven 2 mai', weekday:'Ven', day:'2', month:'mai', times:['13h30', '18h00'] },
+    ];
+    const [selectedDay, setSelectedDay] = useState(schedule[0].id);
+    const [selectedTime, setSelectedTime] = useState(null);
+    const [done, setDone] = useState(false);
+    const currentDay = schedule.find(day => day.id === selectedDay) || schedule[0];
+    const sel = selectedTime ? `${currentDay.label} - ${selectedTime}` : null;
+    useEffect(() => {
+      setSelectedTime(null);
+    }, [selectedDay]);
+    const handleAddToCalendar = () => {
+      if (!sel) return;
+      const datePart = selectedDay.replace(/-/g, '');
+      const [hour, minute] = selectedTime.split('h');
+      const startDate = new Date(`${selectedDay}T${hour.padStart(2,'0')}:${minute.padStart(2,'0')}:00`);
+      const endDate = new Date(startDate.getTime() + 45 * 60 * 1000);
+      const toICS = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const h = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${y}${m}${d}T${h}${min}00`;
+      };
+      const start = toICS(startDate);
+      const end = toICS(endDate);
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Claira//RDV//FR",
+        "BEGIN:VEVENT",
+        `UID:claira-${th.id}-${datePart}-${hour}${minute}`,
+        `DTSTAMP:${start}Z`,
+        `DTSTART:${start}`,
+        `DTEND:${end}`,
+        `SUMMARY:Rendez-vous avec ${th.name}`,
+        `DESCRIPTION:Consultation réservée via Claira avec ${th.name}.`,
+        "LOCATION:Cabinet / en ligne",
+        "END:VEVENT",
+        "END:VCALENDAR",
+      ].join("\r\n");
+      const blob = new Blob([ics], { type:'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `rendez-vous-${th.name.toLowerCase().replace(/\s+/g,'-')}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+    if (done) return (<div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', padding:'40px 32px', textAlign:'center', position:'relative', zIndex:1 }}><div className="fade-up" style={{ width:68, height:68, borderRadius:'50%', background:'rgba(100,200,150,0.12)', border:'1px solid rgba(100,200,150,0.25)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:22 }}><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14.5l5 5L22 9" stroke="rgba(100,200,150,0.9)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg></div><h2 className="fade-up" style={{ fontFamily:'Questrial, sans-serif', fontSize:31, color:'rgba(255,255,255,0.92)', fontWeight:700, marginBottom:10, animationDelay:'0.1s', letterSpacing:'-0.02em' }}>C&apos;est confirmé !</h2><p className="fade-up" style={{ fontSize:15, color:'rgba(255,255,255,0.52)', lineHeight:1.65, marginBottom:6, animationDelay:'0.18s', fontFamily:'Questrial, sans-serif' }}>avec {th.name}</p><p className="fade-up" style={{ fontSize:15, color:'rgba(116,227,234,0.92)', fontWeight:700, marginBottom:22, animationDelay:'0.22s', fontFamily:'Questrial, sans-serif' }}>{sel}</p><div className="fade-up" style={{ background:'rgba(255,255,255,0.05)', borderRadius:14, padding:'16px 18px', marginBottom:14, width:'100%', border:'1px solid rgba(255,255,255,0.07)', animationDelay:'0.3s' }}><p style={{ fontSize:14, color:'rgba(255,255,255,0.48)', lineHeight:1.7, margin:0, fontFamily:'Questrial, sans-serif' }}>Un email de confirmation vous a été envoyé. Annulation possible jusqu&apos;à 24h avant.</p></div><button onClick={handleAddToCalendar} className="fade-up" style={{ minHeight:58, width:'100%', background:'rgba(255,255,255,0.92)', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'#0b0b14', fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', animationDelay:'0.34s', letterSpacing:'0.01em', marginBottom:12 }}>Ajouter à mon calendrier</button><button onClick={onRestart} className="fade-up" style={{ minHeight:58, width:'100%', background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'rgba(255,255,255,0.80)', fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', animationDelay:'0.38s', letterSpacing:'0.02em' }}>Retour à l&apos;accueil</button></div>);
+    return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, overflow:'hidden' }}>
+        <AppHeader onBack={onBack} title="Rendez-vous" />
+        <div style={{ padding:'8px 24px 14px', flexShrink:0 }}>
+          <div>
+            <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:22, color:'rgba(255,255,255,0.90)', fontWeight:700, letterSpacing:'-0.02em' }}>Choisir un créneau</h2>
+            <p style={{ fontSize:12, color:'rgba(255,255,255,0.38)', marginTop:3, fontFamily:'Questrial, sans-serif', fontWeight:400 }}>avec {th.name}</p>
+          </div>
+        </div>
+        <div style={{ flex:1, overflowY:'auto', padding:'0 24px', display:'flex', flexDirection:'column' }}>
+          <div style={{ display:'flex', gap:10, overflowX:'auto', paddingBottom:16, marginBottom:6, WebkitOverflowScrolling:'touch' }}>
+            {schedule.map((day) => {
+              const isActive = day.id === selectedDay;
+              return (
+                <button
+                  key={day.id}
+                  onClick={() => setSelectedDay(day.id)}
+                  style={{
+                    minWidth:84,
+                    minHeight:78,
+                    padding:'12px 12px 10px',
+                    borderRadius:20,
+                    border:`1px solid ${isActive ? 'rgba(116,227,234,0.28)' : 'rgba(255,255,255,0.08)'}`,
+                    background:isActive ? 'rgba(116,227,234,0.12)' : 'rgba(255,255,255,0.05)',
+                    color:isActive ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.68)',
+                    display:'flex',
+                    flexDirection:'column',
+                    alignItems:'flex-start',
+                    justifyContent:'space-between',
+                    textAlign:'left',
+                    fontFamily:'Questrial, sans-serif',
+                    cursor:'pointer',
+                    flexShrink:0,
+                  }}
+                >
+                  <span style={{ fontSize:13, fontWeight:700 }}>{day.weekday}</span>
+                  <span style={{ fontSize:28, lineHeight:1, fontWeight:700, color:isActive ? 'rgba(116,227,234,0.95)' : 'rgba(255,255,255,0.90)' }}>{day.day}</span>
+                  <span style={{ fontSize:12, color:isActive ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.46)' }}>{day.month}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div style={{ fontSize:12, color:'rgba(255,255,255,0.42)', fontFamily:'Questrial, sans-serif', marginBottom:10 }}>Créneaux disponibles</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8, paddingBottom:20 }}>
+            {currentDay.times.map((time,i)=>(
+              <button
+                key={i}
+                onClick={()=>setSelectedTime(time)}
+                style={{
+                  minHeight:56,
+                  padding:'14px 18px',
+                  background:selectedTime===time?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.05)',
+                  border:`1px solid ${selectedTime===time?'rgba(255,255,255,0.16)':'rgba(255,255,255,0.08)'}`,
+                  borderRadius:18,
+                  fontSize:15,
+                  fontWeight:600,
+                  color:selectedTime===time?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.72)',
+                  fontFamily:'Questrial, sans-serif',
+                  cursor:'pointer',
+                  textAlign:'left',
+                  transition:'all 0.2s',
+                  display:'flex',
+                  alignItems:'center',
+                  justifyContent:'space-between',
+                }}
+              >
+                <span>{currentDay.label} - {time}</span>
+                <span style={{ fontSize:12, color:selectedTime===time?'rgba(116,227,234,0.92)':'rgba(255,255,255,0.42)' }}>45 min</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding:'16px 24px 32px', flexShrink:0 }}>
+          <button onClick={()=>{ if(!sel) return; onConfirmBooking && onConfirmBooking({ therapistId:th.id, name:th.name, when:sel }); setDone(true); }} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:sel?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.07)', color:sel?'#0b0b14':'rgba(255,255,255,0.40)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:sel?'pointer':'default', transition:'all 0.3s', letterSpacing:'0.02em' }}>Confirmer le rendez-vous</button>
+        </div>
+      </div>
+    );
+  }
+
+  Object.assign(window.Claira, { HomeScreen, DashboardScreen, ChatScreen, InsightScreen, TherapiesScreen, MatchingScreen, TherapyQuestionsScreen, TherapistScreen, BookingScreen });
+})();
+
+(() => {
+  const { useState, useEffect, useCallback, useRef } = React;
+  const { ShaderCanvas, StatusBar } = window.Claira;
+  const { HomeScreen, DashboardScreen, ChatScreen, InsightScreen, TherapiesScreen, MatchingScreen, TherapyQuestionsScreen, TherapistScreen, BookingScreen, MainTabBar } = window.Claira;
+  const { QUESTIONS, getInsight, generateAIInsight } = window.Claira;
+  function App() {
+    const HOME_WAVE_OFFSET = -0.82;
+    const CENTER_WAVE_OFFSET = 0;
+    const [screen, setScreen]   = useState('home');
+    const [step, setStep]       = useState(0);
+    const [answers, setAnswers] = useState({});
+    const [therapist, setTh]    = useState(null);
+    const [bookedAppointment, setBookedAppointment] = useState(null);
+    const [menuOpen, setMenu]   = useState(false);
+    const [mainTab, setMainTab] = useState('home');
+    const [therapyDetailOpen, setTherapyDetailOpen] = useState(false);
+    const [generatedInsight, setGeneratedInsight] = useState(null);
+    const [generatedInsightKey, setGeneratedInsightKey] = useState('');
+    const [shaderWaveOffset, setShaderWaveOffset] = useState(HOME_WAVE_OFFSET);
+    const [shaderTransitionEase, setShaderTransitionEase] = useState(0.055);
+    const shaderMoveTimer = useRef(null);
+    const answersKey = JSON.stringify(answers);
+    const pointIsComplete = QUESTIONS.every(q => answers[q.id]);
+    const baseInsight = Object.keys(answers).length ? getInsight(answers) : null;
+    const insight = generatedInsight || baseInsight;
+    const recommendationInsight = pointIsComplete ? insight : null;
+    useEffect(() => {
+      if (!pointIsComplete) {
+        setGeneratedInsight(null);
+        setGeneratedInsightKey('');
+        return;
+      }
+      if (generatedInsightKey === answersKey) return;
+      let alive = true;
+      setGeneratedInsight(null);
+      setGeneratedInsightKey(answersKey);
+      const fallbackInsight = getInsight(answers);
+      Promise.race([
+        generateAIInsight(answers),
+        new Promise(resolve => setTimeout(() => resolve(fallbackInsight), 4500)),
+      ]).then(result => {
+        if (alive) setGeneratedInsight(result);
+      }).catch(() => {
+        if (alive) setGeneratedInsight(fallbackInsight);
+      });
+      return () => { alive = false; };
+    }, [answersKey, pointIsComplete, answers]);
+    useEffect(() => () => {
+      if (shaderMoveTimer.current) clearTimeout(shaderMoveTimer.current);
+    }, []);
+    const clearShaderMoveTimer = () => {
+      if (!shaderMoveTimer.current) return;
+      clearTimeout(shaderMoveTimer.current);
+      shaderMoveTimer.current = null;
+    };
+    const setShaderForInnerPage = (ease = 0.055) => {
+      clearShaderMoveTimer();
+      setShaderTransitionEase(ease);
+      setShaderWaveOffset(CENTER_WAVE_OFFSET);
+    };
+    const startAssessmentFromHome = () => {
+      clearShaderMoveTimer();
+      setShaderTransitionEase(0.055);
+      setShaderWaveOffset(HOME_WAVE_OFFSET);
+      setScreen('chat');
+      shaderMoveTimer.current = setTimeout(() => {
+        setShaderTransitionEase(0.072);
+        setShaderWaveOffset(CENTER_WAVE_OFFSET);
+        shaderMoveTimer.current = null;
+      }, 1000);
+    };
+    const goToHubFromHome = () => {
+      setShaderForInnerPage(0.95);
+      setMainTab('home');
+      setScreen('hub');
+      setTherapyDetailOpen(false);
+    };
+    const openAssessment = () => {
+      setShaderForInnerPage();
+      const nextStep = QUESTIONS.findIndex(q => !answers[q.id]);
+      setStep(nextStep === -1 ? 0 : nextStep);
+      setScreen('chat');
+    };
+    const goToHub = () => { setShaderForInnerPage(); setMainTab('home'); setScreen('hub'); setTherapyDetailOpen(false); };
+    const goToTherapies = () => { setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); setTherapyDetailOpen(false); };
+    const goToBookingHub = () => { setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); setTherapyDetailOpen(false); };
+    const launchTestDiagnostic = () => {
+      setAnswers(window.Claira.TEST_ANSWERS);
+      setStep(QUESTIONS.length);
+      setTh(null);
+      setGeneratedInsight(null);
+      setGeneratedInsightKey('');
+      setMenu(false);
+      setMainTab('therapies');
+      setScreen('insight');
+    };
+    window.Claira.launchTestDiagnostic = launchTestDiagnostic;
+    const softenBackground = ['hub', 'insight', 'therapies', 'therapy-questions', 'matching', 'therapist', 'booking'].includes(screen);
+    const handleAnswer = useCallback((val) => { const q = QUESTIONS[step]; const next = { ...answers, [q.id]: val }; setAnswers(next); if (step < QUESTIONS.length - 1) setStep(s => s + 1); else setScreen('insight'); }, [step, answers]);
+    const handleEdit = useCallback((idx) => { const trimmed = {}; QUESTIONS.slice(0, idx).forEach(q => { if (answers[q.id]) trimmed[q.id] = answers[q.id]; }); setAnswers(trimmed); setStep(idx); setScreen('chat'); }, [answers]);
+    const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setBookedAppointment(null); };
+    const showTabbar = screen === 'hub' || screen === 'matching' || (screen === 'therapies' && !therapyDetailOpen);
+    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{softenBackground && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(34px) saturate(0.82)', WebkitBackdropFilter:'blur(34px) saturate(0.82)', background:'rgba(7,22,48,0.46)' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={setBookedAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToBookingHub} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
+  }
+  window.Claira.App = App;
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+})();
+</script>
+</body>
+</html>

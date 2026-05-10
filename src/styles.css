@@ -1,0 +1,32 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #05050b; font-family: 'Roboto Condensed', sans-serif; }
+body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+#root {
+  width: 390px; height: 844px;
+  background: #09090f;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.7);
+  display: flex; flex-direction: column;
+}
+@media (max-height: 900px) { #root { height: 100vh; border-radius: 0; } body { background: #0b0b14; } }
+
+@keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+@keyframes slideL  { from { opacity:0; transform:translateX(22px); } to { opacity:1; transform:translateX(0); } }
+@keyframes slideR  { from { opacity:0; transform:translateX(-22px); } to { opacity:1; transform:translateX(0); } }
+@keyframes chipIn  { from { opacity:0; transform:scale(0.9) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes micRing { 0%{ box-shadow:0 0 0 0 rgba(120,80,255,0.5); } 100%{ box-shadow:0 0 0 14px rgba(120,80,255,0); } }
+@keyframes pulse    { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.7; } }
+@keyframes shimmer  { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+.fade-up { animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) both; }
+.fade-in  { animation: fadeIn 0.35s ease both; }
+.slide-l  { animation: slideL 0.4s cubic-bezier(.22,1,.36,1) both; }
+.slide-r  { animation: slideR 0.4s cubic-bezier(.22,1,.36,1) both; }
+
+::-webkit-scrollbar { width: 0; }
+
+input::placeholder { color: rgba(255,255,255,0.28); }
+input:focus { outline: none; }
