@@ -1899,12 +1899,13 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   }
 
   function TherapyQuestionsScreen({ onBack }) {
-    const SUGGESTIONS = [
+    const INITIAL_SUGGESTIONS = [
       "Comment se passe une première séance ?",
       "Quelle est la différence entre TCC et psychanalyse ?",
       "Combien de séances faut-il en général ?",
     ];
     const [messages, setMessages] = useState([]);
+    const [inlineSuggestions, setInlineSuggestions] = useState([]);
     const [input, setInput] = useState('');
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
@@ -1913,12 +1914,36 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     useEffect(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }, [messages, loading]);
+    }, [messages, loading, inlineSuggestions]);
+
+    const fetchSuggestions = async (msgs) => {
+      try {
+        const key = window.Claira.GROQ_API_KEY;
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${key}` },
+          body: JSON.stringify({
+            model:'llama-3.1-8b-instant',
+            messages:[
+              ...msgs,
+              { role:'user', content:"En te basant sur cette conversation, génère exactement 2 questions de suivi courtes et pertinentes que l'utilisateur pourrait poser ensuite. Réponds UNIQUEMENT avec un tableau JSON de 2 strings, sans aucun autre texte. Ex: [\"Et pour les enfants ?\", \"Ça coûte combien ?\"]" },
+            ],
+            max_tokens:100,
+            temperature:0.85,
+          }),
+        });
+        const data = await res.json();
+        const raw = (data.choices?.[0]?.message?.content || '[]').replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setInlineSuggestions(parsed.slice(0, 2));
+      } catch(e) { setInlineSuggestions([]); }
+    };
 
     const send = async (text) => {
       const q = (text || input).trim();
       if (!q || loading) return;
       setInput('');
+      setInlineSuggestions([]);
       const next = [...messages, { role:'user', content:q }];
       setMessages(next);
       setLoading(true);
@@ -1939,16 +1964,15 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         });
         const data = await res.json();
         const answer = data.choices?.[0]?.message?.content || "Je n'ai pas pu répondre, réessaie dans un instant.";
-        setMessages(prev => [...prev, { role:'assistant', content:answer }]);
+        const finalMsgs = [...next, { role:'assistant', content:answer }];
+        setMessages(finalMsgs);
+        fetchSuggestions(finalMsgs);
       } catch(e) {
         setMessages(prev => [...prev, { role:'assistant', content:"Une erreur s'est produite. Vérifie ta connexion et réessaie." }]);
       } finally {
         setLoading(false);
       }
     };
-
-    const askedTexts = new Set(messages.filter(m => m.role === 'user').map(m => m.content));
-    const remainingSuggestions = SUGGESTIONS.filter(s => !askedTexts.has(s));
 
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
@@ -1973,11 +1997,22 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </div>
           )}
 
+          {!loading && inlineSuggestions.length > 0 && (
+            <div className="fade-in" style={{ display:'flex', flexDirection:'column', gap:7, paddingTop:4 }}>
+              {inlineSuggestions.map((s, i) => (
+                <button key={i} onClick={() => send(s)} style={{ width:'100%', textAlign:'left', padding:'11px 15px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.75)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.09)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.055)'}
+                >{s}</button>
+              ))}
+            </div>
+          )}
+
         </div>
 
-        {remainingSuggestions.length > 0 && (
+        {messages.length === 0 && (
           <div className="fade-up" style={{ padding:'0 16px 10px', display:'flex', flexDirection:'column', gap:7, flexShrink:0 }}>
-            {remainingSuggestions.map((s, i) => (
+            {INITIAL_SUGGESTIONS.map((s, i) => (
               <button key={i} onClick={() => send(s)} style={{ width:'100%', textAlign:'left', padding:'11px 16px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.75)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.09)'}
                 onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.055)'}
