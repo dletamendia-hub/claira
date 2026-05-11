@@ -1,7 +1,7 @@
 window.Claira = window.Claira || {};
 
 (() => {
-  const { useState, useEffect, useMemo } = React;
+  const { useState, useEffect, useMemo, useRef } = React;
   const { QUESTIONS, THERAPIES, THERAPISTS, getInsight, generateAIInsight } = window.Claira;
   const { MicButton, AppHeader, StatusBar, BackBtn } = window.Claira;
 
@@ -51,6 +51,9 @@ window.Claira = window.Claira || {};
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
 
+    const onAnswerRef = useRef(onAnswer);
+    useEffect(() => { onAnswerRef.current = onAnswer; }, [onAnswer]);
+
     useEffect(() => {
       setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal('');
     }, [step]);
@@ -80,9 +83,9 @@ window.Claira = window.Claira || {};
 
     useEffect(() => {
       if (phase !== 'exiting') return;
-      const t = setTimeout(() => onAnswer(chosen), 480);
+      const t = setTimeout(() => onAnswerRef.current(chosen), 480);
       return () => clearTimeout(t);
-    }, [phase, chosen, onAnswer]);
+    }, [phase, chosen]);
 
     const handleChose = (val) => {
       if (phase !== 'options') return;

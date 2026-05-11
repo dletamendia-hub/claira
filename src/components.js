@@ -245,8 +245,13 @@ void main(){
     };
 
     const toggle = () => {
-      if (listening) stop();
-      else start();
+      if (submittingRef.current) return;
+      if (listening) {
+        if (transcriptRef.current.trim()) submitTranscript();
+        else stop();
+      } else {
+        start();
+      }
     };
 
     useEffect(() => {
