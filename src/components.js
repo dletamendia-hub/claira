@@ -99,19 +99,76 @@ void main(){
     return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }}/>;
   }
 
-  function MicButton({ onResult, listening, setListening }) {
+  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false }) {
     const recRef = useRef(null);
-    const toggle = () => {
+    const audioStreamRef = useRef(null);
+    const startingRef = useRef(false);
+
+    const ensureMicPermission = async () => {
+      if (!navigator.permissions?.query) return true;
+      try {
+        const status = await navigator.permissions.query({ name: 'microphone' });
+        if (status.state === 'denied') {
+          setVoiceMode?.(false);
+          setListening(false);
+          alert("Autorisation du micro nécessaire pour utiliser la saisie vocale.");
+          return false;
+        }
+      } catch (err) {}
+      return true;
+    };
+
+    const stopMicStream = () => {
+      audioStreamRef.current?.getTracks().forEach(track => track.stop());
+      audioStreamRef.current = null;
+    };
+
+    const start = async () => {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { alert("Reconnaissance vocale non disponible sur ce navigateur."); return; }
-      if (listening) { recRef.current?.stop(); setListening(false); return; }
+      if (startingRef.current || listening) return;
+      startingRef.current = true;
+      const hasPermission = await ensureMicPermission();
+      startingRef.current = false;
+      if (!hasPermission) return;
+      setVoiceMode?.(true);
       const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=false;
       rec.onresult = e => { onResult(e.results[0][0].transcript); setListening(false); };
       rec.onerror = rec.onend = () => setListening(false);
-      recRef.current = rec; rec.start(); setListening(true);
+      recRef.current = rec;
+      try {
+        rec.start();
+        setListening(true);
+      } catch (err) {
+        setListening(false);
+      }
     };
+
+    const stop = () => {
+      setVoiceMode?.(false);
+      stopMicStream();
+      recRef.current?.stop();
+      setListening(false);
+    };
+
+    const toggle = () => {
+      if (listening) stop();
+      else start();
+    };
+
+    useEffect(() => {
+      if (!autoStart || !voiceMode || listening) return;
+      const t = setTimeout(() => start(), 180);
+      return () => clearTimeout(t);
+    }, [autoStart, voiceMode, listening]);
+
+    useEffect(() => () => {
+      recRef.current?.stop();
+      stopMicStream();
+    }, []);
+
     return (
-      <button onClick={toggle} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background: listening ? 'rgba(120,80,255,0.8)' : 'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s', animation: listening ? 'micRing 1s ease-out infinite' : 'none' }}>
+      <button onClick={toggle} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background: listening ? 'rgba(120,80,255,0.8)' : voiceMode ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s', animation: listening ? 'micRing 1s ease-out infinite' : 'none' }}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <rect x="6" y="1" width="6" height="10" rx="3" fill="white" opacity={listening ? 1 : 0.75}/>
           <path d="M3 9a6 6 0 0 0 12 0" stroke="white" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity={listening ? 1 : 0.75}/>

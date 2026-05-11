@@ -49,6 +49,7 @@ window.Claira = window.Claira || {};
     const [chosen, setChosen]   = useState(null);
     const [inputVal, setInputVal] = useState('');
     const [listening, setListening] = useState(false);
+    const [voiceMode, setVoiceMode] = useState(false);
 
     useEffect(() => {
       setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal('');
@@ -174,7 +175,7 @@ window.Claira = window.Claira || {};
               </button>
             )}
           </div>
-          <MicButton onResult={handleText} listening={listening} setListening={setListening}/>
+          <MicButton onResult={handleText} listening={listening} setListening={setListening} voiceMode={voiceMode} setVoiceMode={setVoiceMode} autoStart={phase === 'options'}/>
         </div>
       </div>
     );

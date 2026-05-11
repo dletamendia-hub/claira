@@ -388,10 +388,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
   const BAR_COUNT = 44;
 
-  function MicButton({ onResult, listening, setListening }) {
+  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false }) {
     const recRef        = useRef(null);
+    const audioStreamRef = useRef(null);
     const transcriptRef = useRef('');
     const cancelledRef  = useRef(false);
+    const startingRef   = useRef(false);
     const rafRef        = useRef(null);
     const ampBuf        = useRef(new Array(BAR_COUNT).fill(0));
     const startTs       = useRef(0);
@@ -431,9 +433,34 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    const start = () => {
+    const ensureMicPermission = async () => {
+      if (!navigator.permissions?.query) return true;
+      try {
+        const status = await navigator.permissions.query({ name: 'microphone' });
+        if (status.state === 'denied') {
+          setVoiceMode?.(false);
+          setListening(false);
+          alert("Autorisation du micro nécessaire pour utiliser la saisie vocale.");
+          return false;
+        }
+      } catch (err) {}
+      return true;
+    };
+
+    const stopMicStream = () => {
+      audioStreamRef.current?.getTracks().forEach(track => track.stop());
+      audioStreamRef.current = null;
+    };
+
+    const start = async () => {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { alert("Reconnaissance vocale non disponible sur ce navigateur."); return; }
+      if (startingRef.current || listening) return;
+      startingRef.current = true;
+      const hasPermission = await ensureMicPermission();
+      startingRef.current = false;
+      if (!hasPermission) return;
+      setVoiceMode?.(true);
       transcriptRef.current = '';
       cancelledRef.current = false;
       speakingRef.current = false;
@@ -454,12 +481,18 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       };
       rec.onerror = () => { stopAnim(); setListening(false); transcriptRef.current = ''; };
       recRef.current = rec;
-      rec.start();
+      try {
+        rec.start();
+      } catch (err) {
+        stopAnim();
+        setListening(false);
+      }
     };
 
     const cancel = () => {
       cancelledRef.current = true;
-      stopAudio();
+      setVoiceMode?.(false);
+      stopMicStream();
       recRef.current?.stop();
       setListening(false);
       transcriptRef.current = '';
@@ -468,12 +501,24 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const confirm = () => {
       cancelledRef.current = true;
       const t = transcriptRef.current;
-      stopAudio();
       recRef.current?.stop();
       setListening(false);
       transcriptRef.current = '';
       if (t.trim()) onResult(t.trim());
     };
+
+    useEffect(() => {
+      if (!autoStart || !voiceMode || listening) return;
+      const t = setTimeout(() => start(), 180);
+      return () => clearTimeout(t);
+    }, [autoStart, voiceMode, listening]);
+
+    useEffect(() => () => {
+      cancelledRef.current = true;
+      stopAnim();
+      recRef.current?.stop();
+      stopMicStream();
+    }, []);
 
     if (listening) {
       return (
@@ -505,7 +550,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     }
 
     return (
-      <button onClick={start} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background:'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s' }}>
+      <button onClick={start} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background:voiceMode ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s' }}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <rect x="6" y="1" width="6" height="10" rx="3" fill="white" opacity="0.75"/>
           <path d="M3 9a6 6 0 0 0 12 0" stroke="white" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity="0.75"/>
@@ -931,6 +976,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [chosen, setChosen]   = useState(null);
     const [inputVal, setInputVal] = useState('');
     const [listening, setListening] = useState(false);
+    const [voiceMode, setVoiceMode] = useState(false);
     useEffect(() => { setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal(''); }, [step]);
     useEffect(() => {
       if (phase !== 'writing') return;
@@ -992,7 +1038,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               )}
             </div>
           )}
-          <MicButton onResult={handleText} listening={listening} setListening={setListening}/>
+          <MicButton onResult={handleText} listening={listening} setListening={setListening} voiceMode={voiceMode} setVoiceMode={setVoiceMode} autoStart={phase === 'options'}/>
         </div>
       </div>
     );
