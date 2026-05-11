@@ -206,7 +206,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const raw = data.choices?.[0]?.message?.content || '';
     const jsonStr = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(jsonStr);
-    const isPersonified = (value) => /je\s+(te|vous|suis|comprends|soutiens)|Claira/i.test(String(value || ‘’));
+    const isPersonified = (value) => /je\s+(te|vous|suis|comprends|soutiens)|Claira/i.test(String(value || ""));
     return {
       label:   parsed.label && !isPersonified(parsed.label) ? parsed.label : fallback.label,
       summary: parsed.summary || null,
