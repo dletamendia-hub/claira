@@ -1977,7 +1977,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
         <AppHeader onBack={onBack} title="Questions" />
-        <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', gap:10 }}>
+        <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY: messages.length === 0 ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', justifyContent: messages.length === 0 ? 'center' : 'flex-start', alignItems: messages.length === 0 ? 'center' : 'stretch', gap:10 }}>
+
+          {messages.length === 0 && (
+            <img className="fade-up" src="assets/questions-hero.png" alt="" width="148" height="148" style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))', pointerEvents:'none' }} />
+          )}
 
           {messages.map((m, i) => (
             <div key={i} className="fade-in" style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start' }}>
@@ -2009,12 +2013,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           )}
 
         </div>
-
-        {messages.length === 0 && (
-          <div className="fade-up" style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', pointerEvents:'none', zIndex:0 }}>
-            <img src="assets/questions-hero.png" alt="" width="140" height="140" style={{ width:140, height:140, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))' }} />
-          </div>
-        )}
 
         {messages.length === 0 && (
           <div className="fade-up" style={{ padding:'0 16px 10px', display:'flex', flexDirection:'column', gap:7, flexShrink:0 }}>
