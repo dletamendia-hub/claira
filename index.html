@@ -1899,52 +1899,105 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   }
 
   function TherapyQuestionsScreen({ onBack }) {
-    const prompts = [
-      "Est-ce que cette approche peut m'aider rapidement ?",
+    const SUGGESTIONS = [
       "Comment se passe une première séance ?",
-      "Est-ce que c'est adapté si je ne sais pas trop ce que je ressens ?",
+      "Quelle est la différence entre TCC et psychanalyse ?",
+      "C'est adapté si je ne sais pas trop ce que je ressens ?",
+      "Combien de séances faut-il en général ?",
+      "Est-ce qu'on peut changer de thérapeute en cours de route ?",
     ];
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
-    const [asked, setAsked] = useState(false);
-    const handleText = (val) => {
-      if (!val.trim()) return;
-      setInput(val.trim());
-      setAsked(true);
+    const [loading, setLoading] = useState(false);
+    const scrollRef = useRef(null);
+
+    useEffect(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, [messages, loading]);
+
+    const send = async (text) => {
+      const q = (text || input).trim();
+      if (!q || loading) return;
+      setInput('');
+      const next = [...messages, { role:'user', content:q }];
+      setMessages(next);
+      setLoading(true);
+      try {
+        const key = window.Claira.GROQ_API_KEY;
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${key}` },
+          body: JSON.stringify({
+            model:'llama-3.1-8b-instant',
+            messages:[
+              { role:'system', content:"Tu es Claira, un assistant intégré dans une application d'orientation thérapeutique. Tu réponds aux questions sur les approches thérapeutiques, le déroulement des séances, les différences entre types de thérapies. Tes réponses sont courtes (3-5 phrases max), claires, sans jargon médical. Tu tutois l'utilisateur. Tu n'es pas un thérapeute et ne poses pas de diagnostic." },
+              ...next,
+            ],
+            max_tokens:320,
+            temperature:0.7,
+          }),
+        });
+        const data = await res.json();
+        const answer = data.choices?.[0]?.message?.content || "Je n'ai pas pu répondre, réessaie dans un instant.";
+        setMessages(prev => [...prev, { role:'assistant', content:answer }]);
+      } catch(e) {
+        setMessages(prev => [...prev, { role:'assistant', content:"Une erreur s'est produite. Vérifie ta connexion et réessaie." }]);
+      } finally {
+        setLoading(false);
+      }
     };
-    const handleVoiceText = (val) => {
-      if (!val.trim()) return;
-      setInput(val.trim());
-    };
+
+    const askedTexts = new Set(messages.filter(m => m.role === 'user').map(m => m.content));
+    const remainingSuggestions = SUGGESTIONS.filter(s => !askedTexts.has(s));
+
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
         <AppHeader onBack={onBack} title="Questions" />
-        <div style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 24px 18px', display:'flex', flexDirection:'column', gap:14 }}>
-          <div style={{ alignSelf:'flex-start', maxWidth:'86%', background:'rgba(73,202,166,0.12)', border:'1px solid rgba(73,202,166,0.12)', color:'rgba(255,255,255,0.86)', borderRadius:'22px 22px 22px 8px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
-            Je peux t&apos;aider à clarifier une approche, comprendre une première séance ou comparer plusieurs thérapies.
-          </div>
-          <div style={{ alignSelf:'flex-end', maxWidth:'86%', background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.92)', borderRadius:'22px 22px 8px 22px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
-            Peux-tu m&apos;expliquer la différence entre les approches ?
-          </div>
-          <div style={{ alignSelf:'flex-start', maxWidth:'88%', background:'rgba(73,202,166,0.13)', border:'1px solid rgba(73,202,166,0.12)', color:'rgba(255,255,255,0.86)', borderRadius:'22px 22px 22px 8px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.7 }}>
-            Oui. Certaines approches sont plus concrètes, avec des outils pour agir au quotidien. D&apos;autres explorent davantage ton histoire, tes relations ou ce qui se répète. Le bon repère, c&apos;est surtout ce dont tu as besoin maintenant: comprendre, apaiser, agir, ou travailler en profondeur.
-          </div>
-          {asked && (
-            <>
-              <div style={{ alignSelf:'flex-end', maxWidth:'86%', background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.92)', borderRadius:'22px 22px 8px 22px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
-                {input}
-              </div>
-              <div style={{ alignSelf:'flex-start', maxWidth:'88%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.78)', borderRadius:'22px 22px 22px 8px', padding:'13px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.7 }}>
-                Une première séance peut servir à poser cette question tranquillement, sans avoir à tout formuler parfaitement. Le thérapeute t&apos;aide à mettre de l&apos;ordre dans ce que tu ressens et à voir si son cadre te convient.
-              </div>
-            </>
+        <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', gap:10 }}>
+
+          {messages.length === 0 && (
+            <div className="fade-up" style={{ display:'flex', flexDirection:'column', gap:8, paddingTop:4 }}>
+              <p style={{ fontSize:13, color:'rgba(255,255,255,0.38)', fontFamily:'Questrial, sans-serif', marginBottom:2, paddingLeft:2, letterSpacing:'0.03em' }}>Questions fréquentes</p>
+              {SUGGESTIONS.map((s, i) => (
+                <button key={i} onClick={() => send(s)} className="fade-up" style={{ animationDelay:`${i*0.04}s`, width:'100%', textAlign:'left', minHeight:48, padding:'12px 16px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.80)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:18, fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.09)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.055)'}
+                >{s}</button>
+              ))}
+            </div>
           )}
-          <div style={{ display:'flex', flexDirection:'column', gap:8, paddingTop:4 }}>
-            {prompts.map((p, i) => (
-              <button key={i} onClick={()=>handleText(p)} style={{ width:'100%', textAlign:'left', minHeight:48, padding:'12px 15px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.78)', border:'1px solid rgba(255,255,255,0.075)', borderRadius:18, fontSize:14, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer' }}>{p}</button>
-            ))}
-          </div>
+
+          {messages.map((m, i) => (
+            <div key={i} className="fade-in" style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start' }}>
+              <div style={{ maxWidth:'84%', background: m.role==='user' ? 'rgba(255,255,255,0.11)' : 'rgba(73,202,166,0.11)', border: m.role==='user' ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(73,202,166,0.14)', color: m.role==='user' ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.86)', borderRadius: m.role==='user' ? '20px 20px 6px 20px' : '20px 20px 20px 6px', padding:'12px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
+                {m.content}
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="fade-in" style={{ display:'flex', justifyContent:'flex-start' }}>
+              <div style={{ background:'rgba(73,202,166,0.09)', border:'1px solid rgba(73,202,166,0.12)', borderRadius:'20px 20px 20px 6px', padding:'12px 16px', display:'flex', gap:5, alignItems:'center' }}>
+                {[0,1,2].map(j => (
+                  <div key={j} style={{ width:6, height:6, borderRadius:'50%', background:'rgba(73,202,166,0.55)', animation:'pulse 1.2s ease-in-out infinite', animationDelay:`${j*0.18}s` }}/>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {messages.length > 0 && !loading && remainingSuggestions.length > 0 && (
+            <div className="fade-in" style={{ display:'flex', flexDirection:'column', gap:6, paddingTop:6 }}>
+              {remainingSuggestions.slice(0, 3).map((s, i) => (
+                <button key={i} onClick={() => send(s)} style={{ width:'100%', textAlign:'left', padding:'10px 14px', background:'rgba(255,255,255,0.04)', color:'rgba(255,255,255,0.55)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:14, fontSize:13, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.07)'}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.04)'}
+                >{s}</button>
+              ))}
+            </div>
+          )}
+
         </div>
         <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center' }}>
           {!voiceMode && (
@@ -1952,20 +2005,20 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               <input
                 className="chat-input"
                 value={input}
-                onChange={e=>setInput(e.target.value)}
-                onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleText(input); }}}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 placeholder="Votre question…"
                 style={{ flex:1, background:'transparent', border:'none', fontSize:14, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif', outline:'none' }}
               />
               {input.trim() && (
-                <button onClick={() => handleText(input)} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <button onClick={() => send()} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
               )}
             </div>
           )}
           <MicButton
-            onResult={handleVoiceText}
+            onResult={text => send(text)}
             listening={listening}
             setListening={setListening}
             voiceMode={voiceMode}
