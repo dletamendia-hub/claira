@@ -2219,6 +2219,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       { id:'2026-04-29', label:'Mar 29 avr', weekday:'Mar', day:'29', month:'avr', times:['9h00', '11h30', '16h00'] },
       { id:'2026-04-30', label:'Mer 30 avr', weekday:'Mer', day:'30', month:'avr', times:['11h30', '15h00'] },
       { id:'2026-05-02', label:'Ven 2 mai', weekday:'Ven', day:'2', month:'mai', times:['13h30', '18h00'] },
+      { id:'2026-05-05', label:'Lun 5 mai', weekday:'Lun', day:'5', month:'mai', times:['9h30', '12h00', '16h30'] },
+      { id:'2026-05-06', label:'Mar 6 mai', weekday:'Mar', day:'6', month:'mai', times:['10h30', '15h30'] },
+      { id:'2026-05-07', label:'Mer 7 mai', weekday:'Mer', day:'7', month:'mai', times:['11h00', '14h00', '18h00'] },
     ];
     const [selectedDay, setSelectedDay] = useState(schedule[0].id);
     const [selectedTime, setSelectedTime] = useState(null);
@@ -2271,7 +2274,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     };
     if (done) return (<div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', padding:'40px 32px', textAlign:'center', position:'relative', zIndex:1 }}><div className="fade-up" style={{ width:68, height:68, borderRadius:'50%', background:'rgba(100,200,150,0.12)', border:'1px solid rgba(100,200,150,0.25)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:22 }}><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14.5l5 5L22 9" stroke="rgba(100,200,150,0.9)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg></div><h2 className="fade-up" style={{ fontFamily:'Questrial, sans-serif', fontSize:31, color:'rgba(255,255,255,0.92)', fontWeight:700, marginBottom:10, animationDelay:'0.1s', letterSpacing:'-0.02em' }}>C&apos;est confirmé !</h2><p className="fade-up" style={{ fontSize:15, color:'rgba(255,255,255,0.52)', lineHeight:1.65, marginBottom:6, animationDelay:'0.18s', fontFamily:'Questrial, sans-serif' }}>avec {th.name}</p><p className="fade-up" style={{ fontSize:15, color:'rgba(116,227,234,0.92)', fontWeight:700, marginBottom:22, animationDelay:'0.22s', fontFamily:'Questrial, sans-serif' }}>{sel}</p><div className="fade-up" style={{ background:'rgba(255,255,255,0.05)', borderRadius:14, padding:'16px 18px', marginBottom:14, width:'100%', border:'1px solid rgba(255,255,255,0.07)', animationDelay:'0.3s' }}><p style={{ fontSize:14, color:'rgba(255,255,255,0.48)', lineHeight:1.7, margin:0, fontFamily:'Questrial, sans-serif' }}>Un email de confirmation vous a été envoyé. Annulation possible jusqu&apos;à 24h avant.</p></div><button onClick={handleAddToCalendar} className="fade-up" style={{ minHeight:58, width:'100%', background:'rgba(255,255,255,0.92)', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'#0b0b14', fontWeight:700, fontFamily:'Questrial, sans-serif', cursor:'pointer', animationDelay:'0.34s', letterSpacing:'0.01em', marginBottom:12 }}>Ajouter à mon calendrier</button><button onClick={onRestart} className="fade-up" style={{ minHeight:58, width:'100%', background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'rgba(255,255,255,0.80)', fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', animationDelay:'0.38s', letterSpacing:'0.02em' }}>Retour à l&apos;accueil</button></div>);
     return (
-      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, overflow:'hidden' }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, overflowY:'hidden', overflowX:'visible' }}>
         <AppHeader onBack={onBack} title="Rendez-vous" />
         <div style={{ padding:'8px 24px 14px', flexShrink:0 }}>
           <div>
@@ -2280,7 +2283,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
         </div>
         <div style={{ flex:1, overflowY:'auto', padding:'0 24px', display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', gap:10, overflowX:'auto', paddingBottom:16, marginBottom:6, WebkitOverflowScrolling:'touch' }}>
+          <div style={{ display:'flex', gap:10, overflowX:'auto', paddingBottom:16, paddingRight:48, marginBottom:6, WebkitOverflowScrolling:'touch', scrollbarWidth:'none', msOverflowStyle:'none' }}>
             {schedule.map((day) => {
               const isActive = day.id === selectedDay;
               return (
