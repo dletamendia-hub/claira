@@ -134,7 +134,11 @@ void main(){
       setVoiceMode?.(true);
       const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=false;
       rec.onresult = e => { onResult(e.results[0][0].transcript); setListening(false); };
-      rec.onerror = rec.onend = () => setListening(false);
+      rec.onend = () => setListening(false);
+      rec.onerror = e => {
+        setListening(false);
+        if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) setVoiceMode?.(false);
+      };
       recRef.current = rec;
       try {
         rec.start();
@@ -168,7 +172,7 @@ void main(){
     }, []);
 
     return (
-      <button onClick={toggle} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background: listening ? 'rgba(120,80,255,0.8)' : voiceMode ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s', animation: listening ? 'micRing 1s ease-out infinite' : 'none' }}>
+      <button onClick={toggle} style={{ width:46, height:46, borderRadius:'50%', border:'none', cursor:'pointer', background: listening ? 'rgba(120,80,255,0.8)' : voiceMode ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s', animation: (listening || (voiceMode && autoStart)) ? 'micRing 1s ease-out infinite' : 'none' }}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <rect x="6" y="1" width="6" height="10" rx="3" fill="white" opacity={listening ? 1 : 0.75}/>
           <path d="M3 9a6 6 0 0 0 12 0" stroke="white" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity={listening ? 1 : 0.75}/>

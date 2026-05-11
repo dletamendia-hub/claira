@@ -164,17 +164,19 @@ window.Claira = window.Claira || {};
         </div>
 
         <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center', opacity: phase === 'options' ? 1 : 0, transition:'opacity 0.3s ease', pointerEvents: phase === 'options' ? 'auto' : 'none' }}>
-          <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 16px', height:46 }}>
-            <input value={inputVal} onChange={e=>setInputVal(e.target.value)}
-              onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleText(inputVal); }}}
-              placeholder="Ou écris ta réponse…"
-              style={{ flex:1, background:'transparent', border:'none', fontSize:14, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif' }}/>
-            {inputVal.trim() && (
-              <button onClick={() => handleText(inputVal)} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </button>
-            )}
-          </div>
+          {!listening && !voiceMode && (
+            <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 16px', height:46 }}>
+              <input value={inputVal} onChange={e=>setInputVal(e.target.value)}
+                onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleText(inputVal); }}}
+                placeholder="Ou écris ta réponse…"
+                style={{ flex:1, background:'transparent', border:'none', fontSize:14, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif' }}/>
+              {inputVal.trim() && (
+                <button onClick={() => handleText(inputVal)} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              )}
+            </div>
+          )}
           <MicButton onResult={handleText} listening={listening} setListening={setListening} voiceMode={voiceMode} setVoiceMode={setVoiceMode} autoStart={phase === 'options'}/>
         </div>
       </div>
