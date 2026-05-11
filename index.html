@@ -394,6 +394,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const transcriptRef = useRef('');
     const cancelledRef  = useRef(false);
     const startingRef   = useRef(false);
+    const listeningRef  = useRef(listening);
+    const voiceModeRef  = useRef(voiceMode);
+    const autoStartRef  = useRef(autoStart);
+    const restartTimerRef = useRef(null);
     const rafRef        = useRef(null);
     const ampBuf        = useRef(new Array(BAR_COUNT).fill(0));
     const startTs       = useRef(0);
@@ -407,6 +411,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     };
 
     const startAnim = () => {
+      if (rafRef.current) return;
       startTs.current = performance.now();
       ampBuf.current = new Array(BAR_COUNT).fill(0);
       smoothRef.current = 0;
@@ -416,9 +421,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         if (ts - last < 40) return;
         last = ts;
         const t = (ts - startTs.current) / 1000;
-        const target = speakingRef.current ? 0.85 : 0.0;
+        const target = speakingRef.current ? 0.85 : (voiceModeRef.current && autoStartRef.current ? 0.22 : 0.0);
         // lerp vers la cible — montée rapide, descente un peu plus douce
-        const rate = speakingRef.current ? 0.22 : 0.10;
+        const rate = speakingRef.current ? 0.22 : 0.08;
         smoothRef.current += (target - smoothRef.current) * rate;
         const level = smoothRef.current;
         // modulation naturelle multipliée par le niveau
@@ -433,11 +438,27 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       rafRef.current = requestAnimationFrame(tick);
     };
 
+    const clearRestartTimer = () => {
+      if (!restartTimerRef.current) return;
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    };
+
+    const scheduleRestart = (delay = 700) => {
+      clearRestartTimer();
+      if (!voiceModeRef.current || !autoStartRef.current || cancelledRef.current) return;
+      restartTimerRef.current = setTimeout(() => {
+        restartTimerRef.current = null;
+        start();
+      }, delay);
+    };
+
     const ensureMicPermission = async () => {
       if (!navigator.permissions?.query) return true;
       try {
         const status = await navigator.permissions.query({ name: 'microphone' });
         if (status.state === 'denied') {
+          voiceModeRef.current = false;
           setVoiceMode?.(false);
           setListening(false);
           alert("Autorisation du micro nécessaire pour utiliser la saisie vocale.");
@@ -455,16 +476,18 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const start = async () => {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { alert("Reconnaissance vocale non disponible sur ce navigateur."); return; }
-      if (startingRef.current || listening) return;
+      if (startingRef.current || listeningRef.current) return;
       startingRef.current = true;
       const hasPermission = await ensureMicPermission();
       startingRef.current = false;
       if (!hasPermission) return;
+      voiceModeRef.current = true;
       setVoiceMode?.(true);
       transcriptRef.current = '';
       cancelledRef.current = false;
       speakingRef.current = false;
       setListening(true);
+      listeningRef.current = true;
       startAnim();
       const rec = new SR();
       rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = false;
@@ -474,58 +497,93 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
       };
       rec.onend = () => {
-        stopAnim();
-        if (!cancelledRef.current && transcriptRef.current.trim()) onResult(transcriptRef.current.trim());
+        const finalTranscript = transcriptRef.current.trim();
+        if (!cancelledRef.current && finalTranscript) onResult(finalTranscript);
         setListening(false);
+        listeningRef.current = false;
         transcriptRef.current = '';
+        if (!cancelledRef.current && !finalTranscript) scheduleRestart();
       };
       rec.onerror = e => {
-        stopAnim();
         setListening(false);
+        listeningRef.current = false;
         transcriptRef.current = '';
-        if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) setVoiceMode?.(false);
+        if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) {
+          clearRestartTimer();
+          voiceModeRef.current = false;
+          setVoiceMode?.(false);
+          stopAnim();
+          return;
+        }
+        scheduleRestart(900);
       };
       recRef.current = rec;
       try {
         rec.start();
       } catch (err) {
-        stopAnim();
         setListening(false);
+        listeningRef.current = false;
+        scheduleRestart(900);
       }
     };
 
     const cancel = () => {
       cancelledRef.current = true;
+      clearRestartTimer();
+      voiceModeRef.current = false;
       setVoiceMode?.(false);
+      stopAnim();
       stopMicStream();
       recRef.current?.stop();
       setListening(false);
+      listeningRef.current = false;
       transcriptRef.current = '';
     };
 
     const confirm = () => {
       cancelledRef.current = true;
       const t = transcriptRef.current;
+      clearRestartTimer();
       recRef.current?.stop();
       setListening(false);
+      listeningRef.current = false;
       transcriptRef.current = '';
       if (t.trim()) onResult(t.trim());
     };
 
     useEffect(() => {
+      listeningRef.current = listening;
+    }, [listening]);
+
+    useEffect(() => {
+      voiceModeRef.current = voiceMode;
+      if (voiceMode && autoStart) startAnim();
+      if (!voiceMode) {
+        clearRestartTimer();
+        stopAnim();
+      }
+    }, [voiceMode, autoStart]);
+
+    useEffect(() => {
+      autoStartRef.current = autoStart;
+      if (!autoStart) clearRestartTimer();
+    }, [autoStart]);
+
+    useEffect(() => {
       if (!autoStart || !voiceMode || listening) return;
-      const t = setTimeout(() => start(), 180);
-      return () => clearTimeout(t);
+      startAnim();
+      scheduleRestart(260);
     }, [autoStart, voiceMode, listening]);
 
     useEffect(() => () => {
       cancelledRef.current = true;
+      clearRestartTimer();
       stopAnim();
       recRef.current?.stop();
       stopMicStream();
     }, []);
 
-    const activeVoice = listening || (voiceMode && autoStart);
+    const activeVoice = voiceMode && autoStart;
 
     if (activeVoice) {
       return (

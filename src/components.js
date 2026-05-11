@@ -103,12 +103,32 @@ void main(){
     const recRef = useRef(null);
     const audioStreamRef = useRef(null);
     const startingRef = useRef(false);
+    const listeningRef = useRef(listening);
+    const voiceModeRef = useRef(voiceMode);
+    const autoStartRef = useRef(autoStart);
+    const restartTimerRef = useRef(null);
+
+    const clearRestartTimer = () => {
+      if (!restartTimerRef.current) return;
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    };
+
+    const scheduleRestart = (delay = 700) => {
+      clearRestartTimer();
+      if (!voiceModeRef.current || !autoStartRef.current) return;
+      restartTimerRef.current = setTimeout(() => {
+        restartTimerRef.current = null;
+        start();
+      }, delay);
+    };
 
     const ensureMicPermission = async () => {
       if (!navigator.permissions?.query) return true;
       try {
         const status = await navigator.permissions.query({ name: 'microphone' });
         if (status.state === 'denied') {
+          voiceModeRef.current = false;
           setVoiceMode?.(false);
           setListening(false);
           alert("Autorisation du micro nécessaire pour utiliser la saisie vocale.");
@@ -126,33 +146,47 @@ void main(){
     const start = async () => {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { alert("Reconnaissance vocale non disponible sur ce navigateur."); return; }
-      if (startingRef.current || listening) return;
+      if (startingRef.current || listeningRef.current) return;
       startingRef.current = true;
       const hasPermission = await ensureMicPermission();
       startingRef.current = false;
       if (!hasPermission) return;
+      voiceModeRef.current = true;
       setVoiceMode?.(true);
       const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=false;
-      rec.onresult = e => { onResult(e.results[0][0].transcript); setListening(false); };
-      rec.onend = () => setListening(false);
+      rec.onresult = e => { onResult(e.results[0][0].transcript); setListening(false); listeningRef.current = false; };
+      rec.onend = () => { setListening(false); listeningRef.current = false; scheduleRestart(); };
       rec.onerror = e => {
         setListening(false);
-        if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) setVoiceMode?.(false);
+        listeningRef.current = false;
+        if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) {
+          clearRestartTimer();
+          voiceModeRef.current = false;
+          setVoiceMode?.(false);
+          return;
+        }
+        scheduleRestart(900);
       };
       recRef.current = rec;
       try {
         rec.start();
         setListening(true);
+        listeningRef.current = true;
       } catch (err) {
         setListening(false);
+        listeningRef.current = false;
+        scheduleRestart(900);
       }
     };
 
     const stop = () => {
+      clearRestartTimer();
+      voiceModeRef.current = false;
       setVoiceMode?.(false);
       stopMicStream();
       recRef.current?.stop();
       setListening(false);
+      listeningRef.current = false;
     };
 
     const toggle = () => {
@@ -162,11 +196,25 @@ void main(){
 
     useEffect(() => {
       if (!autoStart || !voiceMode || listening) return;
-      const t = setTimeout(() => start(), 180);
-      return () => clearTimeout(t);
+      scheduleRestart(260);
     }, [autoStart, voiceMode, listening]);
 
+    useEffect(() => {
+      listeningRef.current = listening;
+    }, [listening]);
+
+    useEffect(() => {
+      voiceModeRef.current = voiceMode;
+      if (!voiceMode) clearRestartTimer();
+    }, [voiceMode]);
+
+    useEffect(() => {
+      autoStartRef.current = autoStart;
+      if (!autoStart) clearRestartTimer();
+    }, [autoStart]);
+
     useEffect(() => () => {
+      clearRestartTimer();
       recRef.current?.stop();
       stopMicStream();
     }, []);
