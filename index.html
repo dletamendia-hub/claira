@@ -185,7 +185,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   const labels = { emotion:'Émotion', duration:'Durée', impact:'Impact quotidien', goal:'Objectif', constraint:'Contraintes', style:'Style de thérapeute' };
   const answersText = Object.entries(answers).map(([k, v]) => `- ${labels[k] || k} : ${v}`).join('\n');
 
-  const prompt = `Tu es Claira, une application d'aide à la compréhension et d'orientation thérapeutique. Un utilisateur vient de répondre à un questionnaire. Voici ses réponses :\n${answersText}\n\nGénère un résumé descriptif, sobre et utile en JSON avec exactement ces 4 champs :\n- "label" : titre court (5-8 mots max), descriptif, sans promesse de soutien, sans formulation à la première personne\n- "summary" : 2-3 phrases qui décrivent ce que la personne vit, en utilisant "vous". Ton clair et analytique, pas consolateur. Entoure 2-3 mots ou expressions clés de **double astérisques** (ex: "vous vous sentez **épuisé·e** depuis **plusieurs mois**")\n- "text" : 2-3 phrases sur ce que cela peut évoquer psychologiquement, nuancé et non diagnostique\n- "process" : 2-3 phrases sur comment la thérapie peut aider à comprendre, clarifier ou travailler ces mécanismes, de façon concrète\n\nContraintes strictes : n'écris jamais à la première personne ("je", "nous", "Claira"). Évite les formules de soutien personnifié comme "je vous soutiens", "je suis là", "je comprends", "vous n'êtes pas seul". Ne donne pas l'impression que l'application parle comme une personne aidante : elle produit un point de compréhension.\n\nRéponds UNIQUEMENT avec le JSON valide, rien d'autre.`;
+  const prompt = `Tu es Claira, une application d'aide à la compréhension et d'orientation thérapeutique. Un utilisateur vient de répondre à un questionnaire. Certaines réponses peuvent être saisies à la première personne (via dictée vocale) — traite-les comme l'expression directe du vécu de l'utilisateur et reformule toujours en "vous" dans ta réponse. Voici ses réponses :\n${answersText}\n\nGénère un résumé descriptif, sobre et utile en JSON avec exactement ces 4 champs :\n- "label" : titre court (5-8 mots max), descriptif, sans promesse de soutien, sans formulation à la première personne\n- "summary" : 2-3 phrases qui décrivent ce que la personne vit, en utilisant "vous". Ton clair et analytique, pas consolateur. Entoure 2-3 mots ou expressions clés de **double astérisques** (ex: "vous vous sentez **épuisé·e** depuis **plusieurs mois**")\n- "text" : 2-3 phrases sur ce que cela peut évoquer psychologiquement, nuancé et non diagnostique\n- "process" : 2-3 phrases sur comment la thérapie peut aider à comprendre, clarifier ou travailler ces mécanismes, de façon concrète\n\nContraintes strictes : n'écris jamais à la première personne dans ta réponse ("je", "nous", "Claira"). Évite les formules de soutien personnifié comme "je vous soutiens", "je suis là", "je comprends", "vous n'êtes pas seul". Ne donne pas l'impression que l'application parle comme une personne aidante : elle produit un point de compréhension.\n\nRéponds UNIQUEMENT avec le JSON valide, rien d'autre.`;
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -206,10 +206,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const raw = data.choices?.[0]?.message?.content || '';
     const jsonStr = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(jsonStr);
-    const isPersonified = (value) => /\b(je|j'|nous|Claira)\b|je\s+(te|vous)|je\s+suis\s+là|je\s+comprends|soutiens?|vous\s+n['’]êtes\s+pas\s+seul/i.test(String(value || ''));
+    const isPersonified = (value) => /je\s+(te|vous|suis\s+là|comprends|soutiens?)|nous\s+sommes\s+là|vous\s+n[‘’]êtes\s+pas\s+seul|\bClaira\b/i.test(String(value || ‘’));
     return {
       label:   parsed.label && !isPersonified(parsed.label) ? parsed.label : fallback.label,
-      summary: parsed.summary && !isPersonified(parsed.summary) ? parsed.summary : null,
+      summary: parsed.summary || null,
       text:    parsed.text && !isPersonified(parsed.text) ? parsed.text : fallback.text,
       process: parsed.process && !isPersonified(parsed.process) ? parsed.process : fallback.process,
       therapy: fallback.therapy,
