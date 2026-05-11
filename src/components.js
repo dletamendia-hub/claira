@@ -196,10 +196,11 @@ void main(){
       setVoiceMode?.(true);
       transcriptRef.current = '';
       submittingRef.current = false;
+      clearSubmitTimer();
       const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=true; rec.continuous=true;
       rec.onresult = e => {
         transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
-        if (Array.from(e.results).some(r => r.isFinal)) {
+        if (Array.from(e.results).some(r => r.isFinal) && !submittingRef.current) {
           clearSubmitTimer();
           submitTimerRef.current = setTimeout(submitTranscript, 850);
         }
