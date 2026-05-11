@@ -61,9 +61,9 @@ window.Claira.THERAPIES = [
   { id:'tcc',       name:"Thérapie cognitive\net comportementale", short:"TCC",       tagline:"Pensées · Comportements · Résultats", desc:"Aide à identifier et modifier les schémas qui alimentent le mal-être. Orientée résultats, concrète.",    benefits:["Outils pratiques dès le début","Efficace sur anxiété et dépression","Résultats en quelques séances"],          constraints:["Engagement actif requis","Moins orientée passé"],                        duration:"12–20 séances", hue:"260" },
   { id:'humaniste', name:"Thérapie\nhumaniste",                    short:"Humaniste", tagline:"Écoute · Présent · Croissance",       desc:"Centrée sur vous, votre ressenti, votre potentiel. Vous êtes expert·e de votre propre vie, le thérapeute vous accompagne.", benefits:["Espace de parole bienveillant","Renforce l'estime de soi","Aucune rigidité"],              constraints:["Progrès parfois plus lents","Moins adapté aux crises"],                   duration:"Variable",       hue:"175" },
   { id:'emdr',      name:"EMDR",                                   short:"EMDR",      tagline:"Trauma · Mémoire · Libération",       desc:"Stimulations bilatérales pour traiter des souvenirs douloureux. Très efficace sur les traumatismes.",    benefits:["Efficace sur traumatismes","Résultats rapides","Moins de mots, plus de ressenti"], constraints:["Peut être intense","Praticien certifié nécessaire"],                    duration:"6–12 séances",   hue:"310" },
-  { id:'act',       name:"Thérapie\nd’acceptation\net d’engagement", short:"ACT",     tagline:"Valeurs · Acceptation · Action",     desc:"Aide à faire de la place à ce que vous ressentez, tout en avançant vers ce qui compte pour vous au quotidien.", benefits:["Utile quand on tourne en rond","Travail sur les valeurs","Approche souple et concrète"], constraints:["Demande de l’implication","Moins centrée sur l’analyse du passé"], duration:"8-16 séances", hue:"205" },
+  { id:'act',       name:"Thérapie\nd'acceptation\net d'engagement", short:"ACT",     tagline:"Valeurs · Acceptation · Action",     desc:"Aide à faire de la place à ce que vous ressentez, tout en avançant vers ce qui compte pour vous au quotidien.", benefits:["Utile quand on tourne en rond","Travail sur les valeurs","Approche souple et concrète"], constraints:["Demande de l'implication","Moins centrée sur l'analyse du passé"], duration:"8-16 séances", hue:"205" },
   { id:'systemique',name:"Thérapie\nsystémique",                   short:"Systémique",tagline:"Liens · Famille · Dynamiques",      desc:"Regarde les difficultés dans leur contexte relationnel pour mieux comprendre ce qui se rejoue avec les autres.", benefits:["Pertinente pour les relations","Aide à prendre du recul","Travail sur les interactions"], constraints:["Parfois moins directe","Peut bousculer les habitudes familiales"], duration:"Variable", hue:"28" },
-  { id:'psychodynamique',name:"Thérapie\npsychodynamique",         short:"Psychodynamique",tagline:"Histoire · Sens · Inconscient", desc:"Permet d’explorer en profondeur ce qui se répète, pour mieux relier le présent à votre histoire et retrouver du mouvement.", benefits:["Travail en profondeur","Aide à mieux se comprendre","Donne du sens aux répétitions"], constraints:["Souvent plus long","Moins orientée outils immédiats"], duration:"Plusieurs mois", hue:"336" },
+  { id:'psychodynamique',name:"Thérapie\npsychodynamique",         short:"Psychodynamique",tagline:"Histoire · Sens · Inconscient", desc:"Permet d'explorer en profondeur ce qui se répète, pour mieux relier le présent à votre histoire et retrouver du mouvement.", benefits:["Travail en profondeur","Aide à mieux se comprendre","Donne du sens aux répétitions"], constraints:["Souvent plus long","Moins orientée outils immédiats"], duration:"Plusieurs mois", hue:"336" },
 ];
 
 const therapistPhoto = (set, id) => `https://randomuser.me/api/portraits/${set}/${id}.jpg`;
@@ -900,7 +900,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const recommendationSummary = recommendedTherapy
       ? ({
           tcc: "Une approche concrète pour retrouver des repères et apaiser ce qui déborde.",
-          humaniste: "Une approche d’écoute pour déposer ce que vous vivez et avancer à votre rythme.",
+          humaniste: "Une approche d'écoute pour déposer ce que vous vivez et avancer à votre rythme.",
           emdr: "Une approche utile pour travailler ce qui reste bloqué après une expérience difficile.",
           act: "Une approche pour faire de la place à ce que vous ressentez et avancer plus clairement.",
           systemique: "Une approche pour mieux comprendre ce qui se joue dans vos liens et vos équilibres.",
@@ -1038,26 +1038,26 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
             <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontFamily:'Questrial, sans-serif', fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.90)', marginBottom:20 }}>Parcours de soin</div>
-              <div style={{ display:’flex’, flexDirection:’column’, gap:14, marginBottom:18 }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:14, marginBottom:18 }}>
                 {[
-                  { step:’01’, title:’Faire le point’, text:"Mettre des mots sur ce que vous vivez et clarifier ce dont vous avez besoin aujourd’hui.", done: isComplete },
-                  { step:’02’, title:’Comparer les approches’, text:"Comprendre les types de thérapie pour voir ce qui vous parle le plus.", done: hasViewedTherapist },
-                  { step:’03’, title:’Choisir un thérapeute’, text:"Repérer une personne, poser vos questions et réserver quand vous vous sentez prêt·e.", done: !!bookedAppointment },
+                  { step:'01', title:'Faire le point', text:"Mettre des mots sur ce que vous vivez et clarifier ce dont vous avez besoin aujourd'hui.", done: isComplete },
+                  { step:'02', title:'Comparer les approches', text:"Comprendre les types de thérapie pour voir ce qui vous parle le plus.", done: hasViewedTherapist },
+                  { step:'03', title:'Choisir un thérapeute', text:"Repérer une personne, poser vos questions et réserver quand vous vous sentez prêt·e.", done: !!bookedAppointment },
                 ].map((item, i, arr) => (
-                  <div key={item.step} style={{ display:’grid’, gridTemplateColumns:’48px 1fr’, gap:16, alignItems:’start’, position:’relative’ }}>
-                    <div style={{ position:’relative’, display:’flex’, justifyContent:’center’, minHeight:’100%’ }}>
-                      <div style={{ width:32, height:32, borderRadius:999, background:’rgba(73,202,166,0.18)’, border:’1px solid rgba(73,202,166,0.28)’, color:’#74e3ea’, display:’flex’, alignItems:’center’, justifyContent:’center’, fontFamily:’Questrial, sans-serif’, fontSize:11, fontWeight:700, letterSpacing:’0.04em’, flexShrink:0, transition:’background 0.3s, border-color 0.3s’ }}>
+                  <div key={item.step} style={{ display:'grid', gridTemplateColumns:'48px 1fr', gap:16, alignItems:'start', position:'relative' }}>
+                    <div style={{ position:'relative', display:'flex', justifyContent:'center', minHeight:'100%' }}>
+                      <div style={{ width:32, height:32, borderRadius:999, background:'rgba(73,202,166,0.18)', border:'1px solid rgba(73,202,166,0.28)', color:'#74e3ea', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Questrial, sans-serif', fontSize:11, fontWeight:700, letterSpacing:'0.04em', flexShrink:0, transition:'background 0.3s, border-color 0.3s' }}>
                         {item.done
                           ? <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6.5" stroke="#49caa6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           : item.step}
                       </div>
                       {i < arr.length - 1 && (
-                        <div style={{ position:’absolute’, left:’50%’, transform:’translateX(-50%)’, top:32, bottom:-14, width:1, background:’linear-gradient(to bottom, rgba(73,202,166,0.30), rgba(73,202,166,0.08))’ }}></div>
+                        <div style={{ position:'absolute', left:'50%', transform:'translateX(-50%)', top:32, bottom:-14, width:1, background:'linear-gradient(to bottom, rgba(73,202,166,0.30), rgba(73,202,166,0.08))' }}></div>
                       )}
                     </div>
                     <div style={{ paddingTop:2 }}>
-                      <div style={{ fontFamily:’Questrial, sans-serif’, fontSize:16, fontWeight:700, color:’rgba(255,255,255,0.88)’, marginBottom:5 }}>{item.title}</div>
-                      <p style={{ fontFamily:’Questrial, sans-serif’, fontSize:14, lineHeight:1.7, color:’rgba(255,255,255,0.62)’, margin:0, textWrap:’pretty’ }}>{item.text}</p>
+                      <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.88)', marginBottom:5 }}>{item.title}</div>
+                      <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.62)', margin:0, textWrap:'pretty' }}>{item.text}</p>
                     </div>
                   </div>
                 ))}
@@ -1999,7 +1999,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       { icon:'handshake', title:'Première rencontre', text:'On clarifie ce que tu traverses et ce que tu attends, sans pression.' },
       { icon:'map-signs', title:'Cadrage', text:'On choisit ensemble un cap simple, concret et compatible avec ton quotidien.' },
       { icon:'tools', title:'Outils', text:'Selon le besoin, on met en place des repères pratiques, des exercices ou un travail plus exploratoire.' },
-      { icon:'leaf', title:'Tempo', text:'Le rythme reste ajusté à toi: on avance sans forcer, avec des points d’appui réguliers.' },
+      { icon:'leaf', title:'Tempo', text:'Le rythme reste ajusté à toi: on avance sans forcer, avec des points d'appui réguliers.' },
     ];
     const reviewHighlights = [
       { icon:'heart', text:"Quelqu'un de rassurant et très clair dans ses explications." },
