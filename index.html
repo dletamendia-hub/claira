@@ -220,7 +220,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 };
 
 (() => {
-  const { useState, useEffect, useRef } = React;
+  const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
   const THREE_BACKGROUND_SETTINGS = {
     dpr: 1.0,
