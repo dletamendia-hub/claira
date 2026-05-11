@@ -389,67 +389,55 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   const BAR_COUNT = 44;
 
   function MicButton({ onResult, listening, setListening }) {
-    const recRef      = useRef(null);
+    const recRef        = useRef(null);
     const transcriptRef = useRef('');
     const cancelledRef  = useRef(false);
-    const audioCtxRef   = useRef(null);
-    const analyserRef   = useRef(null);
-    const streamRef     = useRef(null);
     const rafRef        = useRef(null);
     const ampBuf        = useRef(new Array(BAR_COUNT).fill(0));
+    const startTs       = useRef(0);
     const [amps, setAmps] = useState(() => new Array(BAR_COUNT).fill(0));
 
-    const stopAudio = () => {
+    const stopAnim = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      try { audioCtxRef.current?.close(); } catch(_) {}
-      streamRef.current?.getTracks().forEach(t => t.stop());
-      rafRef.current = audioCtxRef.current = analyserRef.current = streamRef.current = null;
+      rafRef.current = null;
     };
 
-    const startAudio = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        streamRef.current = stream;
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        audioCtxRef.current = ctx;
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.6;
-        analyserRef.current = analyser;
-        ctx.createMediaStreamSource(stream).connect(analyser);
-        const data = new Uint8Array(analyser.frequencyBinCount);
-        let last = 0;
-        const tick = (ts) => {
-          rafRef.current = requestAnimationFrame(tick);
-          if (ts - last < 40) return; // ~25fps
-          last = ts;
-          analyser.getByteTimeDomainData(data);
-          let sum = 0;
-          for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
-          const rms = Math.min(1, Math.sqrt(sum / data.length) * 6);
-          ampBuf.current = [...ampBuf.current.slice(1), rms];
-          setAmps([...ampBuf.current]);
-        };
+    const startAnim = () => {
+      startTs.current = performance.now();
+      ampBuf.current = new Array(BAR_COUNT).fill(0);
+      let last = 0;
+      const tick = (ts) => {
         rafRef.current = requestAnimationFrame(tick);
-      } catch(_) { /* getUserMedia refusé : waveform désactivée */ }
+        if (ts - last < 40) return;
+        last = ts;
+        const t = (ts - startTs.current) / 1000;
+        // combinaison de sinus à fréquences décalées → waveform naturelle
+        const v = 0.38
+          + Math.sin(t * 4.1)        * 0.18
+          + Math.sin(t * 9.7 + 1.3)  * 0.13
+          + Math.sin(t * 17.3 + 0.7) * 0.08
+          + Math.sin(t * 31.1 + 2.1) * 0.05;
+        const amp = Math.max(0.04, Math.min(0.98, v));
+        ampBuf.current = [...ampBuf.current.slice(1), amp];
+        setAmps([...ampBuf.current]);
+      };
+      rafRef.current = requestAnimationFrame(tick);
     };
 
-    const start = async () => {
+    const start = () => {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { alert("Reconnaissance vocale non disponible sur ce navigateur."); return; }
       transcriptRef.current = '';
       cancelledRef.current = false;
-      ampBuf.current = new Array(BAR_COUNT).fill(0);
-      setAmps(new Array(BAR_COUNT).fill(0));
       setListening(true);
-      startAudio();
+      startAnim();
       const rec = new SR();
       rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = false;
       rec.onresult = e => {
         transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
       };
       rec.onend = () => {
-        stopAudio();
+        stopAnim();
         if (!cancelledRef.current && transcriptRef.current.trim()) onResult(transcriptRef.current.trim());
         setListening(false);
         transcriptRef.current = '';
