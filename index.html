@@ -388,7 +388,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
   const BAR_COUNT = 44;
 
-  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false }) {
+  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false, stayActiveAfterResult = true }) {
     const recRef        = useRef(null);
     const audioStreamRef = useRef(null);
     const audioContextRef = useRef(null);
@@ -490,6 +490,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       setListening(false);
       listeningRef.current = false;
       transcriptRef.current = '';
+      if (!stayActiveAfterResult) {
+        voiceModeRef.current = false;
+        setVoiceMode?.(false);
+        stopAnim();
+        stopMicStream();
+      }
       onResult(finalTranscript);
     };
 
@@ -622,6 +628,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       setListening(false);
       listeningRef.current = false;
       transcriptRef.current = '';
+      if (!stayActiveAfterResult) {
+        voiceModeRef.current = false;
+        setVoiceMode?.(false);
+        stopAnim();
+        stopMicStream();
+      }
       if (t.trim()) onResult(t.trim());
     };
 
@@ -1910,11 +1922,16 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     ];
     const [input, setInput] = useState('');
     const [listening, setListening] = useState(false);
+    const [voiceMode, setVoiceMode] = useState(false);
     const [asked, setAsked] = useState(false);
     const handleText = (val) => {
       if (!val.trim()) return;
       setInput(val.trim());
       setAsked(true);
+    };
+    const handleVoiceText = (val) => {
+      if (!val.trim()) return;
+      setInput(val.trim());
     };
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
@@ -1946,7 +1963,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
         </div>
         <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center' }}>
-          {!listening && (
+          {!voiceMode && (
             <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46 }}>
               <input
                 className="chat-input"
@@ -1963,7 +1980,15 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               )}
             </div>
           )}
-          <MicButton onResult={handleText} listening={listening} setListening={setListening}/>
+          <MicButton
+            onResult={handleVoiceText}
+            listening={listening}
+            setListening={setListening}
+            voiceMode={voiceMode}
+            setVoiceMode={setVoiceMode}
+            autoStart={voiceMode}
+            stayActiveAfterResult={false}
+          />
         </div>
       </div>
     );

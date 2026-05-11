@@ -99,7 +99,7 @@ void main(){
     return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }}/>;
   }
 
-  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false }) {
+  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false, stayActiveAfterResult = true }) {
     const recRef = useRef(null);
     const audioStreamRef = useRef(null);
     const audioContextRef = useRef(null);
@@ -143,6 +143,11 @@ void main(){
       setListening(false);
       listeningRef.current = false;
       transcriptRef.current = '';
+      if (!stayActiveAfterResult) {
+        voiceModeRef.current = false;
+        setVoiceMode?.(false);
+        stopMicStream();
+      }
       onResult(finalTranscript);
     };
 
