@@ -1612,7 +1612,13 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     }));
     const [mode, setMode] = useState('list');
     const [filterOpen, setFilterOpen] = useState(false);
+    const [filterClosing, setFilterClosing] = useState(false);
     const [sortBy, setSortBy] = useState('compatibility');
+
+    const closeFilter = () => {
+      setFilterClosing(true);
+      setTimeout(() => { setFilterOpen(false); setFilterClosing(false); }, 170);
+    };
 
     useEffect(() => {
       setContextFilters({
@@ -1727,7 +1733,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               </button>
             </div>
             <button
-              onClick={() => setFilterOpen(v => !v)}
+              onClick={() => filterOpen ? closeFilter() : setFilterOpen(true)}
               style={{ width:52, height:52, borderRadius:18, border:'1px solid rgba(255,255,255,0.08)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.78)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}
               title="Filtres et affichage"
             >
@@ -1771,11 +1777,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             ))}
           </div>
           {filterOpen && (
-            <div style={{ position:'absolute', right:24, top:64, zIndex:20, width:192, maxHeight:272, overflowY:'auto', background:'rgba(28,30,42,0.97)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:20, padding:'10px 6px', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', boxShadow:'0 24px 48px rgba(0,0,0,0.36)' }}>
+            <div style={{ position:'absolute', right:24, top:64, zIndex:20, width:216, maxHeight:340, overflowY:'auto', background:'rgba(28,30,42,0.97)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:20, padding:'10px 6px', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', boxShadow:'0 24px 48px rgba(0,0,0,0.36)', transformOrigin:'top right', animation: filterClosing ? 'filterOut 0.17s cubic-bezier(.4,0,1,1) both' : 'filterIn 0.20s cubic-bezier(.22,1,.36,1) both' }}>
               <div style={{ fontSize:10, color:'rgba(255,255,255,0.40)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.10em', textTransform:'uppercase', padding:'2px 10px 6px' }}>Affichage</div>
               <div style={{ display:'flex', gap:5, padding:'0 6px 8px' }}>
                 {[['list','Liste'],['map','Carte']].map(([key,label]) => (
-                  <button key={key} onClick={() => { setMode(key); setFilterOpen(false); }} style={{ flex:1, minHeight:32, borderRadius:9, border:'none', background:mode === key ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.06)', color:mode === key ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.50)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, cursor:'pointer', transition:'all 0.15s' }}>{label}</button>
+                  <button key={key} onClick={() => { setMode(key); closeFilter(); }} style={{ flex:1, minHeight:32, borderRadius:9, border:'none', background:mode === key ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.06)', color:mode === key ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.50)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, cursor:'pointer', transition:'all 0.15s' }}>{label}</button>
                 ))}
               </div>
               <div style={{ height:1, background:'rgba(255,255,255,0.08)', margin:'0 4px 8px' }}></div>
@@ -1787,7 +1793,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               ].map(([key, label]) => {
                 const active = sortBy === key;
                 return (
-                  <button key={key} onClick={() => { setSortBy(key); setFilterOpen(false); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
+                  <button key={key} onClick={() => { setSortBy(key); closeFilter(); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
                     <span>{label}</span>
                     {active && <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="rgba(255,255,255,0.80)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   </button>
@@ -1801,7 +1807,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               ].map(([key, label]) => {
                 const active = contextFilters.therapy === key;
                 return (
-                  <button key={key || 'all'} onClick={() => { setContextFilters(prev => ({ ...prev, therapy:key })); setFilterOpen(false); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
+                  <button key={key || 'all'} onClick={() => { setContextFilters(prev => ({ ...prev, therapy:key })); closeFilter(); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
                     <span>{label}</span>
                     {active && <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="rgba(255,255,255,0.80)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   </button>
