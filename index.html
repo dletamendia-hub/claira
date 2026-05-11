@@ -840,7 +840,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 })();
 
 (() => {
-  const { useState, useEffect, useMemo } = React;
+  const { useState, useEffect, useRef, useMemo } = React;
   const { QUESTIONS, THERAPIES, THERAPISTS, getInsight, generateAIInsight } = window.Claira;
   const { MicButton, AppHeader, StatusBar, BackBtn, MainTabBar } = window.Claira;
 
