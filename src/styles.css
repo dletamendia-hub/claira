@@ -17,7 +17,9 @@ body { display: flex; align-items: center; justify-content: center; min-height: 
 @keyframes slideL  { from { opacity:0; transform:translateX(22px); } to { opacity:1; transform:translateX(0); } }
 @keyframes slideR  { from { opacity:0; transform:translateX(-22px); } to { opacity:1; transform:translateX(0); } }
 @keyframes chipIn  { from { opacity:0; transform:scale(0.9) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
-@keyframes micRing { 0%{ box-shadow:0 0 0 0 rgba(120,80,255,0.5); } 100%{ box-shadow:0 0 0 14px rgba(120,80,255,0); } }
+@keyframes micRing    { 0%{ box-shadow:0 0 0 0 rgba(120,80,255,0.5); } 100%{ box-shadow:0 0 0 14px rgba(120,80,255,0); } }
+@keyframes barPulse   { from { transform:scaleY(0.2); opacity:0.3; } to { transform:scaleY(1); opacity:0.85; } }
+@keyframes voiceExpand{ from { opacity:0; transform:scaleX(0.85); } to { opacity:1; transform:scaleX(1); } }
 @keyframes pulse    { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.7; } }
 @keyframes shimmer  { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
