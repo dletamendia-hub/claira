@@ -391,13 +391,18 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false }) {
     const recRef        = useRef(null);
     const audioStreamRef = useRef(null);
+    const audioContextRef = useRef(null);
+    const analyserRef = useRef(null);
+    const audioDataRef = useRef(null);
     const transcriptRef = useRef('');
     const cancelledRef  = useRef(false);
+    const submittingRef = useRef(false);
     const startingRef   = useRef(false);
     const listeningRef  = useRef(listening);
     const voiceModeRef  = useRef(voiceMode);
     const autoStartRef  = useRef(autoStart);
     const restartTimerRef = useRef(null);
+    const submitTimerRef = useRef(null);
     const rafRef        = useRef(null);
     const ampBuf        = useRef(new Array(BAR_COUNT).fill(0));
     const startTs       = useRef(0);
@@ -408,6 +413,19 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const stopAnim = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
+    };
+
+    const readAudioLevel = () => {
+      const analyser = analyserRef.current;
+      const data = audioDataRef.current;
+      if (!analyser || !data) return null;
+      analyser.getByteTimeDomainData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i += 1) {
+        const value = (data[i] - 128) / 128;
+        sum += value * value;
+      }
+      return Math.min(1, Math.sqrt(sum / data.length) * 7);
     };
 
     const startAnim = () => {
@@ -421,7 +439,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         if (ts - last < 40) return;
         last = ts;
         const t = (ts - startTs.current) / 1000;
-        const target = speakingRef.current ? 0.85 : (voiceModeRef.current && autoStartRef.current ? 0.22 : 0.0);
+        const measuredLevel = readAudioLevel();
+        const target = measuredLevel !== null
+          ? Math.max(voiceModeRef.current && autoStartRef.current ? 0.16 : 0, measuredLevel)
+          : speakingRef.current ? 0.85 : (voiceModeRef.current && autoStartRef.current ? 0.22 : 0.0);
         // lerp vers la cible — montée rapide, descente un peu plus douce
         const rate = speakingRef.current ? 0.22 : 0.08;
         smoothRef.current += (target - smoothRef.current) * rate;
@@ -444,6 +465,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       restartTimerRef.current = null;
     };
 
+    const clearSubmitTimer = () => {
+      if (!submitTimerRef.current) return;
+      clearTimeout(submitTimerRef.current);
+      submitTimerRef.current = null;
+    };
+
     const scheduleRestart = (delay = 700) => {
       clearRestartTimer();
       if (!voiceModeRef.current || !autoStartRef.current || cancelledRef.current) return;
@@ -453,8 +480,49 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       }, delay);
     };
 
+    const submitTranscript = () => {
+      const finalTranscript = transcriptRef.current.trim();
+      if (!finalTranscript) return;
+      submittingRef.current = true;
+      clearRestartTimer();
+      clearSubmitTimer();
+      recRef.current?.stop();
+      setListening(false);
+      listeningRef.current = false;
+      transcriptRef.current = '';
+      onResult(finalTranscript);
+    };
+
+    const scheduleSubmit = () => {
+      clearSubmitTimer();
+      submitTimerRef.current = setTimeout(submitTranscript, 850);
+    };
+
+    const setupAudioMeter = async () => {
+      if (window.location.protocol === 'file:' || audioStreamRef.current?.active || !navigator.mediaDevices?.getUserMedia) return true;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStreamRef.current = stream;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const source = ctx.createMediaStreamSource(stream);
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.72;
+          source.connect(analyser);
+          audioContextRef.current = ctx;
+          analyserRef.current = analyser;
+          audioDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+        }
+        return true;
+      } catch (err) {
+        return true;
+      }
+    };
+
     const ensureMicPermission = async () => {
-      if (!navigator.permissions?.query) return true;
+      if (!navigator.permissions?.query) return setupAudioMeter();
       try {
         const status = await navigator.permissions.query({ name: 'microphone' });
         if (status.state === 'denied') {
@@ -465,10 +533,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           return false;
         }
       } catch (err) {}
-      return true;
+      return setupAudioMeter();
     };
 
     const stopMicStream = () => {
+      audioContextRef.current?.close?.();
+      audioContextRef.current = null;
+      analyserRef.current = null;
+      audioDataRef.current = null;
       audioStreamRef.current?.getTracks().forEach(track => track.stop());
       audioStreamRef.current = null;
     };
@@ -485,37 +557,37 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       setVoiceMode?.(true);
       transcriptRef.current = '';
       cancelledRef.current = false;
+      submittingRef.current = false;
       speakingRef.current = false;
       setListening(true);
       listeningRef.current = true;
       startAnim();
       const rec = new SR();
-      rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = false;
+      rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = true;
       rec.onspeechstart = () => { speakingRef.current = true; };
       rec.onspeechend   = () => { speakingRef.current = false; };
       rec.onresult = e => {
         transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
+        const hasFinalResult = Array.from(e.results).some(r => r.isFinal);
+        if (hasFinalResult) scheduleSubmit();
       };
       rec.onend = () => {
-        const finalTranscript = transcriptRef.current.trim();
-        if (!cancelledRef.current && finalTranscript) onResult(finalTranscript);
         setListening(false);
         listeningRef.current = false;
-        transcriptRef.current = '';
-        if (!cancelledRef.current && !finalTranscript) scheduleRestart();
+        if (!cancelledRef.current && !submittingRef.current && !transcriptRef.current.trim()) scheduleRestart(1200);
       };
       rec.onerror = e => {
         setListening(false);
         listeningRef.current = false;
-        transcriptRef.current = '';
         if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) {
           clearRestartTimer();
+          clearSubmitTimer();
           voiceModeRef.current = false;
           setVoiceMode?.(false);
           stopAnim();
           return;
         }
-        scheduleRestart(900);
+        if (!submittingRef.current && !transcriptRef.current.trim()) scheduleRestart(1400);
       };
       recRef.current = rec;
       try {
@@ -530,6 +602,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const cancel = () => {
       cancelledRef.current = true;
       clearRestartTimer();
+      clearSubmitTimer();
       voiceModeRef.current = false;
       setVoiceMode?.(false);
       stopAnim();
@@ -544,6 +617,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       cancelledRef.current = true;
       const t = transcriptRef.current;
       clearRestartTimer();
+      clearSubmitTimer();
       recRef.current?.stop();
       setListening(false);
       listeningRef.current = false;
@@ -560,6 +634,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       if (voiceMode && autoStart) startAnim();
       if (!voiceMode) {
         clearRestartTimer();
+        clearSubmitTimer();
         stopAnim();
       }
     }, [voiceMode, autoStart]);
@@ -578,6 +653,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     useEffect(() => () => {
       cancelledRef.current = true;
       clearRestartTimer();
+      clearSubmitTimer();
       stopAnim();
       recRef.current?.stop();
       stopMicStream();

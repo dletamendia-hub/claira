@@ -102,11 +102,15 @@ void main(){
   function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false }) {
     const recRef = useRef(null);
     const audioStreamRef = useRef(null);
+    const audioContextRef = useRef(null);
     const startingRef = useRef(false);
     const listeningRef = useRef(listening);
     const voiceModeRef = useRef(voiceMode);
     const autoStartRef = useRef(autoStart);
     const restartTimerRef = useRef(null);
+    const submitTimerRef = useRef(null);
+    const transcriptRef = useRef('');
+    const submittingRef = useRef(false);
 
     const clearRestartTimer = () => {
       if (!restartTimerRef.current) return;
@@ -123,8 +127,38 @@ void main(){
       }, delay);
     };
 
+    const clearSubmitTimer = () => {
+      if (!submitTimerRef.current) return;
+      clearTimeout(submitTimerRef.current);
+      submitTimerRef.current = null;
+    };
+
+    const submitTranscript = () => {
+      const finalTranscript = transcriptRef.current.trim();
+      if (!finalTranscript) return;
+      submittingRef.current = true;
+      clearRestartTimer();
+      clearSubmitTimer();
+      recRef.current?.stop();
+      setListening(false);
+      listeningRef.current = false;
+      transcriptRef.current = '';
+      onResult(finalTranscript);
+    };
+
+    const setupMicStream = async () => {
+      if (window.location.protocol === 'file:' || audioStreamRef.current?.active || !navigator.mediaDevices?.getUserMedia) return true;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStreamRef.current = stream;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioContextRef.current = new AudioCtx();
+      } catch (err) {}
+      return true;
+    };
+
     const ensureMicPermission = async () => {
-      if (!navigator.permissions?.query) return true;
+      if (!navigator.permissions?.query) return setupMicStream();
       try {
         const status = await navigator.permissions.query({ name: 'microphone' });
         if (status.state === 'denied') {
@@ -135,10 +169,12 @@ void main(){
           return false;
         }
       } catch (err) {}
-      return true;
+      return setupMicStream();
     };
 
     const stopMicStream = () => {
+      audioContextRef.current?.close?.();
+      audioContextRef.current = null;
       audioStreamRef.current?.getTracks().forEach(track => track.stop());
       audioStreamRef.current = null;
     };
@@ -153,19 +189,32 @@ void main(){
       if (!hasPermission) return;
       voiceModeRef.current = true;
       setVoiceMode?.(true);
-      const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=false;
-      rec.onresult = e => { onResult(e.results[0][0].transcript); setListening(false); listeningRef.current = false; };
-      rec.onend = () => { setListening(false); listeningRef.current = false; scheduleRestart(); };
+      transcriptRef.current = '';
+      submittingRef.current = false;
+      const rec = new SR(); rec.lang='fr-FR'; rec.interimResults=true; rec.continuous=true;
+      rec.onresult = e => {
+        transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
+        if (Array.from(e.results).some(r => r.isFinal)) {
+          clearSubmitTimer();
+          submitTimerRef.current = setTimeout(submitTranscript, 850);
+        }
+      };
+      rec.onend = () => {
+        setListening(false);
+        listeningRef.current = false;
+        if (!submittingRef.current && !transcriptRef.current.trim()) scheduleRestart(1200);
+      };
       rec.onerror = e => {
         setListening(false);
         listeningRef.current = false;
         if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) {
           clearRestartTimer();
+          clearSubmitTimer();
           voiceModeRef.current = false;
           setVoiceMode?.(false);
           return;
         }
-        scheduleRestart(900);
+        if (!submittingRef.current && !transcriptRef.current.trim()) scheduleRestart(1400);
       };
       recRef.current = rec;
       try {
@@ -181,6 +230,7 @@ void main(){
 
     const stop = () => {
       clearRestartTimer();
+      clearSubmitTimer();
       voiceModeRef.current = false;
       setVoiceMode?.(false);
       stopMicStream();
@@ -215,6 +265,7 @@ void main(){
 
     useEffect(() => () => {
       clearRestartTimer();
+      clearSubmitTimer();
       recRef.current?.stop();
       stopMicStream();
     }, []);
