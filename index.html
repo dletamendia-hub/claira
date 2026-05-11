@@ -716,7 +716,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  function AppHeader({ onBack, title, navIcon = 'back' }) {
+  function AppHeader({ onBack, title, navIcon = 'back', rightAction }) {
     return (
       <div style={{ height:56, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 20px', flexShrink:0, position:'relative', zIndex:10 }}>
         {onBack ? (
@@ -735,9 +735,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           <div style={{ width:36 }}></div>
         )}
         <div style={{ fontFamily: title ? 'Questrial, sans-serif' : 'Abhaya Libre, serif', fontSize: title ? 16 : 22, color:'rgba(255,255,255,0.92)', letterSpacing:title ? '0.01em' : '0.04em', fontWeight: title ? 400 : 600, textAlign:'center', flex:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title || 'Claira'}</div>
-        <button onClick={() => window.Claira.launchTestDiagnostic?.()} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <span style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.55)' }}>?</span>
-        </button>
+        {rightAction ? rightAction : (
+          <button onClick={() => window.Claira.launchTestDiagnostic?.()} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <span style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.55)' }}>?</span>
+          </button>
+        )}
       </div>
     );
   }
@@ -1976,7 +1978,18 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
-        <AppHeader onBack={onBack} title="Questions" />
+        <AppHeader onBack={onBack} title="Questions" rightAction={
+          messages.length > 0 ? (
+            <button onClick={() => { setMessages([]); setInlineSuggestions([]); }} title="Effacer la conversation"
+              style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.14)'}
+              onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.08)'}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 4h10M6 4V3h4v1M5.5 4l.5 8M10.5 4l-.5 8M8 4v8" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          ) : <div style={{ width:36 }} />
+        } />
         <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY: messages.length === 0 ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', justifyContent: messages.length === 0 ? 'center' : 'flex-start', alignItems: messages.length === 0 ? 'center' : 'stretch', gap:10 }}>
 
           {messages.length === 0 && (
