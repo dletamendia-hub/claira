@@ -877,7 +877,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  function DashboardScreen({ answers, bookedAppointment, onStartAssessment, onOpenSummary, onGoTherapies, onGoBooking }) {
+  function DashboardScreen({ answers, bookedAppointment, hasViewedTherapist = false, onStartAssessment, onOpenSummary, onGoTherapies, onGoBooking }) {
     const [heroLoaded, setHeroLoaded] = useState(false);
     const answerCount = Object.keys(answers).length;
     const isComplete = answerCount === QUESTIONS.length;
@@ -1038,43 +1038,26 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
             <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontFamily:'Questrial, sans-serif', fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.90)', marginBottom:20 }}>Parcours de soin</div>
-              <div style={{ display:'flex', flexDirection:'column', gap:14, marginBottom:18 }}>
+              <div style={{ display:’flex’, flexDirection:’column’, gap:14, marginBottom:18 }}>
                 {[
-                  {
-                    step:'01',
-                    title:'Faire le point',
-                    text:"Mettre des mots sur ce que vous vivez et clarifier ce dont vous avez besoin aujourd’hui.",
-                    active:true,
-                  },
-                  {
-                    step:'02',
-                    title:'Comparer les approches',
-                    text:"Comprendre les types de thérapie pour voir ce qui vous parle le plus.",
-                    active:true,
-                  },
-                  {
-                    step:'03',
-                    title:'Choisir un thérapeute',
-                    text:"Repérer une personne, poser vos questions et réserver quand vous vous sentez prêt·e.",
-                    active:false,
-                  },
+                  { step:’01’, title:’Faire le point’, text:"Mettre des mots sur ce que vous vivez et clarifier ce dont vous avez besoin aujourd’hui.", done: isComplete },
+                  { step:’02’, title:’Comparer les approches’, text:"Comprendre les types de thérapie pour voir ce qui vous parle le plus.", done: hasViewedTherapist },
+                  { step:’03’, title:’Choisir un thérapeute’, text:"Repérer une personne, poser vos questions et réserver quand vous vous sentez prêt·e.", done: !!bookedAppointment },
                 ].map((item, i, arr) => (
-                  <div key={item.step} style={{ display:'grid', gridTemplateColumns:'48px 1fr', gap:16, alignItems:'start', position:'relative' }}>
-                    <div style={{ position:'relative', display:'flex', justifyContent:'center', minHeight:'100%' }}>
-                      <div style={{ width:32, height:32, borderRadius:999, background:item.active ? 'rgba(73,202,166,0.18)' : 'rgba(255,255,255,0.08)', border:`1px solid ${item.active ? 'rgba(73,202,166,0.28)' : 'rgba(255,255,255,0.10)'}`, color:item.active ? '#74e3eafc' : 'rgba(255,255,255,0.52)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Questrial, sans-serif', fontSize:11, fontWeight:700, letterSpacing:'0.04em', flexShrink:0 }}>
-                        {item.step}
+                  <div key={item.step} style={{ display:’grid’, gridTemplateColumns:’48px 1fr’, gap:16, alignItems:’start’, position:’relative’ }}>
+                    <div style={{ position:’relative’, display:’flex’, justifyContent:’center’, minHeight:’100%’ }}>
+                      <div style={{ width:32, height:32, borderRadius:999, background:’rgba(73,202,166,0.18)’, border:’1px solid rgba(73,202,166,0.28)’, color:’#74e3ea’, display:’flex’, alignItems:’center’, justifyContent:’center’, fontFamily:’Questrial, sans-serif’, fontSize:11, fontWeight:700, letterSpacing:’0.04em’, flexShrink:0, transition:’background 0.3s, border-color 0.3s’ }}>
+                        {item.done
+                          ? <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6.5" stroke="#49caa6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          : item.step}
                       </div>
                       {i < arr.length - 1 && (
-                        <div style={{ position:'absolute', left:'50%', transform:'translateX(-50%)', top:32, bottom:-14, width:1, background:item.active ? 'linear-gradient(to bottom, rgba(73,202,166,0.30), rgba(255,255,255,0.10))' : 'rgba(255,255,255,0.10)' }}></div>
+                        <div style={{ position:’absolute’, left:’50%’, transform:’translateX(-50%)’, top:32, bottom:-14, width:1, background:’linear-gradient(to bottom, rgba(73,202,166,0.30), rgba(73,202,166,0.08))’ }}></div>
                       )}
                     </div>
                     <div style={{ paddingTop:2 }}>
-                      <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.88)', marginBottom:5 }}>
-                        {item.title}
-                      </div>
-                      <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.62)', margin:0, textWrap:'pretty' }}>
-                        {item.text}
-                      </p>
+                      <div style={{ fontFamily:’Questrial, sans-serif’, fontSize:16, fontWeight:700, color:’rgba(255,255,255,0.88)’, marginBottom:5 }}>{item.title}</div>
+                      <p style={{ fontFamily:’Questrial, sans-serif’, fontSize:14, lineHeight:1.7, color:’rgba(255,255,255,0.62)’, margin:0, textWrap:’pretty’ }}>{item.text}</p>
                     </div>
                   </div>
                 ))}
@@ -2299,6 +2282,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [answers, setAnswers] = useState({});
     const [therapist, setTh]    = useState(null);
     const [bookedAppointment, setBookedAppointment] = useState(null);
+    const [hasViewedTherapist, setHasViewedTherapist] = useState(false);
     const [menuOpen, setMenu]   = useState(false);
     const [mainTab, setMainTab] = useState('home');
     const [therapyDetailOpen, setTherapyDetailOpen] = useState(false);
@@ -2388,7 +2372,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const handleEdit = useCallback((idx) => { const trimmed = {}; QUESTIONS.slice(0, idx).forEach(q => { if (answers[q.id]) trimmed[q.id] = answers[q.id]; }); setAnswers(trimmed); setStep(idx); setScreen('chat'); }, [answers]);
     const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setBookedAppointment(null); };
     const showTabbar = screen === 'hub' || screen === 'matching' || (screen === 'therapies' && !therapyDetailOpen);
-    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{softenBackground && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(34px) saturate(0.82)', WebkitBackdropFilter:'blur(34px) saturate(0.82)', background:'rgba(7,22,48,0.46)' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={setBookedAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToBookingHub} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
+    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{softenBackground && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(34px) saturate(0.82)', WebkitBackdropFilter:'blur(34px) saturate(0.82)', background:'rgba(7,22,48,0.46)' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={setBookedAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToBookingHub} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
   }
   window.Claira.App = App;
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
