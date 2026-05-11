@@ -2011,6 +2011,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         </div>
 
         {messages.length === 0 && (
+          <div className="fade-up" style={{ display:'flex', justifyContent:'center', alignItems:'center', flex:1, pointerEvents:'none' }}>
+            <img src="assets/questions-hero.png" alt="" width="140" height="140" style={{ width:140, height:140, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))' }} />
+          </div>
+        )}
+
+        {messages.length === 0 && (
           <div className="fade-up" style={{ padding:'0 16px 10px', display:'flex', flexDirection:'column', gap:7, flexShrink:0 }}>
             {INITIAL_SUGGESTIONS.map((s, i) => (
               <button key={i} onClick={() => send(s)} style={{ width:'100%', textAlign:'left', padding:'11px 16px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.75)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
