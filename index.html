@@ -564,6 +564,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       transcriptRef.current = '';
       cancelledRef.current = false;
       submittingRef.current = false;
+      clearSubmitTimer();
       speakingRef.current = false;
       setListening(true);
       listeningRef.current = true;
@@ -575,7 +576,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       rec.onresult = e => {
         transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
         const hasFinalResult = Array.from(e.results).some(r => r.isFinal);
-        if (hasFinalResult) scheduleSubmit();
+        if (hasFinalResult && !submittingRef.current && !cancelledRef.current) scheduleSubmit();
       };
       rec.onend = () => {
         setListening(false);
@@ -620,7 +621,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     };
 
     const confirm = () => {
-      cancelledRef.current = true;
+      submittingRef.current = true;
       const t = transcriptRef.current;
       clearRestartTimer();
       clearSubmitTimer();
