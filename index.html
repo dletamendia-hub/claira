@@ -674,7 +674,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     const activeVoice = voiceMode && autoStart;
 
-    if (voiceMode && !autoStart) return null;
+    if (voiceMode && !autoStart) return <div style={{ width:46, height:46, flexShrink:0 }} />;
 
     if (activeVoice) {
       return (
@@ -878,6 +878,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   }
 
   function DashboardScreen({ answers, bookedAppointment, onStartAssessment, onOpenSummary, onGoTherapies, onGoBooking }) {
+    const [heroLoaded, setHeroLoaded] = useState(false);
     const answerCount = Object.keys(answers).length;
     const isComplete = answerCount === QUESTIONS.length;
     const hasProgress = answerCount > 0;
@@ -940,12 +941,16 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               alt="Illustration d'accompagnement"
               width="92"
               height="101"
+              onLoad={() => setHeroLoaded(true)}
               style={{
                 width:92,
                 height:101,
                 display:'block',
                 marginBottom:10,
-                filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.22))'
+                filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.22))',
+                opacity: heroLoaded ? 1 : 0,
+                transform: heroLoaded ? 'scale(1)' : 'scale(0.88)',
+                transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1)',
               }}
             />
             <div style={{ fontFamily:'Questrial, sans-serif', fontSize:21, lineHeight:1.12, color:'rgba(255,255,255,0.95)', fontWeight:700, marginBottom:10 }}>
