@@ -33,7 +33,7 @@ window.Claira = window.Claira || {};
 
     return (
       <div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}>
-        <ShaderCanvas />
+        <ShaderCanvas blur={screen !== 'home' ? 32 : 0} />
         {screen !== 'home' && <StatusBar />}
 
         <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative' }}>

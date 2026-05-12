@@ -348,9 +348,9 @@ window.Claira = window.Claira || {};
                 </div>
               ))}
             </div>
-            <div style={{ display:'flex', gap:4, marginBottom:18 }}>
+            <div style={{ display:'flex', gap:16, marginBottom:18, justifyContent:'center' }}>
               {[['bio','Profil'],['approach','Approche'],['reviews','Avis']].map(([id,label])=>(
-                <button key={id} onClick={()=>setTab(id)} style={{ flex:1, padding:'9px', background:tab===id?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.05)', color:tab===id?'rgba(255,255,255,0.90)':'rgba(255,255,255,0.38)', border:`1px solid ${tab===id?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.06)'}`, borderRadius:10, fontSize:12, fontWeight:500, fontFamily:'inherit', cursor:'pointer', transition:'all 0.2s' }}>{label}</button>
+                <button key={id} onClick={()=>setTab(id)} style={{ padding:'8px 18px', background:tab===id?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.05)', color:tab===id?'rgba(255,255,255,0.90)':'rgba(255,255,255,0.38)', border:`1px solid ${tab===id?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.06)'}`, borderRadius:10, fontSize:12, fontWeight:500, fontFamily:'inherit', cursor:'pointer', transition:'all 0.2s' }}>{label}</button>
               ))}
             </div>
             {tab==='bio' && <div className="fade-in">

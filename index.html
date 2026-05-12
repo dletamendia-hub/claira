@@ -796,28 +796,74 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             );
           })}
         </div>
-        <button onClick={onSOS} style={{ width:62, padding:'5px', borderRadius:24, background:'rgba(12,13,22,0.82)', border:'1px solid rgba(220,50,50,0.30)', backdropFilter:'blur(18px)', WebkitBackdropFilter:'blur(18px)', boxShadow:'0 20px 50px rgba(0,0,0,0.35)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, cursor:'pointer', color:'rgba(255,80,80,0.92)', transition:'all 0.2s' }}>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <path d="M3.5 5.5c0-.8.6-1.5 1.4-1.5h1.2c.3 0 .6.2.7.5l.9 2.2c.1.3 0 .7-.3.9l-.8.7c.6 1.3 1.7 2.4 3 3l.7-.8c.2-.3.6-.4.9-.3l2.2.9c.3.1.5.4.5.7v1.2c0 .8-.7 1.5-1.5 1.5C6.3 14.5 3.5 11.7 3.5 8.3V5.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-          </svg>
-          <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.04em', lineHeight:1.1 }}>SOS</span>
-        </button>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', width:62 }}>
+          <button onClick={onSOS} style={{ width:62, height:62, padding:0, borderRadius:'50%', background:'rgba(12,13,22,0.82)', border:'1px solid rgba(255,255,255,0.08)', backdropFilter:'blur(18px)', WebkitBackdropFilter:'blur(18px)', boxShadow:'0 20px 50px rgba(0,0,0,0.35)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, cursor:'pointer', color:'rgba(255,80,80,0.92)', transition:'all 0.2s', flexShrink:0 }}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3.5 5.5c0-.8.6-1.5 1.4-1.5h1.2c.3 0 .6.2.7.5l.9 2.2c.1.3 0 .7-.3.9l-.8.7c.6 1.3 1.7 2.4 3 3l.7-.8c.2-.3.6-.4.9-.3l2.2.9c.3.1.5.4.5.7v1.2c0 .8-.7 1.5-1.5 1.5C6.3 14.5 3.5 11.7 3.5 8.3V5.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.04em', lineHeight:1.1, fontFamily:'Questrial, sans-serif' }}>SOS</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   function SOSModal({ onClose }) {
+    const { useState: _us, useRef: _ur, useEffect: _ue } = React;
+    const [entered, setEntered] = _us(false);
+    const [closing, setClosing] = _us(false);
+    const [dragY, setDragY] = _us(0);
+    const [dragging, setDragging] = _us(false);
+    const startYRef = _ur(null);
+    const isDraggingRef = _ur(false);
+
+    _ue(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => setEntered(true)));
+    }, []);
+
+    function handleClose() {
+      setClosing(true);
+      setTimeout(onClose, 300);
+    }
+
+    function onTouchStart(e) {
+      startYRef.current = e.touches[0].clientY;
+      isDraggingRef.current = true;
+      setDragging(true);
+    }
+    function onTouchMove(e) {
+      if (!isDraggingRef.current) return;
+      const delta = e.touches[0].clientY - startYRef.current;
+      if (delta > 0) setDragY(delta);
+    }
+    function onTouchEnd() {
+      isDraggingRef.current = false;
+      setDragging(false);
+      if (dragY > 110) { setClosing(true); setTimeout(onClose, 280); }
+      else { setDragY(0); }
+    }
+
+    const translateY = closing ? '110%' : dragging ? `${dragY}px` : entered ? '0px' : '100%';
+    const sheetStyle = {
+      position:'relative', zIndex:1,
+      background:'#13131e',
+      borderRadius:'28px 28px 0 0',
+      padding:'32px 24px 44px',
+      transform: `translateY(${translateY})`,
+      transition: dragging ? 'none' : 'transform 0.30s cubic-bezier(.22,1,.36,1)',
+    };
+
     return (
-      <div className="fade-in" style={{ position:'absolute', inset:0, zIndex:200, display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
-        <div onClick={onClose} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.62)' }} />
-        <div style={{ position:'relative', zIndex:1, background:'#13131e', borderRadius:'28px 28px 0 0', padding:'32px 24px 44px', animation:'sheetUp 0.22s cubic-bezier(.22,1,.36,1) both' }}>
-          <div style={{ width:36, height:4, borderRadius:2, background:'rgba(255,255,255,0.14)', margin:'0 auto 28px' }} />
+      <div style={{ position:'absolute', inset:0, zIndex:200, display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+        <div onClick={handleClose} style={{ position:'absolute', inset:0, background:'rgba(255,255,255,0.10)', opacity: (entered && !closing) ? 1 : 0, transition:'opacity 0.30s ease' }} />
+        <div style={sheetStyle} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div style={{ width:36, height:4, borderRadius:2, background:'rgba(255,255,255,0.14)', margin:'0 auto 28px', cursor:'grab' }} />
           <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:22, fontWeight:700, color:'rgba(255,255,255,0.96)', lineHeight:1.2, marginBottom:12, textAlign:'center' }}>Vous avez besoin d&apos;aide maintenant&nbsp;?</h2>
           <p style={{ fontFamily:'Questrial, sans-serif', fontSize:15, color:'rgba(255,255,255,0.58)', lineHeight:1.65, textAlign:'center', marginBottom:28 }}>Vous n&apos;êtes pas seul·e. Un professionnel peut vous répondre immédiatement.</p>
-          <a href="tel:3114" style={{ display:'block', width:'100%', minHeight:60, padding:'16px 24px', background:'rgba(210,38,38,0.92)', border:'none', borderRadius:100, fontSize:16, fontWeight:700, color:'white', fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em', textAlign:'center', textDecoration:'none', lineHeight:'28px', marginBottom:16, boxSizing:'border-box' }}>
+          <a href="tel:3114" style={{ display:'block', width:'100%', minHeight:60, padding:'16px 24px', background:'#d5000073', border:'none', borderRadius:100, fontSize:16, fontWeight:700, color:'white', fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em', textAlign:'center', textDecoration:'none', lineHeight:'28px', marginBottom:12, boxSizing:'border-box' }}>
             Appeler de l&apos;aide psychiatrique
           </a>
-          <button onClick={onClose} style={{ display:'block', width:'100%', background:'none', border:'none', fontSize:14, color:'rgba(255,255,255,0.38)', fontFamily:'Questrial, sans-serif', cursor:'pointer', padding:'8px', textAlign:'center' }}>
+          <button onClick={handleClose} style={{ display:'block', width:'100%', minHeight:58, padding:'16px 24px', background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:16, fontWeight:600, color:'rgba(255,255,255,0.80)', fontFamily:'Questrial, sans-serif', cursor:'pointer', textAlign:'center', boxSizing:'border-box' }}>
             Je n&apos;en ai pas besoin
           </button>
         </div>

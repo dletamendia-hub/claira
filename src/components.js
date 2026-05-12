@@ -49,7 +49,7 @@ void main(){
   gl_FragColor = vec4(clamp(final, 0.0, 1.0), 1.0);
 }`;
 
-  function ShaderCanvas() {
+  function ShaderCanvas({ blur = 0 }) {
     const ref = useRef(null);
     useEffect(() => {
       const canvas = ref.current;
@@ -96,7 +96,7 @@ void main(){
       raf = requestAnimationFrame(draw);
       return () => cancelAnimationFrame(raf);
     }, []);
-    return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }}/>;
+    return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none', filter: blur ? `blur(${blur}px)` : undefined }}/>;
   }
 
   function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false, stayActiveAfterResult = true }) {
