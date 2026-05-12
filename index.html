@@ -736,7 +736,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         )}
         <div style={{ fontFamily: title ? 'Questrial, sans-serif' : 'Abhaya Libre, serif', fontSize: title ? 16 : 22, color:'rgba(255,255,255,0.92)', letterSpacing:title ? '0.01em' : '0.04em', fontWeight: title ? 400 : 600, textAlign:'center', flex:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title || 'Claira'}</div>
         {rightAction ? rightAction : (
-          <button onClick={onHelp || undefined} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor: onHelp ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center', opacity: onHelp ? 1 : 0.4 }}>
+          <button onClick={onHelp || undefined} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor: onHelp ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <span style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.55)' }}>?</span>
           </button>
         )}
