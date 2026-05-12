@@ -1912,6 +1912,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [heroLoaded, setHeroLoaded] = useState(false);
     const scrollRef = useRef(null);
 
     useEffect(() => {
@@ -1993,7 +1994,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY: messages.length === 0 ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', justifyContent: messages.length === 0 ? 'center' : 'flex-start', alignItems: messages.length === 0 ? 'center' : 'stretch', gap:10 }}>
 
           {messages.length === 0 && (
-            <img className="fade-up" src="assets/questions-hero.png" alt="" width="148" height="148" style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))', pointerEvents:'none' }} />
+            <img src="assets/questions-hero.png" alt="" width="148" height="148" onLoad={() => setHeroLoaded(true)} style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))', pointerEvents:'none', opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? 'scale(1)' : 'scale(0.88)', transition:'opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1)' }} />
           )}
 
           {messages.map((m, i) => (
