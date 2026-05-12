@@ -1098,7 +1098,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 ))}
               </div>
               {bookedAppointment ? (
-                  <div style={{ padding:'14px 14px 0', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ padding:'14px 0 0', borderTop:'1px solid rgba(255,255,255,0.12)' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
                       <div style={{ width:8, height:8, borderRadius:'50%', background:'#49caa6', boxShadow:'0 0 0 3px rgba(73,202,166,0.2)', flexShrink:0 }}></div>
                       <div style={{ fontFamily:'Questrial, sans-serif', fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'#49caa6' }}>Rendez-vous confirmé</div>
@@ -1116,14 +1116,16 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                     </div>
                   </div>
               ) : (
-                <div style={{ display:'flex', alignItems:'flex-start', gap:12, padding:'14px 14px 0', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
-                  <div style={{ width:34, height:34, borderRadius:12, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                      <rect x="3.5" y="4.5" width="11" height="9" rx="2" stroke="rgba(255,255,255,0.52)" strokeWidth="1.4"/>
-                      <path d="M6 2.8v2.4M12 2.8v2.4M3.5 8h11" stroke="rgba(255,255,255,0.52)" strokeWidth="1.4" strokeLinecap="round"/>
-                    </svg>
+                <div style={{ display:'grid', gridTemplateColumns:'48px 1fr', gap:16, padding:'14px 0 0', borderTop:'1px solid rgba(255,255,255,0.12)' }}>
+                  <div style={{ display:'flex', justifyContent:'center' }}>
+                    <div style={{ width:32, height:32, borderRadius:10, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <rect x="3.5" y="4.5" width="11" height="9" rx="2" stroke="rgba(255,255,255,0.52)" strokeWidth="1.4"/>
+                        <path d="M6 2.8v2.4M12 2.8v2.4M3.5 8h11" stroke="rgba(255,255,255,0.52)" strokeWidth="1.4" strokeLinecap="round"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div>
+                  <div style={{ paddingTop:2 }}>
                     <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.72)', marginBottom:4 }}>
                       Vous n'avez pas de rendez-vous en cours
                     </div>
