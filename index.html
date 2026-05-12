@@ -768,83 +768,70 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  function MainTabBar({ active, onHome, onTherapies, onBooking }) {
+  function MainTabBar({ active, onHome, onTherapies, onBooking, onSOS }) {
     const items = [
       {
-        id:'home',
-        label:'Accueil',
-        onClick:onHome,
-        icon:(
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <path d="M3.5 7.8 9 3l5.5 4.8v6.2H11v-3.7H7V14H3.5V7.8Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-          </svg>
-        ),
+        id:'home', label:'Accueil', onClick:onHome,
+        icon:<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3.5 7.8 9 3l5.5 4.8v6.2H11v-3.7H7V14H3.5V7.8Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>,
       },
       {
-        id:'therapies',
-        label:'Thérapies',
-        onClick:onTherapies,
-        icon:(
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <path d="M4.2 4.8c0-1.2 1-2.2 2.2-2.2h5.2c1.2 0 2.2 1 2.2 2.2v3.8c0 1.2-1 2.2-2.2 2.2H8.2L5 13.4v-2.6h-.8c-1.2 0-2.2-1-2.2-2.2V4.8Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round"/>
-            <path d="M9 8.9 8.4 8.4C7.3 7.5 6.6 6.8 6.6 5.9c0-.8.6-1.4 1.4-1.4.4 0 .8.2 1 .5.2-.3.6-.5 1-.5.8 0 1.4.6 1.4 1.4 0 .9-.7 1.6-1.8 2.5L9 8.9Z" fill="currentColor"/>
-          </svg>
-        ),
+        id:'therapies', label:'Thérapies', onClick:onTherapies,
+        icon:<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.2 4.8c0-1.2 1-2.2 2.2-2.2h5.2c1.2 0 2.2 1 2.2 2.2v3.8c0 1.2-1 2.2-2.2 2.2H8.2L5 13.4v-2.6h-.8c-1.2 0-2.2-1-2.2-2.2V4.8Z" stroke="currentColor" strokeWidth="1.45" strokeLinejoin="round"/><path d="M9 8.9 8.4 8.4C7.3 7.5 6.6 6.8 6.6 5.9c0-.8.6-1.4 1.4-1.4.4 0 .8.2 1 .5.2-.3.6-.5 1-.5.8 0 1.4.6 1.4 1.4 0 .9-.7 1.6-1.8 2.5L9 8.9Z" fill="currentColor"/></svg>,
       },
       {
-        id:'booking',
-        label:'Prendre un RDV',
-        onClick:onBooking,
-        icon:(
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <rect x="3" y="4.5" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M6 2.8v3M12 2.8v3M3 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        ),
+        id:'booking', label:'RDV', onClick:onBooking,
+        icon:<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="3" y="4.5" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M6 2.8v3M12 2.8v3M3 8h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
       },
     ];
     return (
-      <div style={{ position:'absolute', left:16, right:16, bottom:16, zIndex:30, padding:'5px', display:'flex', gap:5, borderRadius:32, background:'rgba(12,13,22,0.82)', border:'1px solid rgba(255,255,255,0.08)', backdropFilter:'blur(18px)', WebkitBackdropFilter:'blur(18px)', boxShadow:'0 20px 50px rgba(0,0,0,0.35)' }}>
-        {items.map(item => {
-          const isActive = active === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={item.onClick}
-              style={{
-                flex:1,
-                minHeight:52,
-                padding:'8px 8px',
-                border:'none',
-                borderRadius:24,
-                background:isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                color:isActive ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.66)',
-                display:'flex',
-                flexDirection:'column',
-                alignItems:'center',
-                justifyContent:'center',
-                gap:3,
-                cursor:'pointer',
-                fontFamily:'Questrial, sans-serif',
-                transition:'all 0.2s',
-              }}
-            >
-              {item.icon}
-              <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.01em', textAlign:'center', lineHeight:1.1 }}>{item.label}</span>
-            </button>
-          );
-        })}
+      <div style={{ position:'absolute', left:16, right:16, bottom:16, zIndex:30, display:'flex', gap:8, alignItems:'stretch' }}>
+        <div style={{ flex:1, padding:'5px', display:'flex', gap:5, borderRadius:32, background:'rgba(12,13,22,0.82)', border:'1px solid rgba(255,255,255,0.08)', backdropFilter:'blur(18px)', WebkitBackdropFilter:'blur(18px)', boxShadow:'0 20px 50px rgba(0,0,0,0.35)' }}>
+          {items.map(item => {
+            const isActive = active === item.id;
+            return (
+              <button key={item.id} onClick={item.onClick} style={{ flex:1, minHeight:52, padding:'8px 8px', border:'none', borderRadius:24, background:isActive ? 'rgba(255,255,255,0.12)' : 'transparent', color:isActive ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.52)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, cursor:'pointer', fontFamily:'Questrial, sans-serif', transition:'all 0.2s' }}>
+                {item.icon}
+                <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.01em', textAlign:'center', lineHeight:1.1 }}>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        <button onClick={onSOS} style={{ width:62, padding:'5px', borderRadius:24, background:'rgba(12,13,22,0.82)', border:'1px solid rgba(220,50,50,0.30)', backdropFilter:'blur(18px)', WebkitBackdropFilter:'blur(18px)', boxShadow:'0 20px 50px rgba(0,0,0,0.35)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, cursor:'pointer', color:'rgba(255,80,80,0.92)', transition:'all 0.2s' }}>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M3.5 5.5c0-.8.6-1.5 1.4-1.5h1.2c.3 0 .6.2.7.5l.9 2.2c.1.3 0 .7-.3.9l-.8.7c.6 1.3 1.7 2.4 3 3l.7-.8c.2-.3.6-.4.9-.3l2.2.9c.3.1.5.4.5.7v1.2c0 .8-.7 1.5-1.5 1.5C6.3 14.5 3.5 11.7 3.5 8.3V5.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.04em', lineHeight:1.1 }}>SOS</span>
+        </button>
       </div>
     );
   }
 
-  Object.assign(window.Claira, { ShaderCanvas, MicButton, AppHeader, StatusBar, BackBtn, MainTabBar });
+  function SOSModal({ onClose }) {
+    return (
+      <div className="fade-in" style={{ position:'absolute', inset:0, zIndex:200, display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+        <div onClick={onClose} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.62)' }} />
+        <div style={{ position:'relative', zIndex:1, background:'#13131e', borderRadius:'28px 28px 0 0', padding:'32px 24px 44px', animation:'sheetUp 0.22s cubic-bezier(.22,1,.36,1) both' }}>
+          <div style={{ width:36, height:4, borderRadius:2, background:'rgba(255,255,255,0.14)', margin:'0 auto 28px' }} />
+          <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:22, fontWeight:700, color:'rgba(255,255,255,0.96)', lineHeight:1.2, marginBottom:12, textAlign:'center' }}>Vous avez besoin d&apos;aide maintenant&nbsp;?</h2>
+          <p style={{ fontFamily:'Questrial, sans-serif', fontSize:15, color:'rgba(255,255,255,0.58)', lineHeight:1.65, textAlign:'center', marginBottom:28 }}>Vous n&apos;êtes pas seul·e. Un professionnel peut vous répondre immédiatement.</p>
+          <a href="tel:3114" style={{ display:'block', width:'100%', minHeight:60, padding:'16px 24px', background:'rgba(210,38,38,0.92)', border:'none', borderRadius:100, fontSize:16, fontWeight:700, color:'white', fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em', textAlign:'center', textDecoration:'none', lineHeight:'28px', marginBottom:16, boxSizing:'border-box' }}>
+            Appeler de l&apos;aide psychiatrique
+          </a>
+          <button onClick={onClose} style={{ display:'block', width:'100%', background:'none', border:'none', fontSize:14, color:'rgba(255,255,255,0.38)', fontFamily:'Questrial, sans-serif', cursor:'pointer', padding:'8px', textAlign:'center' }}>
+            Je n&apos;en ai pas besoin
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  Object.assign(window.Claira, { ShaderCanvas, MicButton, AppHeader, StatusBar, BackBtn, MainTabBar, SOSModal });
 })();
 
 (() => {
   const { useState, useEffect, useRef, useMemo } = React;
   const { QUESTIONS, THERAPIES, THERAPISTS, getInsight, generateAIInsight } = window.Claira;
-  const { MicButton, AppHeader, StatusBar, BackBtn, MainTabBar } = window.Claira;
+  const { MicButton, AppHeader, StatusBar, BackBtn, MainTabBar, SOSModal } = window.Claira;
 
   function HomeScreen({ onStart, onLater = () => {} }) {
     return (
@@ -2359,7 +2346,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 (() => {
   const { useState, useEffect, useCallback, useRef } = React;
   const { ShaderCanvas, StatusBar } = window.Claira;
-  const { HomeScreen, DashboardScreen, ChatScreen, InsightScreen, TherapiesScreen, MatchingScreen, TherapyQuestionsScreen, TherapistScreen, BookingScreen, MainTabBar } = window.Claira;
+  const { HomeScreen, DashboardScreen, ChatScreen, InsightScreen, TherapiesScreen, MatchingScreen, TherapyQuestionsScreen, TherapistScreen, BookingScreen, MainTabBar, SOSModal } = window.Claira;
   const { QUESTIONS, getInsight, generateAIInsight } = window.Claira;
   function App() {
     const HOME_WAVE_OFFSET = -0.82;
@@ -2372,6 +2359,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [hasViewedTherapist, setHasViewedTherapist] = useState(false);
     const [menuOpen, setMenu]   = useState(false);
     const [mainTab, setMainTab] = useState('home');
+    const [sosOpen, setSosOpen] = useState(false);
     const [therapyDetailOpen, setTherapyDetailOpen] = useState(false);
     const [generatedInsight, setGeneratedInsight] = useState(null);
     const [generatedInsightKey, setGeneratedInsightKey] = useState('');
@@ -2459,7 +2447,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const handleEdit = useCallback((idx) => { const trimmed = {}; QUESTIONS.slice(0, idx).forEach(q => { if (answers[q.id]) trimmed[q.id] = answers[q.id]; }); setAnswers(trimmed); setStep(idx); setScreen('chat'); }, [answers]);
     const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setBookedAppointment(null); };
     const showTabbar = screen === 'hub' || screen === 'matching' || (screen === 'therapies' && !therapyDetailOpen);
-    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{softenBackground && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(72px) saturate(0.70)', WebkitBackdropFilter:'blur(72px) saturate(0.70)', background:'rgba(7,22,48,0.52)' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={setBookedAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToBookingHub} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
+    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{softenBackground && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(72px) saturate(0.70)', WebkitBackdropFilter:'blur(72px) saturate(0.70)', background:'rgba(7,22,48,0.52)' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={setBookedAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToBookingHub} onSOS={() => setSosOpen(true)} />}
+{sosOpen && <SOSModal onClose={() => setSosOpen(false)} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
   }
   window.Claira.App = App;
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
