@@ -1631,17 +1631,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 </button>
               </div>
               {orderedTherapies.map((item, i) => (
-                <SummaryCard
-                  key={item.id}
-                  item={item}
-                  recommended={insight ? item.id === insight.therapy : false}
-                  onClick={() => setSelectedId(item.id)}
-                />
+                <React.Fragment key={item.id}>
+                  {SummaryCard({ item, recommended: insight ? item.id === insight.therapy : false, onClick: () => setSelectedId(item.id) })}
+                </React.Fragment>
               ))}
             </div>
           </div>
         ) : (
-          <DetailView item={th} recommended={isRec} />
+          DetailView({ item: th, recommended: isRec })
         )}
       </div>
     );
