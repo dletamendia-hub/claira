@@ -9,7 +9,11 @@
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"/>
   <link rel="shortcut icon" href="favicon.ico"/>
   <link rel="manifest" href="site.webmanifest"/>
-  <script src="config.js"></script>
+  <script>
+    // Clé API chargée depuis localStorage (jamais committée)
+    // Pour configurer : localStorage.setItem('groq_key', 'gsk_...')
+    window.__GROQ_KEY = localStorage.getItem('groq_key') || '';
+  </script>
   <style>
     html, body {
       background: #555555 !important;
@@ -176,11 +180,11 @@ window.Claira.getInsight = function getInsight(answers) {
   };
 };
 
-// GROQ_API_KEY est chargée depuis config.js (non versionné)
+// Clé API lue depuis localStorage — jamais committée dans le code
 
 window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   const fallback = { ...window.Claira.getInsight(answers), summary: null };
-  const key = window.Claira.GROQ_API_KEY;
+  const key = window.__GROQ_KEY;
   if (!key) return fallback;
 
   const labels = { emotion:'Émotion', duration:'Durée', impact:'Impact quotidien', goal:'Objectif', constraint:'Contraintes', style:'Style de thérapeute' };
@@ -1959,7 +1963,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     const fetchSuggestions = async (msgs) => {
       try {
-        const key = window.Claira.GROQ_API_KEY;
+        const key = window.__GROQ_KEY;
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method:'POST',
           headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${key}` },
@@ -1989,7 +1993,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       setMessages(next);
       setLoading(true);
       try {
-        const key = window.Claira.GROQ_API_KEY;
+        const key = window.__GROQ_KEY;
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method:'POST',
           headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${key}` },
