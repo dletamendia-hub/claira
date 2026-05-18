@@ -209,8 +209,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     if (!res.ok) return fallback;
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content || '';
-    const jsonStr = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    const parsed = JSON.parse(jsonStr);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return fallback;
+    const parsed = JSON.parse(jsonMatch[0]);
     const isPersonified = (value) => /je\s+(te|vous|suis|comprends|soutiens)|Claira/i.test(String(value || ""));
     return {
       label:   parsed.label && !isPersonified(parsed.label) ? parsed.label : fallback.label,
@@ -1266,19 +1267,25 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         'Pas vraiment': 'sans trop déborder sur votre quotidien',
       };
 
+      const knownEmotions = ["Débordé·e","Anxieux·se","Triste","Épuisé·e","Perdu·e","Tendu·e"];
+      const knownDurations = ["Quelques jours","Quelques semaines","Plusieurs mois","Depuis longtemps"];
+
+      const emotionText = knownEmotions.includes(answers.emotion) ? answers.emotion : 'quelque chose de difficile';
+      const durationText = knownDurations.includes(answers.duration) ? answers.duration : null;
+
       const intro = answers.emotion
-        ? <>En ce moment, vous vous sentez {mark('emotion', answers.emotion)}</>
+        ? <>En ce moment, vous traversez {mark('emotion', emotionText)}</>
         : <>En ce moment, quelque chose pèse un peu plus que d&apos;habitude</>;
 
-      const duration = answers.duration
-        ? <> depuis {mark('duration', answers.duration)}</>
+      const duration = durationText
+        ? <> depuis {mark('duration', durationText)}</>
         : null;
 
       const impact = answers.impact
         ? <> {impactClause[answers.impact] || 'et cela a un impact sur votre quotidien'}</>
         : null;
 
-      const goal = answers.goal ? (goalPhrase[answers.goal] || answers.goal.toLowerCase()) : 'du soutien';
+      const goal = answers.goal ? (goalPhrase[answers.goal] || 'du soutien') : 'du soutien';
       const constraint = answers.constraint
         ? {
             'Budget serré': 'dans un cadre abordable',
@@ -1287,9 +1294,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             'Pas de contrainte': '',
           }[answers.constraint] || ''
         : '';
-      const style = answers.style ? stylePhrase[answers.style] : "quelqu'un de rassurant";
-      const goalNode = answers.goal ? mark('goal', answers.goal) : goal;
-      const styleNode = answers.style ? mark('style', answers.style) : style;
+      const style = answers.style ? (stylePhrase[answers.style] || "quelqu'un de rassurant") : "quelqu'un de rassurant";
+      const goalNode = mark('goal', goal);
+      const styleNode = mark('style', style);
 
       return (
         <span>
