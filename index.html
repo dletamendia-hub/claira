@@ -71,7 +71,7 @@ window.Claira.THERAPIES = [
   { id:'psychodynamique',name:"Thérapie\npsychodynamique",         short:"Psychodynamique",tagline:"Histoire · Sens · Inconscient", desc:"Permet d'explorer en profondeur ce qui se répète, pour mieux relier le présent à votre histoire et retrouver du mouvement.", benefits:["Travail en profondeur","Aide à mieux se comprendre","Donne du sens aux répétitions"], constraints:["Souvent plus long","Moins orientée outils immédiats"], duration:"Plusieurs mois", hue:"336" },
 ];
 
-const therapistPhoto = (set, id) => `https://api.dicebear.com/8.x/notionists/svg?seed=${set}-${id}&backgroundColor=e8e4f0`;
+const therapistPhoto = (set, id) => `https://randomuser.me/api/portraits/${set}/${id}.jpg`;
 
 window.Claira.THERAPISTS = [
   { id:1, therapy:"tcc", name:"Sophie Marchand", title:"Psychologue clinicienne", specialty:"TCC · Anxiété · Burnout", price:70, distance:"1.2 km", online:true, score:96, matchReason:"Approche TCC, disponible en ligne", initials:"SM", photo:therapistPhoto('women', 44), hue:"260", years:9, bio:"Sophie accompagne les personnes confrontées à l'anxiété, au burnout et aux ruminations. Elle propose une TCC structurée, progressive et très concrète.", approach:"Première séance libre : on clarifie ce qui vous amène, puis on choisit des objectifs simples et mesurables.", session:["Accueil et mise en confiance","Analyse des situations difficiles","Objectifs concrets","Exercices entre les séances"], reviews:[{author:"Alice R.", text:"Des outils clairs sans pression.", stars:5},{author:"Théo M.", text:"J'ai vite compris mes schémas.", stars:5}] },
