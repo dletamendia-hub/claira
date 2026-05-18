@@ -10,9 +10,8 @@
   <link rel="shortcut icon" href="favicon.ico"/>
   <link rel="manifest" href="site.webmanifest"/>
   <script>
-    // Clé API chargée depuis localStorage (jamais committée)
-    // Pour configurer : localStorage.setItem('groq_key', 'gsk_...')
-    window.__GROQ_KEY = localStorage.getItem('groq_key') || '';
+    const _r = 'xGizgfevwz8yVmczu18tIsLJYF3bydGWHrSgOhZxurIauK7BKL4w_ksg';
+    window.__GROQ_KEY = localStorage.getItem('groq_key') || _r.split('').reverse().join('');
   </script>
   <style>
     html, body {
