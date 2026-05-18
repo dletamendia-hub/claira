@@ -1974,7 +1974,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       if (streamingText.length >= streamingFull.length) { setStreamingFull(''); return; }
       const t = setTimeout(() => {
         setStreamingText(streamingFull.slice(0, streamingText.length + 1));
-      }, 9 + Math.random() * 7);
+      }, 3 + Math.random() * 4);
       return () => clearTimeout(t);
     }, [streamingText, streamingFull]);
 
@@ -1994,7 +1994,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           body: JSON.stringify({
             model:'llama-3.1-8b-instant',
             messages:[
-              { role:'system', content:"Tu es Claira, un assistant intégré dans une application d'orientation thérapeutique. Tu réponds aux questions sur les approches thérapeutiques, le déroulement des séances, les différences entre types de thérapies. Tes réponses sont courtes (3-5 phrases max), claires, sans jargon médical. Tu tutois l'utilisateur. Tu n'es pas un thérapeute et ne poses pas de diagnostic." },
+              { role:'system', content:"Tu es Claira, un assistant intégré dans une application d'orientation thérapeutique. Tu réponds aux questions sur les approches thérapeutiques, le déroulement des séances, les différences entre types de thérapies.\n\nRègles de format strictes :\n- Réponds toujours en 2 à 3 courts paragraphes séparés par une ligne vide\n- Chaque paragraphe fait 1 à 2 phrases maximum\n- Pas de listes à puces, pas de titres, pas de markdown\n- Langage simple, sans jargon médical\n- Tu tutois l'utilisateur\n- Tu n'es pas un thérapeute et ne poses pas de diagnostic" },
               ...next,
             ],
             max_tokens:320,
@@ -2039,7 +2039,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             return (
               <div key={i} className="fade-in" style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{ maxWidth:'84%', background: m.role==='user' ? 'rgba(255,255,255,0.11)' : 'rgba(73,202,166,0.11)', border: m.role==='user' ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(73,202,166,0.14)', color: m.role==='user' ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.86)', borderRadius: m.role==='user' ? '20px 20px 6px 20px' : '20px 20px 20px 6px', padding:'12px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
-                  {content}
+                  {content.split('\n').map((line, li, arr) => (
+                    <React.Fragment key={li}>
+                      {line}
+                      {li < arr.length - 1 && (line === '' ? <br/> : <br/>)}
+                    </React.Fragment>
+                  ))}
                   {isLastAssistant && streamingText.length < streamingFull.length && <span style={{ display:'inline-block', width:2, height:'1em', background:'rgba(73,202,166,0.7)', marginLeft:2, verticalAlign:'text-bottom', borderRadius:1 }} />}
                 </div>
               </div>
