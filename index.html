@@ -1423,7 +1423,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       const parts = text.split(/\*\*(.+?)\*\*/g);
       return parts.map((part, i) =>
         i % 2 === 1
-          ? <strong key={i} style={{ fontWeight:700, fontStyle:'italic', color:'#49caa6fa' }}>{part}</strong>
+          ? <strong key={i} style={{ fontWeight:700, fontStyle:'italic', color:'#49caa6fa', margin:'0 0.12em' }}>{part}</strong>
           : part
       );
     };
