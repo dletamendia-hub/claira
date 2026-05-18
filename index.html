@@ -726,7 +726,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     return (
       <div style={{ height:56, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 20px', flexShrink:0, position:'relative', zIndex:10 }}>
         {onBack ? (
-          <button onClick={onBack} style={{ width:32, height:32, borderRadius:8, background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.72)', transition:'opacity 0.2s' }}
+          <button onClick={onBack} style={{ width:36, height:36, borderRadius:8, background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.72)', transition:'opacity 0.2s', flexShrink:0 }}
             onMouseEnter={e=>e.currentTarget.style.opacity='0.82'}
             onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
             {navIcon === 'close' ? (
@@ -738,12 +738,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             )}
           </button>
         ) : (
-          <div style={{ width:36 }}></div>
+          <div style={{ width:36, flexShrink:0 }}></div>
         )}
-        <div style={{ textAlign:'center', flex:1, overflow:'hidden' }}>
+        <div style={{ position:'absolute', left:0, right:0, top:0, bottom:0, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
           {title
             ? <span style={{ fontFamily:'Questrial, sans-serif', fontSize:16, color:'rgba(255,255,255,0.92)', letterSpacing:'0.01em', fontWeight:400 }}>{title}</span>
-            : <img src="assets/logo.svg" alt="Claira" style={{ height:28, width:'auto', display:'inline-block', verticalAlign:'middle' }} />
+            : <img src="assets/logo.svg" alt="Claira" style={{ height:28, width:'auto', display:'inline-block' }} />
           }
         </div>
         {rightAction ? rightAction : (
