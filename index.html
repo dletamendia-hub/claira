@@ -1469,11 +1469,24 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const orderedTherapies = insight
       ? [...THERAPIES].sort((a, b) => (b.id === insight.therapy) - (a.id === insight.therapy))
       : THERAPIES;
+    const detailScrollRef = useRef(null);
+    const listScrollRef = useRef(null);
+    const savedListScrollRef = useRef(0);
+    // Ref callback : dès que le div liste est monté dans le DOM, on restaure le scroll
+    const listScrollCallback = React.useCallback((node) => {
+      listScrollRef.current = node;
+      if (node) node.scrollTop = savedListScrollRef.current;
+    }, []);
     const handleBack = () => {
-      if (selectedId) setSelectedId(null);
-      else onBack && onBack();
+      if (selectedId) {
+        if (listScrollRef.current) savedListScrollRef.current = listScrollRef.current.scrollTop;
+        setSelectedId(null);
+      } else onBack && onBack();
     };
     useEffect(() => { onDetailStateChange && onDetailStateChange(!!selectedId); }, [selectedId, onDetailStateChange]);
+    useEffect(() => {
+      if (selectedId && detailScrollRef.current) detailScrollRef.current.scrollTop = 0;
+    }, [selectedId]);
 
     const SummaryCard = ({ item, recommended, onClick }) => (
       <button
@@ -1521,9 +1534,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     const DetailView = ({ item, recommended }) => (
       <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden', position:'relative' }}>
-        <div style={{ flex:1, overflowY:'auto', padding:'0 24px 124px', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain' }}>
+        <div ref={detailScrollRef} style={{ flex:1, overflowY:'auto', padding:'0 24px 124px', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain' }}>
           <div style={{ paddingTop:18, paddingBottom:20 }}>
-            <div className="fade-up" style={{ display:'flex', justifyContent:'center', marginBottom:18, minHeight:150 }}>
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:18, minHeight:150, animation:'scaleUp 0.6s cubic-bezier(.22,1,.36,1) both' }}>
               <img
                 src="assets/Détail.png"
                 alt="Illustration de détail"
@@ -1616,8 +1629,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <AppHeader onBack={selectedId ? handleBack : undefined} title={selectedId ? 'Détail' : 'Thérapies'} />
         {!selectedId ? (
           <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden' }}>
-            <div style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'12px 24px 132px', display:'flex', flexDirection:'column', gap:10 }}>
-              <div className="fade-up" style={{ display:'flex', justifyContent:'center', alignItems:'flex-end', paddingBottom:4, minHeight:148 }}>
+            <div ref={listScrollCallback} style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'12px 24px 132px', display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ display:'flex', justifyContent:'center', alignItems:'flex-end', paddingBottom:4, minHeight:148, animation:'scaleUp 0.6s cubic-bezier(.22,1,.36,1) both' }}>
                 <img
                   src="assets/therapies-hero.png"
                   alt=""
@@ -1661,7 +1674,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               </div>
               {orderedTherapies.map((item, i) => (
                 <React.Fragment key={item.id}>
-                  {SummaryCard({ item, recommended: insight ? item.id === insight.therapy : false, onClick: () => setSelectedId(item.id) })}
+                  {SummaryCard({ item, recommended: insight ? item.id === insight.therapy : false, onClick: () => { if (listScrollRef.current) savedListScrollRef.current = listScrollRef.current.scrollTop; setSelectedId(item.id); } })}
                 </React.Fragment>
               ))}
             </div>
