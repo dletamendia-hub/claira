@@ -188,9 +188,19 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   if (!key) return fallback;
 
   const labels = { emotion:'Émotion', duration:'Durée', impact:'Impact quotidien', goal:'Objectif', constraint:'Contraintes', style:'Style de thérapeute' };
-  const answersText = Object.entries(answers).map(([k, v]) => `- ${labels[k] || k} : ${v}`).join('\n');
 
-  const prompt = `Tu es Claira, une application d'aide à la compréhension et d'orientation thérapeutique. Un utilisateur vient de répondre à un questionnaire. Certaines réponses peuvent être saisies à la première personne (via dictée vocale) — traite-les comme l'expression directe du vécu de l'utilisateur et reformule toujours en "vous" dans ta réponse. Voici ses réponses :\n${answersText}\n\nGénère un résumé descriptif, sobre et utile en JSON avec exactement ces 4 champs :\n- "label" : titre court (5-8 mots max), descriptif, sans promesse de soutien, sans formulation à la première personne\n- "summary" : 2-3 phrases qui décrivent ce que la personne vit, en utilisant "vous". Ton clair et analytique, pas consolateur. Entoure 2-3 mots ou expressions clés de **double astérisques** (ex: "vous vous sentez **épuisé·e** depuis **plusieurs mois**")\n- "text" : 2-3 phrases sur ce que cela peut évoquer psychologiquement, nuancé et non diagnostique\n- "process" : 2-3 phrases sur comment la thérapie peut aider à comprendre, clarifier ou travailler ces mécanismes, de façon concrète\n\nContraintes strictes : n'écris jamais à la première personne dans ta réponse ("je", "nous", "Claira"). Évite les formules de soutien personnifié comme "je vous soutiens", "je suis là", "je comprends", "vous n'êtes pas seul". Ne donne pas l'impression que l'application parle comme une personne aidante : elle produit un point de compréhension.\n\nRéponds UNIQUEMENT avec le JSON valide, rien d'autre.`;
+  // Identifie si une réponse est un chip prédéfini ou une saisie libre
+  const predefined = window.Claira.QUESTIONS.reduce((acc, q) => {
+    acc[q.id] = q.options.map(o => o.l);
+    return acc;
+  }, {});
+  const answersText = Object.entries(answers).map(([k, v]) => {
+    const isChip = predefined[k] && predefined[k].includes(v);
+    const tag = isChip ? '[étiquette]' : '[saisie libre]';
+    return `- ${labels[k] || k} (${tag}) : ${v}`;
+  }).join('\n');
+
+  const prompt = `Tu es un outil d'analyse psychologique sobre. Un utilisateur a répondu à un questionnaire de bien-être. Voici ses réponses :\n${answersText}\n\nLes réponses marquées [étiquette] sont des choix prédéfinis à reformuler naturellement en phrases. Les réponses [saisie libre] sont du texte ou de la dictée vocale, parfois à la première personne — reformule toujours en "vous".\n\nRéponds UNIQUEMENT avec ce JSON valide (aucun texte autour) :\n{"label":"...","summary":"...","text":"...","process":"..."}\n\nRègles :\n- label : titre 5-8 mots, factuel, sans promesse ni "vous"\n- summary : 2-3 phrases fluides décrivant ce que la personne vit, en "vous", ton analytique et sobre. OBLIGATOIRE : entoure 2-3 expressions clés avec **double astérisques**. Ne copie jamais les étiquettes mot pour mot — reformule-les.\n- text : 2-3 phrases sur les mécanismes psychologiques en jeu, nuancé et non diagnostique\n- process : 2-3 phrases concrètes sur comment la thérapie peut aider\n\nInterdit : "je", "nous", "Claira", "vous n'êtes pas seul·e", "je suis là", "je comprends".`;
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -200,7 +210,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         'Authorization': `Bearer ${key}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 600,
         temperature: 0.7,
