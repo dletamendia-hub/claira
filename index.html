@@ -9,6 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"/>
   <link rel="shortcut icon" href="favicon.ico"/>
   <link rel="manifest" href="site.webmanifest"/>
+  <script src="config.js"></script>
   <style>
     html, body {
       background: #555555 !important;
@@ -175,7 +176,7 @@ window.Claira.getInsight = function getInsight(answers) {
   };
 };
 
-window.Claira.GROQ_API_KEY = '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';
+// GROQ_API_KEY est chargée depuis config.js (non versionné)
 
 window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   const fallback = { ...window.Claira.getInsight(answers), summary: null };
