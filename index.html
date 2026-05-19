@@ -1563,7 +1563,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const SummaryCard = ({ item, recommended, onClick }) => (
       <button
         onClick={onClick}
-        className="fade-up"
         style={{
           width:'100%',
           background: recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.045)',
@@ -1577,7 +1576,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           textAlign:'left',
           fontFamily:'Questrial, sans-serif',
           transition:'all 0.2s',
-          animationDelay:'0.04s'
         }}
         onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'rgba(255,255,255,0.055)'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.60)' : 'rgba(255,255,255,0.10)'; }}
         onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.45)' : 'rgba(255,255,255,0.08)'; }}
@@ -1986,9 +1984,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                   <button
                     key={th.id}
                     onClick={() => onSelect(th)}
-                    className="fade-up"
                     style={{
-                      animationDelay:`${i*0.06}s`,
                       width:'100%',
                       background: recommended ? 'rgba(73,202,166,0.07)' : 'transparent',
                       border: recommended ? '1.5px solid rgba(73,202,166,0.45)' : 'none',
