@@ -983,7 +983,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   }
 
   function DashboardScreen({ answers, bookedAppointment, hasViewedTherapist = false, onStartAssessment, onOpenSummary, onGoTherapies, onGoBooking, onViewAppointment }) {
-    const [heroLoaded, setHeroLoaded] = useState(false);
     const answerCount = Object.keys(answers).length;
     const isComplete = answerCount === QUESTIONS.length;
     const hasProgress = answerCount > 0;
@@ -1046,16 +1045,15 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               alt="Illustration d'accompagnement"
               width="92"
               height="101"
-              onLoad={() => setHeroLoaded(true)}
+              onLoad={e => e.currentTarget.style.opacity = '1'}
               style={{
                 width:92,
                 height:101,
                 display:'block',
                 marginBottom:10,
                 filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.22))',
-                opacity: heroLoaded ? 1 : 0,
-                transform: heroLoaded ? 'scale(1)' : 'scale(0.88)',
-                transition: 'opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1)',
+                opacity:0,
+                transition:'opacity 0.45s ease',
               }}
             />
             <div style={{ fontFamily:'Questrial, sans-serif', fontSize:21, lineHeight:1.12, color:'rgba(255,255,255,0.95)', fontWeight:700, marginBottom:10 }}>
@@ -1124,12 +1122,15 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               <img
                 src="assets/Therapie.png"
                 alt="Illustration des thérapies"
+                onLoad={e => e.currentTarget.style.opacity = '1'}
                 style={{
                   width:94,
                   height:'auto',
                   display:'block',
                   marginBottom:10,
-                  filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.20))'
+                  filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.20))',
+                  opacity:0,
+                  transition:'opacity 0.45s ease',
                 }}
               />
               <div style={{ fontFamily:'Questrial, sans-serif', fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.90)', marginBottom:10 }}>Des thérapies adaptées</div>
@@ -1437,12 +1438,15 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               <img
                 src="assets/Aide.png"
                 alt="Illustration d'aide personnalisée"
+                onLoad={e => e.currentTarget.style.opacity = '1'}
                 style={{
                   width:138,
                   height:'auto',
                   display:'block',
                   filter:'drop-shadow(0 16px 30px rgba(0,0,0,0.22))',
                   transform:'translateY(-2px)',
+                  opacity:0,
+                  transition:'opacity 0.45s ease',
                 }}
               />
             </div>
@@ -1604,10 +1608,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden', position:'relative' }}>
         <div ref={detailScrollRef} style={{ flex:1, overflowY:'auto', padding:'0 24px 124px', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain' }}>
           <div style={{ paddingTop:18, paddingBottom:20 }}>
-            <div style={{ display:'flex', justifyContent:'center', marginBottom:18, minHeight:150, animation:'scaleUp 0.6s cubic-bezier(.22,1,.36,1) both' }}>
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:18, minHeight:150 }}>
               <img
                 src="assets/Détail.png"
                 alt="Illustration de détail"
+                onLoad={e => e.currentTarget.style.opacity = '1'}
                 style={{
                   width:150,
                   height:150,
@@ -1615,6 +1620,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                   objectFit:'contain',
                   filter:'drop-shadow(0 18px 30px rgba(0,0,0,0.24))',
                   transform:'translateY(-2px)',
+                  opacity:0,
+                  transition:'opacity 0.45s ease',
                 }}
               />
             </div>
@@ -1698,13 +1705,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         {!selectedId ? (
           <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'hidden' }}>
             <div ref={listScrollCallback} style={{ flex:1, minHeight:0, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'12px 24px 132px', display:'flex', flexDirection:'column', gap:18 }}>
-              <div style={{ display:'flex', justifyContent:'center', alignItems:'flex-end', paddingBottom:4, minHeight:148, animation:'scaleUp 0.6s cubic-bezier(.22,1,.36,1) both' }}>
+              <div style={{ display:'flex', justifyContent:'center', alignItems:'flex-end', paddingBottom:4, minHeight:148 }}>
                 <img
                   src="assets/therapies-hero.png"
                   alt=""
                   width="148"
                   height="148"
-                  style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 18px 36px rgba(73,160,220,0.28))' }}
+                  onLoad={e => e.currentTarget.style.opacity = '1'}
+                  style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 18px 36px rgba(73,160,220,0.28))', opacity:0, transition:'opacity 0.45s ease' }}
                 />
               </div>
               <div style={{ paddingBottom:6 }}>
@@ -2051,7 +2059,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [heroLoaded, setHeroLoaded] = useState(false);
     const scrollRef = useRef(null);
 
     useEffect(() => {
@@ -2108,7 +2115,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY: messages.length === 0 ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', justifyContent: messages.length === 0 ? 'center' : 'flex-start', alignItems: messages.length === 0 ? 'center' : 'stretch', gap:10 }}>
 
           {messages.length === 0 && (
-            <img src="assets/questions-hero.png" alt="" width="148" height="148" onLoad={() => setHeroLoaded(true)} style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))', pointerEvents:'none', opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? 'scale(1)' : 'scale(0.88)', transition:'opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1)' }} />
+            <img src="assets/questions-hero.png" alt="" width="148" height="148" onLoad={e => e.currentTarget.style.opacity = '1'} style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))', pointerEvents:'none', opacity:0, transition:'opacity 0.45s ease' }} />
           )}
 
           {messages.map((m, i) => (
@@ -2511,7 +2518,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <div style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:`0 24px ${(bottomInset||0)+94}px` }}>
           {shown.length === 0 ? (
             <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:52, textAlign:'center' }}>
-              <img src="src/calendrier.png" alt="" style={{ width:130, height:130, objectFit:'contain', marginBottom:18, filter:'drop-shadow(0 8px 24px rgba(80,120,255,0.18))' }} />
+              <img src="src/calendrier.png" alt="" onLoad={e => e.currentTarget.style.opacity = '1'} style={{ width:130, height:130, objectFit:'contain', marginBottom:18, filter:'drop-shadow(0 8px 24px rgba(80,120,255,0.18))', opacity:0, transition:'opacity 0.45s ease' }} />
               <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.62)', marginBottom:10, letterSpacing:'-0.01em' }}>
                 {tab === 'upcoming' ? 'Aucun rendez-vous prévu' : 'Aucun rendez-vous passé'}
               </p>
