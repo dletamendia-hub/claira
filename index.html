@@ -2493,21 +2493,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         action:"Voir l'adresse",
       },
     };
-    const EmptyState = function() {
-      return (
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:52, textAlign:'center', animation:'fadeUp 0.5s cubic-bezier(.22,1,.36,1) both' }}>
-          <img src="src/calendrier.png" alt="" style={{ width:130, height:130, objectFit:'contain', marginBottom:18, filter:'drop-shadow(0 8px 24px rgba(80,120,255,0.18))' }} />
-          <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.62)', marginBottom:10, letterSpacing:'-0.01em' }}>
-            {tab === 'upcoming' ? 'Aucun rendez-vous prévu' : 'Aucun rendez-vous passé'}
-          </p>
-          <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.35)', lineHeight:1.65, maxWidth:230 }}>
-            {tab === 'upcoming'
-              ? 'Prenez votre premier rendez-vous avec un thérapeute qui vous correspond.'
-              : 'Vos séances terminées apparaîtront ici.'}
-          </p>
-        </div>
-      );
-    };
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, overflowY:'hidden' }}>
         <AppHeader title="Vos rendez-vous" />
@@ -2524,7 +2509,19 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
         </div>
         <div style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:`0 24px ${(bottomInset||0)+94}px` }}>
-          {shown.length === 0 ? <EmptyState /> : (
+          {shown.length === 0 ? (
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:52, textAlign:'center' }}>
+              <img src="src/calendrier.png" alt="" style={{ width:130, height:130, objectFit:'contain', marginBottom:18, filter:'drop-shadow(0 8px 24px rgba(80,120,255,0.18))' }} />
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.62)', marginBottom:10, letterSpacing:'-0.01em' }}>
+                {tab === 'upcoming' ? 'Aucun rendez-vous prévu' : 'Aucun rendez-vous passé'}
+              </p>
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.35)', lineHeight:1.65, maxWidth:230 }}>
+                {tab === 'upcoming'
+                  ? 'Prenez votre premier rendez-vous avec un thérapeute qui vous correspond.'
+                  : 'Vos séances terminées apparaîtront ici.'}
+              </p>
+            </div>
+          ) : (
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
               {shown.map(function(appt){
                 const cfg = typeConfig[appt.type] || typeConfig.video;
