@@ -2321,15 +2321,32 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   }
 
   function BookingScreen({ therapist:th, onBack, onRestart, onConfirmBooking }) {
-    const schedule = [
-      { id:'2026-04-28', label:'Lun 28 avr', weekday:'Lun', day:'28', month:'avr', times:['10h00', '14h30', '17h30'] },
-      { id:'2026-04-29', label:'Mar 29 avr', weekday:'Mar', day:'29', month:'avr', times:['9h00', '11h30', '16h00'] },
-      { id:'2026-04-30', label:'Mer 30 avr', weekday:'Mer', day:'30', month:'avr', times:['11h30', '15h00'] },
-      { id:'2026-05-02', label:'Ven 2 mai', weekday:'Ven', day:'2', month:'mai', times:['13h30', '18h00'] },
-      { id:'2026-05-05', label:'Lun 5 mai', weekday:'Lun', day:'5', month:'mai', times:['9h30', '12h00', '16h30'] },
-      { id:'2026-05-06', label:'Mar 6 mai', weekday:'Mar', day:'6', month:'mai', times:['10h30', '15h30'] },
-      { id:'2026-05-07', label:'Mer 7 mai', weekday:'Mer', day:'7', month:'mai', times:['11h00', '14h00', '18h00'] },
-    ];
+    const schedule = (() => {
+      const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+      const months = ['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
+      const timeSlots = [
+        ['10h00','14h30','17h30'],['9h00','11h30','16h00'],['11h30','15h00'],
+        ['13h30','18h00'],['9h30','12h00','16h30'],['10h30','15h30'],['11h00','14h00','18h00'],
+      ];
+      const result = [];
+      const now = new Date();
+      // Commence demain (les créneaux d'aujourd'hui sont passés)
+      let d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      let slotIdx = 0;
+      while (result.length < 7) {
+        const dow = d.getDay();
+        if (dow !== 0 && dow !== 6) { // Skip week-ends
+          const id = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          const weekday = days[dow];
+          const day = String(d.getDate());
+          const month = months[d.getMonth()];
+          result.push({ id, label:`${weekday} ${day} ${month}`, weekday, day, month, times: timeSlots[slotIdx % timeSlots.length] });
+          slotIdx++;
+        }
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+      }
+      return result;
+    })();
     const [selectedDay, setSelectedDay] = useState(schedule[0].id);
     const [selectedTime, setSelectedTime] = useState(null);
     const [done, setDone] = useState(false);
