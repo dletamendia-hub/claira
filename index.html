@@ -1309,7 +1309,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
   function InsightScreen({ answers, insight, onContinue, onRestart, onBack }) {
     const [extraNote, setExtraNote] = useState('');
+    const [extraChips, setExtraChips] = useState([]);
     const [showExtraNote, setShowExtraNote] = useState(false);
+    const EXTRA_CHIPS = ['Insomnies','Manque d\'appétit','Agitation','Concentration difficile','Auto-dévaluation','Peurs intenses','Pensées suicidaires','Médicaments en cours'];
+    const toggleChip = (c) => setExtraChips(prev => prev.includes(c) ? prev.filter(x=>x!==c) : [...prev, c]);
     const [showApiKeyModal, setShowApiKeyModal] = useState(false);
     const renderSummary = () => {
       const mark = (key, text) => (
@@ -1492,26 +1495,37 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 Ajouter quelque chose
               </button>
             ) : (
-              <textarea
-                className="detail-field"
-                value={extraNote}
-                onChange={e=>setExtraNote(e.target.value)}
-                placeholder={"Si vous le souhaitez, ajoutez ce que vous ressentez, du contexte, un événement particulier..."}
-                rows={4}
-                style={{
-                  width:'100%',
-                  resize:'none',
-                  borderRadius:22,
-                  border:'1px solid rgba(255,255,255,0.09)',
-                  background:'rgba(255,255,255,0.06)',
-                  color:'rgba(255,255,255,0.92)',
-                  fontFamily:'Questrial, sans-serif',
-                  fontSize:17,
-                  lineHeight:1.75,
-                  padding:'18px 18px',
-                  outline:'none',
-                }}
-              />
+              <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                  {EXTRA_CHIPS.map(c => {
+                    const sel = extraChips.includes(c);
+                    const isSensitive = c === 'Pensées suicidaires';
+                    return (
+                      <button key={c} onClick={()=>toggleChip(c)} style={{
+                        padding:'8px 14px',
+                        borderRadius:100,
+                        border:`1.5px solid ${sel ? (isSensitive ? 'rgba(255,120,120,0.45)' : 'rgba(73,202,166,0.50)') : 'rgba(255,255,255,0.12)'}`,
+                        background: sel ? (isSensitive ? 'rgba(255,100,100,0.12)' : 'rgba(73,202,166,0.12)') : 'rgba(255,255,255,0.05)',
+                        color: sel ? (isSensitive ? 'rgba(255,160,160,0.95)' : 'rgba(120,230,200,0.95)') : 'rgba(255,255,255,0.68)',
+                        fontFamily:'Questrial, sans-serif',
+                        fontSize:14,
+                        fontWeight: sel ? 700 : 500,
+                        cursor:'pointer',
+                        transition:'all 0.18s',
+                        letterSpacing:'0.01em',
+                      }}>{c}</button>
+                    );
+                  })}
+                </div>
+                <textarea
+                  className="detail-field"
+                  value={extraNote}
+                  onChange={e=>setExtraNote(e.target.value)}
+                  placeholder="Contexte, événement particulier, traitement en cours..."
+                  rows={3}
+                  style={{ width:'100%', resize:'none', borderRadius:18, border:'1px solid rgba(255,255,255,0.09)', background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.7, padding:'14px 16px', outline:'none' }}
+                />
+              </div>
             )}
           </div>
 
