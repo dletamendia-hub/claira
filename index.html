@@ -2117,7 +2117,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           {messages.map((m, i) => (
             <div key={i} style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start', animation:'msgIn 0.38s cubic-bezier(.22,1,.36,1) both' }}>
               {m.role === 'user' ? (
-                <div style={{ maxWidth:'84%', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,0.92)', borderRadius:'20px 20px 6px 20px', padding:'12px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
+                <div style={{ maxWidth:'84%', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,0.92)', borderRadius:20, padding:'12px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
                   {m.content.split('\n').map((line, li) => (
                     <React.Fragment key={li}>{line}{li < m.content.split('\n').length - 1 && <br/>}</React.Fragment>
                   ))}
