@@ -2108,7 +2108,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </button>
           ) : <div style={{ width:36 }} />
         } />
-        <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY: messages.length === 0 ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', justifyContent: messages.length === 0 ? 'center' : 'flex-start', alignItems: messages.length === 0 ? 'center' : 'stretch', gap:10 }}>
+        <div ref={scrollRef} style={{ flex:1, minHeight:0, overflowY: messages.length === 0 ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:'10px 20px 18px', display:'flex', flexDirection:'column', justifyContent: messages.length === 0 ? 'center' : 'flex-start', alignItems: messages.length === 0 ? 'center' : 'stretch', gap:24 }}>
 
           {messages.length === 0 && (
             <img src="assets/questions-hero.png" alt="" width="148" height="148" ref={el => { if (el && el.complete) el.style.opacity = '1'; }} onLoad={e => e.currentTarget.style.opacity = '1'} style={{ width:148, height:148, objectFit:'contain', filter:'drop-shadow(0 16px 32px rgba(73,202,166,0.20))', pointerEvents:'none', opacity:0, transition:'opacity 0.45s ease' }} />
