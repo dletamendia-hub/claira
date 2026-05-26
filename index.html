@@ -2042,7 +2042,26 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  const CRISIS_KEYWORDS = /passer à l.acte|me suicider|me tuer|me supprimer|en finir|mettre fin à ma vie|mettre fin à mes jours|me faire du mal|me blesser|me jeter|mourir|me noyer|me pendre|overdose|je veux mourir|envie de mourir|plus envie de vivre|plus la peine de vivre|plus envie d.être là|trop souffrir/i;
+  async function detectCrisis(text) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${window.__GROQ_KEY}` },
+        body: JSON.stringify({
+          model:'llama-3.1-8b-instant',
+          messages:[
+            { role:'system', content:'Tu analyses si un message indique une détresse active et immédiate (pensées suicidaires actuelles, intention de se blesser maintenant). Réponds uniquement avec {"crisis":true} ou {"crisis":false}. Une mention au passé, une souffrance générale ou une métaphore ("je veux mourir de honte") ne sont PAS une crise active.' },
+            { role:'user', content:text },
+          ],
+          max_tokens:10,
+          temperature:0,
+        }),
+      });
+      const data = await res.json();
+      const raw = data.choices?.[0]?.message?.content || '';
+      return raw.includes('"crisis":true') || raw.includes('"crisis": true');
+    } catch(e) { return false; }
+  }
 
   function TherapyQuestionsScreen({ onBack, onSOS }) {
     const INITIAL_SUGGESTIONS = [
@@ -2066,10 +2085,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       const q = (text || input).trim();
       if (!q || loading) return;
       setInput('');
-      if (CRISIS_KEYWORDS.test(q)) { onSOS && onSOS(); return; }
+      setLoading(true);
+      const isCrisis = await detectCrisis(q);
+      if (isCrisis) { setLoading(false); onSOS && onSOS(); return; }
       const next = [...messages, { role:'user', content:q }];
       setMessages(next);
-      setLoading(true);
       try {
         const key = window.__GROQ_KEY;
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
