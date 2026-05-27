@@ -2114,6 +2114,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [voiceMode, setVoiceMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef(null);
+    const inputRef = useRef(null);
 
     useEffect(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -2218,8 +2219,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
         <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center' }}>
           {!voiceMode && (
-            <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46 }}>
+            <div onClick={() => inputRef.current && inputRef.current.focus()} style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46, cursor:'text' }}>
               <input
+                ref={inputRef}
                 className="chat-input"
                 value={input}
                 onChange={e => setInput(e.target.value)}
