@@ -2584,7 +2584,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'13px 18px', borderBottom:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.03)' }}>
                       <span style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.92)' }}>{dateStr}</span>
                       {isPast
-                        ? <span style={{ fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, color:'rgba(255,255,255,0.38)', letterSpacing:'0.01em' }}>Terminé</span>
+                        ? <span style={{ fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, color:'rgba(255,255,255,0.62)', letterSpacing:'0.01em' }}>Terminé</span>
                         : <span style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.95)', letterSpacing:'0.01em' }}>{timeStr}</span>
                       }
                     </div>
@@ -2602,7 +2602,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                           <span style={{ color:cfg.color, display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
                           <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, color:cfg.color, fontWeight:600, letterSpacing:'0.02em' }}>{cfg.label}</span>
                           <span style={{ color:'rgba(255,255,255,0.25)', fontSize:12 }}>·</span>
-                          <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, color:'rgba(255,255,255,0.45)' }}>{th2 ? th2.title : ''}</span>
+                          <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, color:'rgba(255,255,255,0.68)' }}>{th2 ? th2.title : ''}</span>
                         </div>
                       </div>
                     </div>
@@ -2613,7 +2613,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                         {cfg.action}
                       </button>
                     ) : (
-                      <button onClick={onGoMatching} style={{ width:'100%', padding:'12px 18px', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7, fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.72)', letterSpacing:'0.01em' }}>
+                      <button onClick={onGoMatching} style={{ width:'100%', padding:'12px 18px', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7, fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.88)', letterSpacing:'0.01em' }}>
                         Prendre un nouveau RDV
                         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                           <path d="M4.5 2.5 9 7l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
