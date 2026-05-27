@@ -2054,7 +2054,27 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
+  // Mots-clés incontestables — déclenchement immédiat sans appel IA
+  const CRISIS_KEYWORDS = [
+    'me tuer','me suicider','mettre fin à ma vie','en finir avec ma vie',
+    'me pendre','me jeter dans le vide','avaler des médicaments pour mourir',
+    'me tirer une balle','mourir ce soir','mourir cette nuit','mourir aujourd\'hui',
+    'go la mort','je veux mourir maintenant','j\'ai envie de mourir maintenant',
+    'je vais mourir ce soir','je vais mourir cette nuit',
+    'je vais me faire du mal','je vais me blesser',
+    'pensées suicidaires','idées suicidaires',
+  ];
+  function hasCrisisKeyword(text) {
+    const t = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return CRISIS_KEYWORDS.some(function(kw){
+      return t.includes(kw.normalize('NFD').replace(/[̀-ͯ]/g, ''));
+    });
+  }
+
   async function detectCrisis(text) {
+    // Filet de sécurité synchrone — cas évidents sans latence réseau
+    if (hasCrisisKeyword(text)) return true;
+    // Analyse IA pour les cas ambigus
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method:'POST',
@@ -2062,7 +2082,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         body: JSON.stringify({
           model:'llama-3.1-8b-instant',
           messages:[
-            { role:'system', content:'Tu analyses si un message exprime une crise réelle et immédiate. Réponds uniquement avec {"crisis":true} ou {"crisis":false}.\n\nDéclenche {"crisis":true} si :\n- Pensées suicidaires actuelles ou intention de se blesser maintenant\n- Violence envers autrui avec une cible précise ET une temporalité concrète (ex: "je vais tuer Bernard ce soir", "je vais m\'en prendre à lui demain")\n\nNe déclenche PAS pour :\n- Expressions de frustration sans cible+temps précis ("je vais le tuer", "je vais tuer ma tante")\n- Métaphores ("je veux mourir de honte", "je suis mort de rire")\n- Mentions au passé ou souffrance générale\n\nLa combinaison cible nommée + moment précis = intention sérieuse.' },
+            { role:'system', content:'Tu analyses si un message exprime une crise réelle et immédiate. Réponds uniquement avec {"crisis":true} ou {"crisis":false}.\n\nDéclenche {"crisis":true} si :\n- Pensées suicidaires actuelles ou intention de se blesser maintenant\n- Violence envers autrui avec une cible précise ET une temporalité concrète (ex: "je vais tuer Bernard ce soir")\n\nNe déclenche PAS pour :\n- Expressions de frustration sans cible+temps précis ("je vais le tuer", "je vais tuer ma tante")\n- Métaphores ("je veux mourir de honte", "je suis mort de rire")\n- Mentions au passé ou souffrance générale\n\nLa combinaison cible nommée + moment précis = intention sérieuse.' },
             { role:'user', content:text },
           ],
           max_tokens:10,
