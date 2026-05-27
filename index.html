@@ -1807,6 +1807,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     const filteredTherapists = [...THERAPISTS].filter(th => {
       if (contextFilters.therapy && !therapyMatches(th, contextFilters.therapy)) return false;
+      if (locationQuery && locationQuery !== 'Autour de moi' && locationQuery !== 'Ma position') {
+        const q = locationQuery.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const haystack = `${th.name} ${th.title} ${th.specialty} ${th.location || ''}`.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        if (!haystack.includes(q)) return false;
+      }
       return true;
     }).sort((a, b) => {
       if (sortBy === 'compatibility') return b.score - a.score;
@@ -1886,7 +1891,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 className="search-input"
                 value={locationQuery}
                 onChange={e=>setLocationQuery(e.target.value)}
-                placeholder="Autour de moi, une adresse, une ville…"
+                placeholder="Un nom, un lieu…"
                 style={{ flex:1, background:'transparent', border:'none', outline:'none', color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', fontSize:15 }}
               />
               <button
