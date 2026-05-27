@@ -2573,33 +2573,46 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 const photo = th2 ? th2.photo : null;
                 const initials = appt.initials || (appt.name ? appt.name.split(' ').map(function(n){ return n[0]; }).join('').slice(0,2) : '?');
                 const hue = appt.hue || (th2 ? th2.hue : '260');
+                const isPast = appt.status === 'past';
+                // split "Mer 20 mai - 14h30" → ["Mer 20 mai", "14h30"]
+                const whenParts = appt.when ? appt.when.split(' - ') : [appt.when, ''];
+                const dateStr = whenParts[0] || '';
+                const timeStr = whenParts[1] || '';
                 return (
-                  <div key={appt.id} className="fade-up" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:22, padding:'18px 18px 4px' }}>
-                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
-                      <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:cfg.bg, border:`1px solid ${cfg.border}`, borderRadius:100, padding:'4px 10px 4px 8px' }}>
-                        <span style={{ color:cfg.color, display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
-                        <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, fontWeight:600, color:cfg.color, letterSpacing:'0.02em' }}>{cfg.label}</span>
-                      </div>
-                      {appt.status === 'past' && <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, color:'rgba(255,255,255,0.30)', fontWeight:500 }}>Terminé</span>}
+                  <div key={appt.id} style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:22, overflow:'hidden', position:'relative', opacity: isPast ? 0.72 : 1 }}>
+                    {/* Coin "Terminé" pour les passés */}
+                    {isPast && (
+                      <div style={{ position:'absolute', top:0, right:0, width:0, height:0, borderStyle:'solid', borderWidth:'0 58px 58px 0', borderColor:`transparent rgba(255,255,255,0.06) transparent transparent`, zIndex:1 }} />
+                    )}
+                    {isPast && (
+                      <div style={{ position:'absolute', top:10, right:4, fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.38)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase', zIndex:2, transform:'rotate(45deg)', transformOrigin:'center' }}>Terminé</div>
+                    )}
+                    {/* Header : date + heure */}
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'13px 18px', borderBottom:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.03)' }}>
+                      <span style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.88)' }}>{dateStr}</span>
+                      <span style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.95)', letterSpacing:'0.01em' }}>{timeStr}</span>
                     </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
+                    {/* Corps : photo + nom + type */}
+                    <div style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 18px', borderBottom: !isPast ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
                       {photo
-                        ? <img src={photo} alt="" style={{ width:44, height:44, borderRadius:14, objectFit:'cover', flexShrink:0 }} />
-                        : <div style={{ width:44, height:44, borderRadius:14, background:`hsla(${hue},55%,42%,0.22)`, border:`1px solid hsla(${hue},55%,55%,0.18)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:`hsl(${hue},60%,70%)` }}>{initials}</div>
+                        ? <img src={photo} alt="" style={{ width:48, height:48, borderRadius:16, objectFit:'cover', flexShrink:0 }} />
+                        : <div style={{ width:48, height:48, borderRadius:16, background:`hsla(${hue},55%,42%,0.22)`, border:`1px solid hsla(${hue},55%,55%,0.18)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:`hsl(${hue},60%,70%)` }}>{initials}</div>
                       }
                       <div style={{ flex:1, minWidth:0 }}>
                         <button onClick={function(){ if(th2 && onViewTherapist) onViewTherapist(th2); }} style={{ background:'none', border:'none', padding:0, cursor: th2 ? 'pointer' : 'default', textAlign:'left', width:'100%' }}>
-                          <div style={{ fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.92)', marginBottom:2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textDecoration: th2 ? 'underline' : 'none', textDecorationColor:'rgba(255,255,255,0.22)', textUnderlineOffset:3 }}>{appt.name}</div>
+                          <div style={{ fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.92)', marginBottom:3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textDecoration: th2 ? 'underline' : 'none', textDecorationColor:'rgba(255,255,255,0.20)', textUnderlineOffset:3 }}>{appt.name}</div>
                         </button>
-                        <div style={{ fontFamily:'Questrial, sans-serif', fontSize:13, color:'rgba(255,255,255,0.45)' }}>{th2 ? th2.title : ''}</div>
+                        <div style={{ display:'inline-flex', alignItems:'center', gap:5 }}>
+                          <span style={{ color:cfg.color, display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
+                          <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, color:cfg.color, fontWeight:600, letterSpacing:'0.02em' }}>{cfg.label}</span>
+                          <span style={{ color:'rgba(255,255,255,0.25)', fontSize:12 }}>·</span>
+                          <span style={{ fontFamily:'Questrial, sans-serif', fontSize:12, color:'rgba(255,255,255,0.45)' }}>{th2 ? th2.title : ''}</span>
+                        </div>
                       </div>
                     </div>
-                    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 12px', background:'rgba(255,255,255,0.04)', borderRadius:12, border:'1px solid rgba(255,255,255,0.07)', marginBottom:14 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="rgba(255,255,255,0.38)" strokeWidth="1.8"/><path d="M3 10h18" stroke="rgba(255,255,255,0.38)" strokeWidth="1.8"/><path d="M8 2v3M16 2v3" stroke="rgba(255,255,255,0.38)" strokeWidth="1.8" strokeLinecap="round"/></svg>
-                      <span style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.75)', fontWeight:600 }}>{appt.when}</span>
-                    </div>
-                    {appt.status === 'upcoming' && (
-                      <button style={{ width:'100%', minHeight:52, padding:'13px 18px', background:'rgba(255,255,255,0.92)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:600, color:'#0b0b14', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginBottom:18, transition:'all 0.2s' }}>
+                    {/* CTA pour les RDV à venir uniquement */}
+                    {!isPast && (
+                      <button style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.92)', border:'none', fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:600, color:'#0b0b14', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:8, transition:'all 0.2s' }}>
                         <span style={{ display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
                         {cfg.action}
                       </button>
