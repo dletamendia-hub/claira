@@ -2062,7 +2062,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         body: JSON.stringify({
           model:'llama-3.1-8b-instant',
           messages:[
-            { role:'system', content:'Tu analyses si un message exprime une crise réelle et immédiate : pensées suicidaires actuelles, intention de se blesser maintenant, ou intention sérieuse de violence envers autrui. Réponds uniquement avec {"crisis":true} ou {"crisis":false}. Ne déclenche PAS pour : expressions de frustration courantes ("je vais le tuer", "je vais tuer ma tante"), métaphores ("je veux mourir de honte"), mentions au passé, ou souffrance générale. Déclenche uniquement si le message traduit une intention concrète et immédiate de nuire à soi ou à autrui.' },
+            { role:'system', content:'Tu analyses si un message exprime une crise réelle et immédiate. Réponds uniquement avec {"crisis":true} ou {"crisis":false}.\n\nDéclenche {"crisis":true} si :\n- Pensées suicidaires actuelles ou intention de se blesser maintenant\n- Violence envers autrui avec une cible précise ET une temporalité concrète (ex: "je vais tuer Bernard ce soir", "je vais m\'en prendre à lui demain")\n\nNe déclenche PAS pour :\n- Expressions de frustration sans cible+temps précis ("je vais le tuer", "je vais tuer ma tante")\n- Métaphores ("je veux mourir de honte", "je suis mort de rire")\n- Mentions au passé ou souffrance générale\n\nLa combinaison cible nommée + moment précis = intention sérieuse.' },
             { role:'user', content:text },
           ],
           max_tokens:10,
