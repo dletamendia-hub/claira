@@ -2589,7 +2589,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                       }
                     </div>
                     {/* Corps : photo + nom + type */}
-                    <div style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 18px', borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:14, padding:'16px 18px' }}>
                       {photo
                         ? <img src={photo} alt="" style={{ width:48, height:48, borderRadius:16, objectFit:'cover', flexShrink:0 }} />
                         : <div style={{ width:48, height:48, borderRadius:16, background:`hsla(${hue},55%,42%,0.22)`, border:`1px solid hsla(${hue},55%,55%,0.18)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:`hsl(${hue},60%,70%)` }}>{initials}</div>
@@ -2615,12 +2615,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                         </button>
                       </div>
                     ) : (
-                      <button onClick={function(){ if(th2 && onBookTherapist) onBookTherapist(th2); else onGoMatching && onGoMatching(); }} style={{ width:'100%', padding:'12px 18px', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7, fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.88)', letterSpacing:'0.01em' }}>
-                        Prendre un nouveau RDV
-                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                          <path d="M4.5 2.5 9 7l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
+                      <div style={{ padding:'0 16px 14px' }}>
+                        <button onClick={function(){ if(th2 && onBookTherapist) onBookTherapist(th2); else onGoMatching && onGoMatching(); }} style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.10)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.92)', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:9, transition:'all 0.18s', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.16)'; }} onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.10)'; }}>
+                          Prendre un nouveau RDV
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
