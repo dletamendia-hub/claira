@@ -1773,7 +1773,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
   function MatchingScreen({ insight, onSelect, onBack, titleOverride, bottomInset = 0 }) {
     const therapyLabel = insight ? (THERAPIES.find(t => t.id === insight.therapy)?.short || '') : '';
     const compactBookingView = titleOverride === 'Prendre un RDV';
-    const [locationQuery, setLocationQuery] = useState('Autour de moi');
+    const [locationQuery, setLocationQuery] = useState('');
     const [contextFilters, setContextFilters] = useState(() => ({
       therapy: insight?.therapy || null,
     }));
@@ -1807,7 +1807,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     const filteredTherapists = [...THERAPISTS].filter(th => {
       if (contextFilters.therapy && !therapyMatches(th, contextFilters.therapy)) return false;
-      if (locationQuery && locationQuery !== 'Autour de moi' && locationQuery !== 'Ma position') {
+      if (locationQuery && locationQuery !== 'Ma position') {
         const q = locationQuery.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
         const haystack = `${th.name} ${th.title} ${th.specialty} ${th.location || ''}`.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
         if (!haystack.includes(q)) return false;
