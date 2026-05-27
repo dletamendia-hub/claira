@@ -2606,12 +2606,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                         </div>
                       </div>
                     </div>
-                    {/* Footer : CTA principal (upcoming) ou lien "Reprendre RDV" (past) */}
+                    {/* Footer : CTA secondaire (upcoming) ou lien "Reprendre RDV" (past) */}
                     {!isPast ? (
-                      <button style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.92)', border:'none', fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:600, color:'#0b0b14', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:8, transition:'all 0.2s' }}>
-                        <span style={{ display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
-                        {cfg.action}
-                      </button>
+                      <div style={{ padding:'12px 16px 14px' }}>
+                        <button style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.10)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.92)', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:9, transition:'all 0.18s', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.16)'; }} onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.10)'; }}>
+                          <span style={{ display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
+                          {cfg.action}
+                        </button>
+                      </div>
                     ) : (
                       <button onClick={function(){ if(th2 && onBookTherapist) onBookTherapist(th2); else onGoMatching && onGoMatching(); }} style={{ width:'100%', padding:'12px 18px', background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7, fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.88)', letterSpacing:'0.01em' }}>
                         Prendre un nouveau RDV
