@@ -1295,10 +1295,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           )}
           {voiceMode && (
             <div style={{ position:'absolute', bottom:14, left:24, right:24, maxHeight:'33vh', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
-              <div style={{ position:'absolute', top:0, left:0, right:0, height:48, background:'linear-gradient(to bottom, rgba(11,11,20,0.0), rgba(11,11,20,0.0))', pointerEvents:'none', zIndex:1 }} />
-              <div style={{ position:'absolute', top:0, left:0, right:0, height:56, background:'linear-gradient(to bottom, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0) 100%)', pointerEvents:'none', zIndex:2 }} />
-              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:20, fontStyle:'italic', color: voiceTranscript ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.28)', lineHeight:1.55, margin:0, transition:'color 0.2s' }}>
-                {voiceTranscript || 'Je vous écoute…'}
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontStyle:'italic', color: voiceTranscript ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.32)', lineHeight:1.55, margin:0, transition:'color 0.2s' }}>
+                {voiceTranscript || 'Je vous écoute'}
               </p>
             </div>
           )}
