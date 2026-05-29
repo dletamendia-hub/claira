@@ -1233,8 +1233,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
     const [voiceTranscript, setVoiceTranscript] = useState('');
+    const [chipsHidden, setChipsHidden] = useState(false);
     const chatInputRef = useRef(null);
-    useEffect(() => { setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal(''); }, [step]);
+    useEffect(() => { setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal(''); setVoiceTranscript(''); setChipsHidden(false); }, [step]);
+    useEffect(() => { if (voiceTranscript) setChipsHidden(true); }, [voiceTranscript]);
     useEffect(() => {
       if (phase !== 'writing') return;
       if (wordIdx >= totalWords) { const t = setTimeout(() => setPhase('rising'), 140); return () => clearTimeout(t); }
@@ -1280,8 +1282,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           <div key={step} style={{ position:'absolute', left:28, right:28, top:questionUp ? '12%' : '42%', transform:`translateY(${questionUp ? questionShift : '-50%'})`, opacity:questionOpacity, transition: phase === 'writing' ? 'none' : 'top 0.62s cubic-bezier(.22,1,.36,1), transform 0.48s ease, opacity 0.38s ease' }}>
             <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:34, color:'rgba(255,255,255,0.95)', fontWeight:400, lineHeight:1.22, letterSpacing:'-0.2px' }}>{renderedText}</h2>
           </div>
-          {(phase === 'options' || phase === 'chosen') && !voiceTranscript && (
-            <div style={{ position:'absolute', bottom:14, left:24, right:24 }}>
+          {(phase === 'options' || phase === 'chosen') && (
+            <div style={{ position:'absolute', bottom:14, left:24, right:24, opacity: chipsHidden ? 0 : 1, transition:'opacity 0.35s ease', pointerEvents: chipsHidden ? 'none' : 'auto' }}>
               <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
                 {q.options.map((opt, i) => {
                   const isSel = chosen === opt.l;
