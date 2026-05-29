@@ -403,7 +403,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
   const BAR_COUNT = 44;
 
-  function MicButton({ onResult, listening, setListening, voiceMode, setVoiceMode, autoStart = false, stayActiveAfterResult = true }) {
+  function MicButton({ onResult, onTranscriptChange, listening, setListening, voiceMode, setVoiceMode, autoStart = false, stayActiveAfterResult = true }) {
     const recRef        = useRef(null);
     const audioStreamRef = useRef(null);
     const audioContextRef = useRef(null);
@@ -479,6 +479,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       clearTimeout(restartTimerRef.current);
       restartTimerRef.current = null;
     };
+    const clearTranscript = () => { transcriptRef.current = ''; onTranscriptChange && onTranscriptChange(''); };
 
     const clearSubmitTimer = () => {
       if (!submitTimerRef.current) return;
@@ -504,7 +505,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       recRef.current?.stop();
       setListening(false);
       listeningRef.current = false;
-      transcriptRef.current = '';
+      clearTranscript();
       if (!stayActiveAfterResult) {
         voiceModeRef.current = false;
         setVoiceMode?.(false);
@@ -576,7 +577,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       if (!hasPermission) return;
       voiceModeRef.current = true;
       setVoiceMode?.(true);
-      transcriptRef.current = '';
+      clearTranscript();
       cancelledRef.current = false;
       submittingRef.current = false;
       clearSubmitTimer();
@@ -590,6 +591,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       rec.onspeechend   = () => { speakingRef.current = false; };
       rec.onresult = e => {
         transcriptRef.current = Array.from(e.results).map(r => r[0].transcript).join(' ');
+        onTranscriptChange && onTranscriptChange(transcriptRef.current);
         const hasFinalResult = Array.from(e.results).some(r => r.isFinal);
         if (hasFinalResult && !submittingRef.current && !cancelledRef.current) scheduleSubmit();
       };
@@ -632,7 +634,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       recRef.current?.stop();
       setListening(false);
       listeningRef.current = false;
-      transcriptRef.current = '';
+      clearTranscript();
     };
 
     const confirm = () => {
@@ -643,7 +645,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       recRef.current?.stop();
       setListening(false);
       listeningRef.current = false;
-      transcriptRef.current = '';
+      clearTranscript();
       if (!stayActiveAfterResult) {
         voiceModeRef.current = false;
         setVoiceMode?.(false);
@@ -1230,6 +1232,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [inputVal, setInputVal] = useState('');
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
+    const [voiceTranscript, setVoiceTranscript] = useState('');
     const chatInputRef = useRef(null);
     useEffect(() => { setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal(''); }, [step]);
     useEffect(() => {
@@ -1277,7 +1280,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           <div key={step} style={{ position:'absolute', left:28, right:28, top:questionUp ? '12%' : '42%', transform:`translateY(${questionUp ? questionShift : '-50%'})`, opacity:questionOpacity, transition: phase === 'writing' ? 'none' : 'top 0.62s cubic-bezier(.22,1,.36,1), transform 0.48s ease, opacity 0.38s ease' }}>
             <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:34, color:'rgba(255,255,255,0.95)', fontWeight:400, lineHeight:1.22, letterSpacing:'-0.2px' }}>{renderedText}</h2>
           </div>
-          {(phase === 'options' || phase === 'chosen') && (
+          {(phase === 'options' || phase === 'chosen') && !voiceMode && (
             <div style={{ position:'absolute', bottom:14, left:24, right:24 }}>
               <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
                 {q.options.map((opt, i) => {
@@ -1288,6 +1291,15 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                   );
                 })}
               </div>
+            </div>
+          )}
+          {voiceMode && (
+            <div style={{ position:'absolute', bottom:14, left:24, right:24, maxHeight:'33vh', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+              <div style={{ position:'absolute', top:0, left:0, right:0, height:48, background:'linear-gradient(to bottom, rgba(11,11,20,0.0), rgba(11,11,20,0.0))', pointerEvents:'none', zIndex:1 }} />
+              <div style={{ position:'absolute', top:0, left:0, right:0, height:56, background:'linear-gradient(to bottom, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0) 100%)', pointerEvents:'none', zIndex:2 }} />
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:20, fontStyle:'italic', color: voiceTranscript ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.28)', lineHeight:1.55, margin:0, transition:'color 0.2s' }}>
+                {voiceTranscript || 'Je vous écoute…'}
+              </p>
             </div>
           )}
         </div>
@@ -1302,7 +1314,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               )}
             </div>
           )}
-          <MicButton onResult={handleText} listening={listening} setListening={setListening} voiceMode={voiceMode} setVoiceMode={setVoiceMode} autoStart={phase === 'options'}/>
+          <MicButton onResult={handleText} onTranscriptChange={setVoiceTranscript} listening={listening} setListening={setListening} voiceMode={voiceMode} setVoiceMode={setVoiceMode} autoStart={phase === 'options'}/>
         </div>
       </div>
     );
