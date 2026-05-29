@@ -690,22 +690,26 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     }, []);
 
     const activeVoice = voiceMode && autoStart;
+    const wasIdleRef = useRef(false);
 
-    if (voiceMode && !autoStart) return (
-      <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 6px 0 14px', height:46 }}>
-        <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'flex-start', gap:'2.5px', overflow:'hidden', height:28 }}>
-          {Array.from({ length: BAR_COUNT }).map((_, i) => (
-            <div key={i} style={{ width:3, height:3, borderRadius:'50%', flexShrink:0, background:'rgba(255,255,255,0.35)' }} />
-          ))}
+    if (voiceMode && !autoStart) {
+      wasIdleRef.current = true;
+      return (
+        <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 14px', height:46 }}>
+          <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'flex-start', gap:'2.5px', overflow:'hidden', height:28 }}>
+            {Array.from({ length: BAR_COUNT }).map((_, i) => (
+              <div key={i} style={{ width:3, height:3, borderRadius:'50%', flexShrink:0, background:'rgba(255,255,255,0.35)' }} />
+            ))}
+          </div>
         </div>
-        <div style={{ width:32, height:32, flexShrink:0 }} />
-        <div style={{ width:34, height:34, flexShrink:0 }} />
-      </div>
-    );
+      );
+    }
 
     if (activeVoice) {
+      const skipAnim = wasIdleRef.current;
+      wasIdleRef.current = false;
       return (
-        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 6px 0 14px', height:46, transformOrigin:'right center', animation:'voiceExpand 0.28s cubic-bezier(.22,1,.36,1) both' }}>
+        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 6px 0 14px', height:46, transformOrigin:'right center', animation: skipAnim ? 'none' : 'voiceExpand 0.28s cubic-bezier(.22,1,.36,1) both' }}>
           <div style={{ flex:1, display:'flex', alignItems:'flex-end', justifyContent:'flex-start', gap:'2.5px', overflow:'hidden', height:28, paddingBottom:0 }}>
             {amps.map((amp, i) => {
               const h = amp < 0.03 ? 3 : Math.max(4, amp * 24);
