@@ -416,6 +416,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const listeningRef  = useRef(listening);
     const voiceModeRef  = useRef(voiceMode);
     const autoStartRef  = useRef(autoStart);
+    const prevVoiceModeRef = useRef(voiceMode);
     const restartTimerRef = useRef(null);
     const submitTimerRef = useRef(null);
     const rafRef        = useRef(null);
@@ -661,6 +662,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
     useEffect(() => {
       voiceModeRef.current = voiceMode;
+      prevVoiceModeRef.current = voiceMode;
       if (voiceMode && autoStart) startAnim();
       if (!voiceMode) {
         clearRestartTimer();
@@ -690,34 +692,34 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     }, []);
 
     const activeVoice = voiceMode && autoStart;
+    const justActivated = voiceMode && !prevVoiceModeRef.current;
 
     if (activeVoice || (voiceMode && !autoStart)) {
       const isIdle = voiceMode && !autoStart;
       return (
-        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 6px 0 14px', height:46 }}>
+        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 6px 0 14px', height:46, transformOrigin:'right center', animation: justActivated ? 'voiceExpand 0.28s cubic-bezier(.22,1,.36,1) both' : 'none' }}>
           <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'space-between', overflow:'hidden', height:28 }}>
             {amps.map((amp, i) => {
               const h = isIdle ? 3 : (amp < 0.03 ? 3 : Math.max(4, amp * 24));
-              const isDot = isIdle || amp < 0.03;
               return (
                 <div key={i} style={{
                   width: 3, height: h,
-                  borderRadius: isDot ? '50%' : 2,
+                  borderRadius: 2,
                   flexShrink: 0,
-                  background: isIdle ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.7)',
-                  transition: 'height 0.08s ease',
+                  background: isIdle ? 'rgba(255,255,255,0.30)' : 'rgba(255,255,255,0.7)',
+                  transition: 'height 0.08s ease, background 0.2s ease',
                   alignSelf: 'center',
                 }}/>
               );
             })}
           </div>
           {!isIdle && (
-            <button onClick={cancel} style={{ width:32, height:32, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.15)', background:'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'rgba(255,255,255,0.7)' }}>
+            <button onClick={cancel} style={{ width:32, height:32, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.15)', background:'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'rgba(255,255,255,0.7)', animation:'chipIn 0.22s cubic-bezier(.22,1,.36,1) both' }}>
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 2l7 7M9 2l-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
             </button>
           )}
           {!isIdle && (
-            <button onClick={confirm} style={{ width:34, height:34, borderRadius:'50%', border:'none', background:'rgba(255,255,255,0.92)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <button onClick={confirm} style={{ width:34, height:34, borderRadius:'50%', border:'none', background:'rgba(255,255,255,0.92)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, animation:'chipIn 0.22s cubic-bezier(.22,1,.36,1) 0.05s both' }}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-6.5" stroke="#0b0b14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           )}
