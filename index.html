@@ -1303,7 +1303,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </div>
           ) : null}
         </div>
-        <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center' }}>
+        <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center', opacity: phase === 'options' || voiceMode ? 1 : 0, transition:'opacity 0.3s ease', pointerEvents: phase === 'options' || voiceMode ? 'auto' : 'none' }}>
           <div style={{ flex:1, opacity: phase === 'options' ? 1 : 0, transition:'opacity 0.3s ease', pointerEvents: phase === 'options' ? 'auto' : 'none' }}>
             {!listening && !voiceMode && (
               <div onClick={() => chatInputRef.current && chatInputRef.current.focus()} style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46, cursor:'text' }}>
