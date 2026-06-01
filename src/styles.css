@@ -38,3 +38,10 @@ body { display: flex; align-items: center; justify-content: center; min-height: 
 
 input::placeholder { color: rgba(255,255,255,0.28); }
 input:focus { outline: none; }
+textarea:focus { outline: none; }
+
+.input-wrap { border: 1px solid transparent; transition: border-color 0.18s ease; }
+.input-wrap:focus-within { border-color: rgba(255,255,255,0.18) !important; }
+
+.textarea-wrap { border: 1px solid transparent; transition: border-color 0.18s ease; cursor: text; }
+.textarea-wrap:focus-within { border-color: rgba(255,255,255,0.18) !important; }
