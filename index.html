@@ -2135,6 +2135,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [listening, setListening] = useState(false);
     const [voiceMode, setVoiceMode] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [crisisDetected, setCrisisDetected] = useState(false);
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -2149,7 +2150,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       setInput('');
       setLoading(true);
       const isCrisis = await detectCrisis(q);
-      if (isCrisis) { setLoading(false); onSOS && onSOS(); return; }
+      if (isCrisis) { setLoading(false); setCrisisDetected(true); onSOS && onSOS(); return; }
       const next = [...messages, { role:'user', content:q }];
       setMessages(next);
       try {
@@ -2237,6 +2238,29 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               >{s}</button>
             ))}
           </div>
+        )}
+
+        {crisisDetected && (
+          <button onClick={() => onSOS && onSOS()} className="fade-up" style={{ margin:'0 16px 10px', flexShrink:0, display:'flex', alignItems:'center', gap:14, background:'rgba(220,55,55,0.13)', border:'1px solid rgba(220,80,80,0.22)', borderRadius:18, padding:'13px 14px 13px 16px', cursor:'pointer', textAlign:'left', width:'calc(100% - 32px)' }}>
+            <div style={{ width:34, height:34, borderRadius:10, background:'rgba(220,55,55,0.18)', border:'1px solid rgba(220,80,80,0.25)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2.5L18.5 17H1.5L10 2.5Z" stroke="rgba(255,100,100,0.90)" strokeWidth="1.7" strokeLinejoin="round"/>
+                <line x1="10" y1="8.5" x2="10" y2="12.5" stroke="rgba(255,100,100,0.90)" strokeWidth="1.7" strokeLinecap="round"/>
+                <circle cx="10" cy="14.5" r="0.9" fill="rgba(255,100,100,0.90)"/>
+              </svg>
+            </div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:700, color:'rgba(255,110,110,0.95)', lineHeight:1.4, marginBottom:4 }}>
+                Vous avez exprimé une détresse immédiate
+              </div>
+              <div style={{ fontFamily:'Questrial, sans-serif', fontSize:12.5, color:'rgba(255,255,255,0.54)', lineHeight:1.5 }}>
+                Vous n'êtes pas seul·e — le <span style={{ color:'rgba(255,255,255,0.78)', fontWeight:600 }}>3114</span> répond gratuitement 24h/24.
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0, opacity:0.45 }}>
+              <path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         )}
 
         <div style={{ padding:'8px 16px 28px', flexShrink:0, display:'flex', gap:10, alignItems:'center' }}>
