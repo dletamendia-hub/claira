@@ -1585,10 +1585,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         style={{
           width:'100%',
           background: recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.06)',
-          border: recommended ? '1.5px solid rgba(73,202,166,0.45)' : 'none',
+          border: recommended ? '1px solid rgb(73 202 166 / 40%)' : 'none',
           borderRadius:24,
           padding:16,
-          boxShadow: recommended ? '0 0 0 4px rgba(73,202,166,0.07), 0 18px 40px rgba(0,0,0,0.22)' : '0 18px 40px rgba(0,0,0,0.18)',
+          boxShadow: recommended ? 'none' : '0 18px 40px rgba(0,0,0,0.18)',
           backdropFilter:'blur(16px)',
           WebkitBackdropFilter:'blur(16px)',
           cursor:'pointer',
@@ -1596,8 +1596,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           fontFamily:'Questrial, sans-serif',
           transition:'all 0.2s',
         }}
-        onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'rgba(255,255,255,0.08)'; if(recommended) e.currentTarget.style.borderColor='rgba(73,202,166,0.60)'; }}
-        onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.06)'; if(recommended) e.currentTarget.style.borderColor='rgba(73,202,166,0.45)'; }}
+        onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'rgba(255,255,255,0.08)'; }}
+        onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'rgba(255,255,255,0.06)'; }}
       >
         <div style={{ display:'flex', justifyContent:'space-between', gap:12, alignItems:'flex-start', marginBottom:10 }}>
           <div style={{ flex:1 }}>
@@ -2009,14 +2009,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                     style={{
                       width:'100%',
                       background: recommended ? 'rgba(73,202,166,0.07)' : 'transparent',
-                      border: recommended ? '1.5px solid rgba(73,202,166,0.45)' : 'none',
-                      borderTop: recommended ? '1.5px solid rgba(73,202,166,0.45)' : '1px solid rgba(255,255,255,0.07)',
+                      border: recommended ? '1px solid rgb(73 202 166 / 40%)' : 'none',
+                      borderTop: recommended ? '1px solid rgb(73 202 166 / 40%)' : '1px solid rgba(255,255,255,0.07)',
                       borderRadius: recommended ? 24 : 0,
                       padding:16,
                       marginLeft:0,
                       marginRight:0,
                       marginBottom: recommended ? 12 : 0,
-                      boxShadow: recommended ? '0 0 0 4px rgba(73,202,166,0.07), 0 18px 40px rgba(0,0,0,0.22)' : 'none',
+                      boxShadow: 'none',
                       backdropFilter: recommended ? 'blur(16px)' : 'none',
                       WebkitBackdropFilter: recommended ? 'blur(16px)' : 'none',
                       cursor:'pointer',
@@ -2025,8 +2025,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                       transition:'all 0.2s',
                       position:'relative',
                     }}
-                    onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'transparent'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.60)' : 'rgba(255,255,255,0.07)'; }}
-                    onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'transparent'; e.currentTarget.style.borderColor= recommended ? 'rgba(73,202,166,0.45)' : 'rgba(255,255,255,0.07)'; }}
+                    onMouseEnter={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.10)' : 'transparent'; }}
+                    onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'transparent'; }}
                   >
                     {recommended && (
                       <div style={{ position:'absolute', left:74, top:14, color:'#49caa6fa', fontSize:10, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>Recommandé</div>
