@@ -697,7 +697,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     if (activeVoice || (voiceMode && !autoStart)) {
       const isIdle = voiceMode && !autoStart;
       return (
-        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.12)', padding:'0 6px 0 14px', height:46, transformOrigin:'right center', animation: justActivated ? 'voiceExpand 0.28s cubic-bezier(.22,1,.36,1) both' : 'none' }}>
+        <div style={{ flex:1, display:'flex', alignItems:'center', gap:8, background:'rgba(255,255,255,0.07)', borderRadius:24, border:'none', padding:'0 6px 0 14px', height:46, transformOrigin:'right center', animation: justActivated ? 'voiceExpand 0.28s cubic-bezier(.22,1,.36,1) both' : 'none' }}>
           <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'space-between', overflow:'hidden', height:28 }}>
             {amps.map((amp, i) => {
               const h = isIdle ? 3 : (amp < 0.03 ? 3 : Math.max(4, amp * 24));
@@ -1277,7 +1277,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                   const isSel = chosen === opt.l;
                   const isOther = chosen && !isSel;
                   return (
-                    <button key={i} onClick={() => handleChose(opt.l)} style={{ padding:'13px 22px', background:isSel ? 'rgba(60,180,160,0.22)' : 'rgba(255,255,255,0.11)', border:`1.5px solid ${isSel ? 'rgba(80,210,185,0.45)' : 'rgba(255,255,255,0.15)'}`, borderRadius:100, fontSize:16, color:isSel ? 'rgba(180,240,225,0.95)' : 'rgba(255,255,255,0.84)', fontFamily:'Questrial, sans-serif', cursor:'pointer', opacity:isOther ? 0 : 1, transform:isOther ? 'scale(0.92)' : 'scale(1)', transition:'opacity 0.22s ease, transform 0.22s ease, background 0.18s, border-color 0.18s', animation:`chipIn 0.32s cubic-bezier(.22,1,.36,1) ${i*0.025}s both`, pointerEvents: phase === 'chosen' ? 'none' : 'auto' }}>{opt.l}</button>
+                    <button key={i} onClick={() => handleChose(opt.l)} style={{ padding:'13px 22px', background:isSel ? 'rgba(60,180,160,0.22)' : 'rgba(255,255,255,0.11)', border:'none', borderRadius:100, fontSize:16, color:isSel ? 'rgba(180,240,225,0.95)' : 'rgba(255,255,255,0.84)', fontFamily:'Questrial, sans-serif', cursor:'pointer', opacity:isOther ? 0 : 1, transform:isOther ? 'scale(0.92)' : 'scale(1)', transition:'opacity 0.22s ease, transform 0.22s ease, background 0.18s', animation:`chipIn 0.32s cubic-bezier(.22,1,.36,1) ${i*0.025}s both`, pointerEvents: phase === 'chosen' ? 'none' : 'auto' }}>{opt.l}</button>
                   );
                 })}
               </div>
@@ -1295,7 +1295,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           {!voiceMode && (
             <div style={{ flex:1, opacity: phase === 'options' ? 1 : 0, transition:'opacity 0.3s ease', pointerEvents: phase === 'options' ? 'auto' : 'none' }}>
               {!listening && (
-                <div onClick={() => chatInputRef.current && chatInputRef.current.focus()} style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'1px solid rgba(255,255,255,0.08)', padding:'0 8px 0 16px', height:46, cursor:'text' }}>
+                <div onClick={() => chatInputRef.current && chatInputRef.current.focus()} style={{ display:'flex', alignItems:'center', background:'rgba(255,255,255,0.07)', borderRadius:24, border:'none', padding:'0 8px 0 16px', height:46, cursor:'text' }}>
                   <input ref={chatInputRef} className="chat-input" value={inputVal} onChange={e=>setInputVal(e.target.value)} onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleText(inputVal); } }} placeholder="Ou écrivez votre réponse…" style={{ flex:1, background:'transparent', border:'none', fontSize:14, color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif' }}/>
                   {inputVal.trim() && (
                     <button onClick={() => handleText(inputVal)} style={{ width:28, height:28, borderRadius:'50%', background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
