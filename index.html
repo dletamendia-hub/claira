@@ -1653,7 +1653,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
             <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:28 }}>
               {[item.short, item.duration, ...item.tagline.split('·').map(s => s.trim())].filter(Boolean).slice(0, 4).map((chip, i) => (
-                <div key={i} style={{ padding:'7px 11px', borderRadius:999, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.82)', fontSize:12, fontWeight:700, fontFamily:'Questrial, sans-serif', letterSpacing:'0.01em', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
+                <div key={i} style={{ padding:'7px 11px', borderRadius:999, background:'rgba(255,255,255,0.06)', border:'none', color:'rgba(255,255,255,0.82)', fontSize:12, fontWeight:700, fontFamily:'Questrial, sans-serif', letterSpacing:'0.01em', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
                   {chip}
                 </div>
               ))}
@@ -2226,8 +2226,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         )}
 
         {crisisDetected && (
-          <button onClick={() => onSOS && onSOS()} className="fade-up" style={{ margin:'0 16px 10px', flexShrink:0, display:'flex', alignItems:'flex-start', gap:14, background:'rgba(220,55,55,0.13)', border:'1px solid rgba(220,80,80,0.22)', borderRadius:18, padding:'13px 14px 13px 16px', cursor:'pointer', textAlign:'left', width:'calc(100% - 32px)' }}>
-            <div style={{ width:34, height:34, borderRadius:10, background:'rgba(220,55,55,0.18)', border:'1px solid rgba(220,80,80,0.25)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
+          <button onClick={() => onSOS && onSOS()} className="fade-up" style={{ margin:'0 16px 10px', flexShrink:0, display:'flex', alignItems:'flex-start', gap:14, background:'rgba(220,55,55,0.13)', border:'none', borderRadius:18, padding:'13px 14px 13px 16px', cursor:'pointer', textAlign:'left', width:'calc(100% - 32px)' }}>
+            <div style={{ width:34, height:34, borderRadius:10, background:'rgba(220,55,55,0.18)', border:'none', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
               <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
                 <path d="M10 2.5L18.5 17H1.5L10 2.5Z" stroke="rgba(255,100,100,0.90)" strokeWidth="1.7" strokeLinejoin="round"/>
                 <line x1="10" y1="8.5" x2="10" y2="12.5" stroke="rgba(255,100,100,0.90)" strokeWidth="1.7" strokeLinecap="round"/>
