@@ -1072,12 +1072,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 : "Claira vous aide à poser des mots sur ce que vous vivez, puis à repérer une approche thérapeutique et un rendez-vous adapté."}
             </p>
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              <button onClick={onStartAssessment} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:15, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
-                {primaryLabel}
-              </button>
-              {isComplete && (
-                <button onClick={onOpenSummary} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.82)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:15, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
-                  Revoir mon résumé
+              {!hasProgress && (
+                <button onClick={onStartAssessment} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:15, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                  Faire le point maintenant
+                </button>
+              )}
+              {hasProgress && (
+                <button onClick={onOpenSummary} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:15, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.01em' }}>
+                  Voir mon résumé
                 </button>
               )}
             </div>
