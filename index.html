@@ -816,7 +816,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           {items.map(item => {
             const isActive = active === item.id;
             return (
-              <button key={item.id} onClick={item.onClick} style={{ flex:1, minHeight:52, padding:'8px 8px', border:'none', borderRadius:24, background:isActive ? 'rgba(255,255,255,0.12)' : 'transparent', color:isActive ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.52)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, cursor:'pointer', fontFamily:'Questrial, sans-serif', transition:'all 0.2s' }}>
+              <button key={item.id} onClick={item.onClick} style={{ flex:1, minHeight:52, padding:'8px 8px', border:'none', borderRadius:26, background:isActive ? 'rgba(255,255,255,0.12)' : 'transparent', color:isActive ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.52)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, cursor:'pointer', fontFamily:'Questrial, sans-serif', transition:'all 0.2s' }}>
                 {item.icon}
                 <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.01em', textAlign:'center', lineHeight:1.1 }}>{item.label}</span>
               </button>
@@ -2027,14 +2027,14 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                     {recommended && (
                       <div style={{ position:'absolute', left:74, top:14, color:'#49caa6fa', fontSize:10, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>Recommandé</div>
                     )}
-                    <div style={{ display:'grid', gridTemplateColumns:'48px minmax(0,1fr) max-content', gap:10, alignItems:'start' }}>
+                    <div style={{ display:'grid', gridTemplateColumns:'48px minmax(0,1fr)', gap:10, alignItems:'start' }}>
                       <div style={{ width:48, height:48, borderRadius:15, background:'rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', border:'1px solid rgba(255,255,255,0.05)', overflow:'hidden' }}>
                         <img src={th.photo} alt={th.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
                       </div>
                       <div style={{ minWidth:0, paddingTop:recommended ? 22 : 0 }}>
                         <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.94)', lineHeight:1.2, marginBottom:3 }}>{th.name}</div>
                         <div style={{ fontSize:12, color:'rgba(255,255,255,0.52)', lineHeight:1.35, marginBottom:6 }}>{th.title}</div>
-                        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:8 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:7 }}>
                           <span style={{ fontSize:12, color:'rgba(255,255,255,0.58)' }}>{th.price}€/séance</span>
                           <span style={{ width:4, height:4, borderRadius:'50%', background:'rgba(255,255,255,0.25)' }}></span>
                           <span style={{ fontSize:12, color:'rgba(255,255,255,0.58)' }}>{th.distance}</span>
@@ -2043,10 +2043,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                             <span style={{ fontSize:12, color:'rgba(255,255,255,0.58)' }}>En ligne</span>
                           </>}
                         </div>
-                      </div>
-                      <div style={{ fontSize:15, fontWeight:700, color:tone.text, flexShrink:0, paddingTop:2, whiteSpace:'nowrap', textAlign:'right' }}>
-                        {th.score}%
-                        <div style={{ fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.38)', letterSpacing:'0.02em' }}>compatibilité</div>
+                        <div style={{ fontSize:12, fontWeight:700, color:tone.text, marginBottom:8 }}>{th.score}% de compatibilité</div>
                       </div>
                       <div style={{ gridColumn:'2 / -1', display:'flex', flexWrap:'wrap', gap:6, marginTop:2 }}>
                         {th.specialty.split(' · ').slice(0,4).map(function(tag){ return (
@@ -2309,7 +2306,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:21, color:'rgba(255,255,255,0.94)', fontWeight:700, marginBottom:4, letterSpacing:'0.01em' }}>{th.name}</h2>
                 <div style={{ marginTop:8, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
                   <span style={{ display:'inline-flex', alignItems:'center', gap:6, color:tone.text, fontSize:12, fontWeight:700, fontFamily:'Questrial, sans-serif' }}>
-                    {th.score}% de compatibilité avec tes besoins
+                    {th.score}% de compatibilité
                   </span>
                 </div>
               </div>
@@ -2318,7 +2315,6 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               {[
                 ['bio','Profil','user'],
                 ['approach','Approche','route'],
-                ['reviews','Avis','comment-dots'],
               ].map(([id,label,icon])=>(
                 <button key={id} onClick={()=>setTab(id)} style={{ flex:'0 0 auto', minHeight:44, padding:'10px 16px', background:tab===id?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.05)', color:tab===id?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.42)', border:'none', borderRadius:100, fontSize:13, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', display:'flex', alignItems:'center', justifyContent:'center', gap:7 }}>
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" style={{ flexShrink:0 }}>
