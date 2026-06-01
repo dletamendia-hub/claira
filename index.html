@@ -1068,7 +1068,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </div>
             <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.70)', textWrap:'pretty', marginBottom:14 }}>
               {hasProgress
-                ? <><strong style={{ color:'rgba(255,255,255,0.92)', fontWeight:700 }}>{recommendationIntro}</strong> {recommendationSummary}</>
+                ? <><strong style={{ color:'rgba(255,255,255,0.92)', fontWeight:700 }}>{recommendationIntro}</strong><br/>{recommendationSummary}</>
                 : "Claira vous aide à poser des mots sur ce que vous vivez, puis à repérer une approche thérapeutique et un rendez-vous adapté."}
             </p>
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
