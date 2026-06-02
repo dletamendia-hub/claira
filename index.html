@@ -235,7 +235,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 };
 
 (() => {
-  const { useState, useEffect, useRef, useMemo, useCallback } = React;
+  const { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } = React;
 
   const THREE_BACKGROUND_SETTINGS = {
     dpr: 1.0,
@@ -952,7 +952,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 })();
 
 (() => {
-  const { useState, useEffect, useRef, useMemo } = React;
+  const { useState, useEffect, useLayoutEffect, useRef, useMemo } = React;
   const { QUESTIONS, THERAPIES, THERAPISTS, getInsight, generateAIInsight, ApiKeyModal } = window.Claira;
   const { MicButton, AppHeader, StatusBar, BackBtn, MainTabBar, SOSModal } = window.Claira;
 
@@ -972,7 +972,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </p>
             <p className="fade-up" style={{ animationDelay:'0.38s', fontSize:13, color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.04em' }}>Anonyme · 1 minute</p>
           </div>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
             <button className="fade-up" onClick={onStart} style={{ animationDelay:'0.55s', width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', border:'1px solid rgba(255,255,255,0.20)', borderRadius:100, fontSize:17, fontWeight:600, color:'#0b0b14', fontFamily:'Questrial, sans-serif', cursor:'pointer', letterSpacing:'0.02em', transition:'all 0.2s' }}
               onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }}
               onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>
@@ -1203,7 +1203,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  function ChatScreen({ step, answers, onAnswer, onEditStep, onCancel }) {
+  function ChatScreen({ step, answers, onAnswer, onEditStep, onCancel, onExiting }) {
     const q = QUESTIONS[step];
     const tokens = useMemo(() => {
       const result = [];
@@ -1222,8 +1222,17 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [voiceMode, setVoiceMode] = useState(false);
     const [voiceTranscript, setVoiceTranscript] = useState('');
     const [chipsHidden, setChipsHidden] = useState(false);
+    const [lastStep, setLastStep] = useState(step);
     const chatInputRef = useRef(null);
-    useEffect(() => { setPhase('writing'); setWordIdx(0); setChosen(null); setInputVal(''); setVoiceTranscript(''); setChipsHidden(false); }, [step]);
+    if (lastStep !== step) {
+      setLastStep(step);
+      setPhase('writing');
+      setWordIdx(0);
+      setChosen(null);
+      setInputVal('');
+      setVoiceTranscript('');
+      setChipsHidden(false);
+    }
     useEffect(() => { if (voiceTranscript) setChipsHidden(true); }, [voiceTranscript]);
     useEffect(() => {
       if (phase !== 'writing') return;
@@ -1234,7 +1243,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     }, [phase, wordIdx, totalWords]);
     useEffect(() => { if (phase !== 'rising') return; const t = setTimeout(() => setPhase('options'), 90); return () => clearTimeout(t); }, [phase]);
     useEffect(() => { if (phase !== 'chosen') return; const t = setTimeout(() => setPhase('exiting'), 320); return () => clearTimeout(t); }, [phase]);
-    useEffect(() => { if (phase !== 'exiting') return; const t = setTimeout(() => onAnswer(chosen), 480); return () => clearTimeout(t); }, [phase, chosen, onAnswer]);
+    useEffect(() => { if (phase !== 'exiting') return; onExiting && onExiting(); const t = setTimeout(() => onAnswer(chosen), 480); return () => clearTimeout(t); }, [phase, chosen, onAnswer, onExiting]);
 
     const handleChose = (val) => { if (phase !== 'options') return; setChosen(val); setPhase('chosen'); };
     const handleText = (val) => { if(val.trim()) handleChose(val.trim()); };
@@ -1270,8 +1279,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           <div key={step} style={{ position:'absolute', left:28, right:28, top:questionUp ? '12%' : '42%', transform:`translateY(${questionUp ? questionShift : '-50%'})`, opacity:questionOpacity, transition: phase === 'writing' ? 'none' : 'top 0.62s cubic-bezier(.22,1,.36,1), transform 0.48s ease, opacity 0.38s ease' }}>
             <h2 style={{ fontFamily:'Questrial, sans-serif', fontSize:34, color:'rgba(255,255,255,0.95)', fontWeight:400, lineHeight:1.22, letterSpacing:'-0.2px' }}>{renderedText}</h2>
           </div>
-          {(phase === 'options' || phase === 'chosen') && (
-            <div style={{ position:'absolute', bottom:14, left:24, right:24, opacity: chipsHidden ? 0 : 1, transform: chipsHidden ? 'translateY(-22px)' : 'translateY(0)', transition:'opacity 0.38s ease, transform 0.38s cubic-bezier(.22,1,.36,1)', pointerEvents: chipsHidden ? 'none' : 'auto' }}>
+          {(phase === 'options' || phase === 'chosen' || phase === 'exiting') && (
+            <div style={{ position:'absolute', bottom:14, left:24, right:24, opacity: (chipsHidden || phase === 'exiting') ? 0 : 1, transform: (chipsHidden || phase === 'exiting') ? 'translateY(16px)' : 'translateY(0)', transition:'opacity 0.36s ease, transform 0.36s cubic-bezier(.22,1,.36,1)', pointerEvents: 'none' }}>
               <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
                 {q.options.map((opt, i) => {
                   const isSel = chosen === opt.l;
@@ -1406,7 +1415,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       return (
         <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0 }}>
           <StickyHeader />
-          <div style={{ flex:1, overflowY:'auto', padding:'32px 22px 30px', display:'flex', flexDirection:'column', gap:20 }}>
+          <div style={{ flex:1, overflowY:'auto', padding:'32px 22px 30px', display:'flex', flexDirection:'column', gap:20, animation:'fadeIn 0.5s ease both' }}>
             <div style={{ display:'flex', justifyContent:'center', marginBottom:4 }}>
               <div style={{ ...shimmerStyle(105, 118), borderRadius:22, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 16px 34px rgba(0,0,0,0.16)' }}>
                 <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true" style={{ filter:'drop-shadow(0 0 10px rgba(255,255,255,0.12))' }}>
@@ -2276,6 +2285,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
   function TherapistScreen({ therapist:th, onBook, onBack }) {
     const [tab, setTab] = useState('bio');
+    const [msgText, setMsgText] = useState('');
+    const [msgSent, setMsgSent] = useState(false);
     const tone = getCompatibilityTone(th.score);
     const introBullets = [
       { icon:'check-circle', text:'Approche concrète si tu veux avancer sans te sentir perdu·e.' },
@@ -2315,6 +2326,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               {[
                 ['bio','Profil','user'],
                 ['approach','Approche','route'],
+                ['message','Message','chat'],
               ].map(([id,label,icon])=>(
                 <button key={id} onClick={()=>setTab(id)} style={{ flex:'0 0 auto', minHeight:44, padding:'10px 16px', background:tab===id?'rgba(255,255,255,0.14)':'rgba(255,255,255,0.05)', color:tab===id?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.42)', border:'none', borderRadius:100, fontSize:13, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', display:'flex', alignItems:'center', justifyContent:'center', gap:7 }}>
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" style={{ flexShrink:0 }}>
@@ -2329,6 +2341,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                       <circle cx="7" cy="7" r="0.7" fill="currentColor"/>
                       <circle cx="9" cy="7" r="0.7" fill="currentColor"/>
                       <circle cx="11" cy="7" r="0.7" fill="currentColor"/>
+                    </>}
+                    {icon === 'chat' && <>
+                      <path d="M3.5 3.5h11v7.5H9.2L6.5 13.5V11H3.5V3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M6.5 7h5M6.5 9h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
                     </>}
                   </svg>
                   <span>{label}</span>
@@ -2380,6 +2396,34 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 </div>
               </div>
             </div>}
+            {tab==='message' && <div className="fade-in">
+              {msgSent ? (
+                <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                  <div style={{ display:'flex', justifyContent:'flex-end' }}>
+                    <div style={{ maxWidth:'80%', background:'rgba(255,255,255,0.12)', borderRadius:'18px 18px 4px 18px', padding:'12px 16px', fontSize:15, color:'rgba(255,255,255,0.90)', fontFamily:'Questrial, sans-serif', lineHeight:1.6 }}>{msgText}</div>
+                  </div>
+                  <div className="fade-up" style={{ display:'flex', alignItems:'flex-start', gap:14, background:'rgba(255,255,255,0.06)', borderRadius:18, padding:'14px 16px' }}>
+                    <div style={{ width:34, height:34, borderRadius:10, background:'rgba(255,255,255,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:1 }}>
+                      <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M3.5 3.5h11v7.5H9.2L6.5 13.5V11H3.5V3.5Z" stroke="rgba(255,255,255,0.70)" strokeWidth="1.5" strokeLinejoin="round"/><path d="M6.5 7h5M6.5 9h3" stroke="rgba(255,255,255,0.70)" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:14, color:'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', lineHeight:1.55, marginBottom:10 }}>{th.name} vous répondra généralement sous 48h.</div>
+                      <button onClick={() => { setMsgSent(false); setMsgText(''); }} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.88)', fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', textDecoration:'underline', padding:0, fontWeight:500 }}>Envoyer un autre message</button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+                  <p style={{ fontSize:14, color:'rgba(255,255,255,0.52)', fontFamily:'Questrial, sans-serif', lineHeight:1.65 }}>Posez une question à {th.name} avant de prendre rendez-vous.</p>
+                  <div className="textarea-wrap" style={{ borderRadius:18, background:'rgba(255,255,255,0.05)', position:'relative' }} onClick={e => { const ta = e.currentTarget.querySelector('textarea'); if (ta) ta.focus(); }}>
+                    <textarea value={msgText} onChange={e => setMsgText(e.target.value)} placeholder={`Écrire à ${th.name}…`} rows={5} style={{ width:'100%', resize:'none', border:'none', background:'transparent', color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.7, padding:'14px 16px 48px', outline:'none', display:'block' }}/>
+                    <button onClick={() => { if (msgText.trim()) setMsgSent(true); }} disabled={!msgText.trim()} style={{ position:'absolute', bottom:10, right:10, width:32, height:32, borderRadius:'50%', background: msgText.trim() ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)', border:'none', cursor: msgText.trim() ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.18s', flexShrink:0 }}>
+                      <svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke={msgText.trim() ? 'white' : 'rgba(255,255,255,0.28)'} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>}
             {tab==='reviews' && <div className="fade-in">
               <div style={{ fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.88)', marginTop:28, marginBottom:14, fontFamily:'Questrial, sans-serif' }}>Ce que les personnes retiennent</div>
               <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:14 }}>
@@ -2407,7 +2451,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
         </div>
         <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'14px 24px 28px', background:'linear-gradient(to top, #0b0b14 65%, transparent)' }}>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
             <button onClick={onBook} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.02em' }} onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>Programmer une visio</button>
             <button onClick={onBook} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.82)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:600, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'0.02em' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>Prendre un rendez-vous en cabinet</button>
           </div>
@@ -2725,6 +2769,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [extraChips, setExtraChips] = useState([]);
     const [shaderWaveOffset, setShaderWaveOffset] = useState(HOME_WAVE_OFFSET);
     const [shaderTransitionEase, setShaderTransitionEase] = useState(0.055);
+    const [blurPreload, setBlurPreload] = useState(false);
     const shaderMoveTimer = useRef(null);
     const answersKey = JSON.stringify(answers);
     const pointIsComplete = QUESTIONS.every(q => answers[q.id]);
@@ -2812,10 +2857,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     window.Claira.launchTestDiagnostic = launchTestDiagnostic;
     const softenBackground = ['hub', 'insight', 'therapies', 'therapy-questions', 'matching', 'therapist', 'booking', 'appointments'].includes(screen);
     const handleAnswer = useCallback((val) => { const q = QUESTIONS[step]; const next = { ...answers, [q.id]: val }; setAnswers(next); if (step < QUESTIONS.length - 1) setStep(s => s + 1); else setScreen('insight'); }, [step, answers]);
-    const handleEdit = useCallback((idx) => { const trimmed = {}; QUESTIONS.slice(0, idx).forEach(q => { if (answers[q.id]) trimmed[q.id] = answers[q.id]; }); setAnswers(trimmed); setStep(idx); setScreen('chat'); }, [answers]);
-    const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setExtraNote(''); setExtraChips([]); setAppointments(function(prev){ return prev.filter(function(a){ return a.status === 'past'; }); }); };
+    const handleEdit = useCallback((idx) => { const trimmed = {}; QUESTIONS.slice(0, idx).forEach(q => { if (answers[q.id]) trimmed[q.id] = answers[q.id]; }); setAnswers(trimmed); setStep(idx); setBlurPreload(false); setScreen('chat'); }, [answers]);
+    const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setBlurPreload(false); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setExtraNote(''); setExtraChips([]); setAppointments(function(prev){ return prev.filter(function(a){ return a.status === 'past'; }); }); };
     const showTabbar = screen === 'hub' || screen === 'matching' || screen === 'appointments' || (screen === 'therapies' && !therapyDetailOpen);
-    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{softenBackground && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(72px) saturate(0.70)', WebkitBackdropFilter:'blur(72px) saturate(0.70)', background:'rgba(7,22,48,0.52)' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} onViewAppointment={bookedAppointment ? goToAppointments : undefined} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} onCancel={goToHub} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} extraNote={extraNote} setExtraNote={setExtraNote} extraChips={extraChips} setExtraChips={setExtraChips} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} onSOS={()=>setSosOpen(true)} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);setTherapistFromScreen('matching');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'appointments' && <AppointmentsScreen appointments={appointments} onGoMatching={goToBookingHub} onBookTherapist={function(t){ setShaderForInnerPage(); setTh(t); setMainTab('booking'); setScreen('booking'); setTherapistFromScreen('appointments'); }} onViewTherapist={handleViewTherapistFromAppt} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen(therapistFromScreen === 'appointments' ? 'appointments' : 'matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={addAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToAppointments} onSOS={() => setSosOpen(true)} />}
+    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{(softenBackground || blurPreload) && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(72px) saturate(0.70)', WebkitBackdropFilter:'blur(72px) saturate(0.70)', background:'rgba(7,22,48,0.52)', animation: blurPreload && !softenBackground ? 'fadeIn 0.45s ease both' : 'none' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} onViewAppointment={bookedAppointment ? goToAppointments : undefined} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} onCancel={goToHub} onExiting={() => { if (step === QUESTIONS.length - 1) setBlurPreload(true); }} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} extraNote={extraNote} setExtraNote={setExtraNote} extraChips={extraChips} setExtraChips={setExtraChips} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} onSOS={()=>setSosOpen(true)} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);setTherapistFromScreen('matching');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'appointments' && <AppointmentsScreen appointments={appointments} onGoMatching={goToBookingHub} onBookTherapist={function(t){ setShaderForInnerPage(); setTh(t); setMainTab('booking'); setScreen('booking'); setTherapistFromScreen('appointments'); }} onViewTherapist={handleViewTherapistFromAppt} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen(therapistFromScreen === 'appointments' ? 'appointments' : 'matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={addAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToAppointments} onSOS={() => setSosOpen(true)} />}
 {sosOpen && <SOSModal onClose={() => setSosOpen(false)} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
   }
   window.Claira.App = App;
