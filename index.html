@@ -1793,10 +1793,20 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [filterOpen, setFilterOpen] = useState(false);
     const [filterClosing, setFilterClosing] = useState(false);
     const [sortBy, setSortBy] = useState('compatibility');
+    const [panelPos, setPanelPos] = useState({ top:110, right:24 });
+    const filterBtnRef = useRef(null);
 
     const closeFilter = () => {
       setFilterClosing(true);
       setTimeout(() => { setFilterOpen(false); setFilterClosing(false); }, 170);
+    };
+    const openFilter = () => {
+      if (filterBtnRef.current) {
+        const br = filterBtnRef.current.getBoundingClientRect();
+        const rr = document.getElementById('root').getBoundingClientRect();
+        setPanelPos({ top: br.bottom - rr.top + 8, right: rr.right - br.right });
+      }
+      setFilterOpen(true);
     };
 
     useEffect(() => {
@@ -1892,7 +1902,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0, overflow:'hidden' }}>
         {!compactBookingView && <AppHeader onBack={onBack} title={titleOverride || `Thérapeutes${therapyLabel ? ` · ${therapyLabel}` : ''}`} />}
-        <div style={{ padding:compactBookingView ? '6px 24px 10px' : '4px 24px 10px', flexShrink:0, position:'relative' }}>
+        <div style={{ padding:compactBookingView ? '6px 24px 10px' : '4px 24px 10px', flexShrink:0, position:'relative', zIndex:10 }}>
           <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:10 }}>
             <div className="input-wrap" style={{ flex:1, display:'flex', alignItems:'center', gap:10, background:'rgba(255,255,255,0.06)', borderRadius:18, padding:'0 14px', minHeight:52, backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1917,11 +1927,16 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               </button>
             </div>
             <button
-              onClick={() => filterOpen ? closeFilter() : setFilterOpen(true)}
-              style={{ width:52, height:52, borderRadius:18, border:'none', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.78)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}
+              ref={filterBtnRef}
+              onClick={() => filterOpen ? closeFilter() : openFilter()}
+              style={{ width:52, height:52, borderRadius:18, border:'none', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.78)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)', transition:'background 0.2s' }}
               title="Filtres et affichage"
             >
-              {mode === 'map' ? (
+              {filterOpen ? (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M5 5l8 8M13 5l-8 8" stroke="rgba(255,255,255,0.90)" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              ) : mode === 'map' ? (
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                   <path d="M9 2a4.5 4.5 0 0 1 4.5 4.5C13.5 10 9 16 9 16S4.5 10 4.5 6.5A4.5 4.5 0 0 1 9 2Z" stroke="rgba(255,255,255,0.72)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   <circle cx="9" cy="6.5" r="1.5" stroke="rgba(255,255,255,0.72)" strokeWidth="1.4"/>
@@ -1960,8 +1975,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               </button>
             ))}
           </div>
-          {filterOpen && (
-            <div style={{ position:'absolute', right:24, top:64, zIndex:20, width:216, maxHeight:340, overflowY:'auto', background:'rgba(28,30,42,0.97)', border:'none', borderRadius:20, padding:'10px 6px', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', boxShadow:'0 24px 48px rgba(0,0,0,0.36)', transformOrigin:'top right', animation: filterClosing ? 'filterOut 0.17s cubic-bezier(.4,0,1,1) both' : 'filterIn 0.20s cubic-bezier(.22,1,.36,1) both' }}>
+        </div>
+        {(filterOpen || filterClosing) && ReactDOM.createPortal(
+          <>
+            <div onClick={closeFilter} style={{ position:'absolute', inset:0, background:'rgba(255,255,255,0.10)', zIndex:200, animation: filterClosing ? 'fadeOut 0.17s ease both' : 'fadeIn 0.2s ease both' }}/>
+            <div style={{ position:'absolute', top:panelPos.top, right:panelPos.right, zIndex:201, width:216, maxHeight:340, overflowY:'auto', background:'rgba(28,30,42,0.97)', border:'none', borderRadius:20, padding:'10px 6px', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', boxShadow:'0 24px 48px rgba(0,0,0,0.36)', transformOrigin:'top right', animation: filterClosing ? 'filterOut 0.17s cubic-bezier(.4,0,1,1) both' : 'filterIn 0.20s cubic-bezier(.22,1,.36,1) both' }}>
               <div style={{ fontSize:10, color:'rgba(255,255,255,0.40)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.10em', textTransform:'uppercase', padding:'2px 10px 6px' }}>Affichage</div>
               <div style={{ display:'flex', gap:5, padding:'0 6px 8px' }}>
                 {[['list','Liste'],['map','Carte']].map(([key,label]) => (
@@ -1970,11 +1988,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               </div>
               <div style={{ height:1, background:'rgba(255,255,255,0.08)', margin:'0 4px 8px' }}></div>
               <div style={{ fontSize:10, color:'rgba(255,255,255,0.40)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.10em', textTransform:'uppercase', padding:'2px 10px 4px' }}>Trier par</div>
-              {[
-                ['compatibility', 'Compatibilité'],
-                ['distance', 'Distance'],
-                ['price', 'Prix'],
-              ].map(([key, label]) => {
+              {[['compatibility','Compatibilité'],['distance','Distance'],['price','Prix']].map(([key,label]) => {
                 const active = sortBy === key;
                 return (
                   <button key={key} onClick={() => { setSortBy(key); closeFilter(); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
@@ -1985,21 +1999,19 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               })}
               <div style={{ height:1, background:'rgba(255,255,255,0.08)', margin:'6px 4px 8px' }}></div>
               <div style={{ fontSize:10, color:'rgba(255,255,255,0.40)', fontFamily:'Questrial, sans-serif', letterSpacing:'0.10em', textTransform:'uppercase', padding:'2px 10px 4px' }}>Filtres</div>
-              {[
-                [null, 'Toutes'],
-                ...THERAPIES.map(item => [item.id, item.short || item.name.replace(/\n+/g, ' ')]),
-              ].map(([key, label]) => {
+              {[[null,'Toutes'],...THERAPIES.map(item => [item.id, item.short || item.name.replace(/\n+/g,' ')])].map(([key,label]) => {
                 const active = contextFilters.therapy === key;
                 return (
-                  <button key={key || 'all'} onClick={() => { setContextFilters(prev => ({ ...prev, therapy:key })); closeFilter(); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
+                  <button key={key||'all'} onClick={() => { setContextFilters(prev => ({ ...prev, therapy:key })); closeFilter(); }} style={{ width:'100%', minHeight:36, padding:'8px 10px', borderRadius:11, border:'none', background:active ? 'rgba(255,255,255,0.10)' : 'transparent', color:active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', fontSize:13, fontWeight:600, textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', boxSizing:'border-box' }}>
                     <span>{label}</span>
                     {active && <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="rgba(255,255,255,0.80)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                   </button>
                 );
               })}
             </div>
-          )}
-        </div>
+          </>,
+          document.getElementById('root')
+        )}
 
         <div style={{ flex:1, minHeight:0, overflowY: mode === 'map' ? 'hidden' : 'auto', WebkitOverflowScrolling:'touch', overscrollBehavior:'contain', padding:`0 24px ${mode === 'map' ? 16 : bottomInset + 46}px` }}>
           {mode === 'map' ? <MapPanel /> : (
@@ -2654,10 +2666,10 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           {shown.length === 0 ? (
             <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:52, textAlign:'center' }}>
               <img src="src/calendrier.png" alt="" ref={el => { if (el && el.complete) el.style.opacity = '1'; }} onLoad={e => e.currentTarget.style.opacity = '1'} style={{ width:130, height:130, objectFit:'contain', marginBottom:18, filter:'drop-shadow(0 8px 24px rgba(80,120,255,0.18))', opacity:0, transition:'opacity 0.45s ease' }} />
-              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.62)', marginBottom:10, letterSpacing:'-0.01em' }}>
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.88)', marginBottom:10, letterSpacing:'-0.01em' }}>
                 {tab === 'upcoming' ? 'Aucun rendez-vous prévu' : 'Aucun rendez-vous passé'}
               </p>
-              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.35)', lineHeight:1.65, maxWidth:230 }}>
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.55)', lineHeight:1.65, maxWidth:230 }}>
                 {tab === 'upcoming'
                   ? 'Prenez votre premier rendez-vous avec un thérapeute qui vous correspond.'
                   : 'Vos séances terminées apparaîtront ici.'}
