@@ -21,7 +21,7 @@
     }
   </style>
   <link rel="stylesheet" href="src/styles.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;600;700&family=Questrial&family=Roboto+Condensed:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;600;700&family=Questrial&family=Roboto+Condensed:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Albert+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet"/>
   <style>
     textarea.detail-field::placeholder {
       color: rgba(255, 255, 255, 0.52);
@@ -963,8 +963,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'20px 28px 36px' }}>
           <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'flex-start', paddingTop:'clamp(36px, 7vh, 72px)' }}>
             <div className="fade-up" style={{ animationDelay:'0.1s', marginBottom:20 }}>
-              <h1 style={{ fontFamily:'DM Serif Display, serif', fontSize:42, color:'rgba(255,255,255,0.95)', fontWeight:400, lineHeight:1.15, letterSpacing:'-0.5px' }}>
-                Tu n'as pas à tout<br/><em style={{ fontStyle:'italic', color:'rgba(160,200,255,0.95)' }}>porter seul·e.</em>
+              <h1 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:42, color:'rgba(255,255,255,0.95)', fontWeight:600, lineHeight:1.15, letterSpacing:'-0.02em' }}>
+                Tu n'as pas à tout<br/><em style={{ fontStyle:'italic', fontWeight:200, color:'rgba(160,200,255,0.95)' }}>porter seul·e.</em>
               </h1>
             </div>
             <p className="fade-up" style={{ animationDelay:'0.25s', fontSize:16, lineHeight:1.7, color:'rgba(255,255,255,0.78)', fontWeight:400, marginBottom:28, maxWidth:300, textWrap:'pretty', fontFamily:'Questrial, sans-serif' }}>
@@ -1465,7 +1465,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 }}
               />
             </div>
-            <h2 style={{ fontFamily:'DM Serif Display, serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:400, lineHeight:1.15, marginBottom:18, letterSpacing:'-0.3px' }}>{insight.label}</h2>
+            <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.15, marginBottom:18, letterSpacing:'-0.02em' }}>{insight.label}</h2>
             <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.82)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>
               {renderAISummary(insight.summary)}
             </p>
@@ -1544,12 +1544,12 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
 
           <div className="fade-up" style={{ animationDelay:'0.24s', marginBottom:30, paddingTop:28, borderTop:'1px solid rgba(255,255,255,0.07)' }}>
-            <h3 style={{ fontFamily:'DM Serif Display, serif', fontSize:24, color:'rgba(255,255,255,0.96)', fontWeight:400, lineHeight:1.1, marginBottom:12 }}>Ce que cela évoque</h3>
+            <h3 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:24, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.1, marginBottom:12, letterSpacing:'-0.02em' }}>Ce que cela évoque</h3>
             <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.72)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>{insight.text}</p>
           </div>
 
           <div className="fade-up" style={{ animationDelay:'0.32s', marginBottom:28 }}>
-            <div style={{ fontSize:24, color:'rgba(255,255,255,0.96)', fontFamily:'DM Serif Display, serif', fontWeight:400, lineHeight:1.1, marginBottom:16 }}>Ce qui peut vous aider</div>
+            <div style={{ fontSize:24, color:'rgba(255,255,255,0.96)', fontFamily:'Albert Sans, sans-serif', fontWeight:600, lineHeight:1.1, marginBottom:16, letterSpacing:'-0.02em' }}>Ce qui peut vous aider</div>
             <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.72)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>{insight.process}</p>
           </div>
 
@@ -1651,7 +1651,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 }}
               />
             </div>
-            <h3 style={{ fontFamily:'DM Serif Display, serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:400, lineHeight:1.08, marginBottom:14, maxWidth:320, textWrap:'pretty', letterSpacing:'-0.3px' }}>{item.name}</h3>
+            <h3 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.08, marginBottom:14, maxWidth:320, textWrap:'pretty', letterSpacing:'-0.02em' }}>{item.name}</h3>
             <p style={{ fontFamily:'Questrial, sans-serif', fontSize:16, lineHeight:1.8, color:'rgba(255,255,255,0.84)', textWrap:'pretty', marginBottom:22, maxWidth:340 }}>
               {item.desc} Elle s&apos;inscrit dans une démarche progressive, adaptée à ton rythme, avec un cadre clair et rassurant.
             </p>
@@ -2873,7 +2873,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setBlurPreload(false); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setExtraNote(''); setExtraChips([]); setAppointments(function(prev){ return prev.filter(function(a){ return a.status === 'past'; }); }); };
     const showTabbar = screen === 'hub' || screen === 'matching' || screen === 'appointments' || (screen === 'therapies' && !therapyDetailOpen);
     return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 1} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{(softenBackground || blurPreload) && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(72px) saturate(0.70)', WebkitBackdropFilter:'blur(72px) saturate(0.70)', background:'rgba(7,22,48,0.52)', animation: blurPreload && !softenBackground ? 'fadeIn 0.45s ease both' : 'none' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} onViewAppointment={bookedAppointment ? goToAppointments : undefined} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} onCancel={goToHub} onExiting={() => { if (step === QUESTIONS.length - 1) setBlurPreload(true); }} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} extraNote={extraNote} setExtraNote={setExtraNote} extraChips={extraChips} setExtraChips={setExtraChips} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} onSOS={()=>setSosOpen(true)} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);setTherapistFromScreen('matching');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'appointments' && <AppointmentsScreen appointments={appointments} onGoMatching={goToBookingHub} onBookTherapist={function(t){ setShaderForInnerPage(); setTh(t); setMainTab('booking'); setScreen('booking'); setTherapistFromScreen('appointments'); }} onViewTherapist={handleViewTherapistFromAppt} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen(therapistFromScreen === 'appointments' ? 'appointments' : 'matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={addAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToAppointments} onSOS={() => setSosOpen(true)} />}
-{sosOpen && <SOSModal onClose={() => setSosOpen(false)} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'DM Serif Display, serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24 }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
+{sosOpen && <SOSModal onClose={() => setSosOpen(false)} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24, letterSpacing:'-0.02em' }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
   }
   window.Claira.App = App;
   ReactDOM.createRoot(document.getElementById('root')).render(<App />);
