@@ -1622,7 +1622,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <div style={{ display:'flex', justifyContent:'space-between', gap:12, alignItems:'flex-start', marginBottom:10 }}>
           <div style={{ flex:1 }}>
             {recommended && (
-              <div style={{ display:'inline-block', marginBottom:12, color:'#49caa6fa', fontSize:10, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>Recommandé</div>
+              <div style={{ display:'inline-block', marginBottom:12, color:'rgba(122,245,198,0.98)', fontSize:12, fontWeight:600, letterSpacing:'0.04em' }}>Recommandé</div>
             )}
             <h3 style={{ fontFamily:'Questrial, sans-serif', fontSize:20, lineHeight:1.25, color:'rgba(255,255,255,0.94)', fontWeight:700, marginBottom:8 }}>{item.name.replace(/\n+/g, ' ')}</h3>
             <div style={{ fontSize:13, color:'rgba(255,255,255,0.52)', lineHeight:1.45 }}>{item.tagline}</div>
@@ -2057,7 +2057,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                     onMouseLeave={e=>{ e.currentTarget.style.background= recommended ? 'rgba(73,202,166,0.07)' : 'transparent'; }}
                   >
                     {recommended && (
-                      <div style={{ position:'absolute', left:74, top:14, color:'#49caa6fa', fontSize:10, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>Recommandé</div>
+                      <div style={{ position:'absolute', left:74, top:14, color:'rgba(122,245,198,0.98)', fontSize:12, fontWeight:600, letterSpacing:'0.04em' }}>Recommandé</div>
                     )}
                     <div style={{ display:'grid', gridTemplateColumns:'48px minmax(0,1fr)', gap:10, alignItems:'start' }}>
                       <div style={{ width:48, height:48, borderRadius:15, background:'rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', border:'1px solid rgba(255,255,255,0.05)', overflow:'hidden' }}>
