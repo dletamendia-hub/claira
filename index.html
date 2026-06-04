@@ -963,7 +963,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'20px 28px 36px' }}>
           <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'flex-start', paddingTop:'clamp(36px, 7vh, 72px)' }}>
             <div className="fade-up" style={{ animationDelay:'0.1s', marginBottom:20 }}>
-              <h1 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:42, color:'rgba(255,255,255,0.95)', fontWeight:600, lineHeight:1.15, letterSpacing:'-0.02em' }}>
+              <h1 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:40, color:'rgba(255,255,255,0.95)', fontWeight:600, lineHeight:1.15, letterSpacing:'-0.02em' }}>
                 Tu n'as pas à tout<br/><em style={{ fontStyle:'italic', fontWeight:200, color:'rgba(160,200,255,0.95)' }}>porter seul·e.</em>
               </h1>
             </div>
@@ -1339,7 +1339,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [showApiKeyModal, setShowApiKeyModal] = useState(false);
     const renderSummary = () => {
       const mark = (key, text) => (
-        <strong key={key} style={{ fontWeight:700, fontStyle:'italic', color:'#49caa6fa' }}>
+        <strong key={key} style={{ fontWeight:700, color:'#49caa6fa' }}>
           {text}
         </strong>
       );
@@ -1426,8 +1426,9 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       return (
         <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, minHeight:0 }}>
           <StickyHeader />
-          <div style={{ flex:1, overflowY:'auto', padding:'32px 22px 30px', display:'flex', flexDirection:'column', gap:20, animation:'fadeIn 0.5s ease both' }}>
-            <div style={{ display:'flex', justifyContent:'center', marginBottom:4 }}>
+          <div style={{ flex:1, overflowY:'auto', padding:'32px 22px 30px', display:'flex', flexDirection:'column', gap:0, animation:'fadeIn 0.5s ease both' }}>
+            {/* Image placeholder */}
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:22 }}>
               <div style={{ ...shimmerStyle(105, 118), borderRadius:22, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 16px 34px rgba(0,0,0,0.16)' }}>
                 <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true" style={{ filter:'drop-shadow(0 0 10px rgba(255,255,255,0.12))' }}>
                   <path d="M15 3.5l2.8 8.1 8.2 2.9-8.2 2.8L15 25.5l-2.8-8.2L4 14.5l8.2-2.9L15 3.5Z" fill="rgba(255,255,255,0.55)"/>
@@ -1435,11 +1436,19 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 </svg>
               </div>
             </div>
-            <div style={shimmerStyle('72%', 30)}></div>
-            <div style={shimmerStyle('100%', 16, '0.15s')}></div>
-            <div style={shimmerStyle('90%',  16, '0.25s')}></div>
-            <div style={shimmerStyle('78%',  16, '0.35s')}></div>
-            <div style={shimmerStyle('50%',  16, '0.45s')}></div>
+            {/* Titre centré — 2 lignes à 30px */}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, marginBottom:22 }}>
+              <div style={shimmerStyle('74%', 30)}></div>
+              <div style={shimmerStyle('52%', 30, '0.08s')}></div>
+            </div>
+            {/* Corps — fontSize 17, gap simulant lineHeight 1.85 */}
+            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+              <div style={shimmerStyle('100%', 17, '0.14s')}></div>
+              <div style={shimmerStyle('100%', 17, '0.22s')}></div>
+              <div style={shimmerStyle('92%',  17, '0.30s')}></div>
+              <div style={shimmerStyle('84%',  17, '0.38s')}></div>
+              <div style={shimmerStyle('58%',  17, '0.46s')}></div>
+            </div>
           </div>
         </div>
       );
@@ -1450,7 +1459,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       const parts = text.split(/\*\*(.+?)\*\*/g);
       return parts.map((part, i) =>
         i % 2 === 1
-          ? <strong key={i} style={{ fontWeight:700, fontStyle:'italic', color:'#49caa6fa', margin:'0 0.12em' }}>{part}</strong>
+          ? <strong key={i} style={{ fontWeight:700, color:'#49caa6fa', margin:'0 0.12em' }}>{part}</strong>
           : part
       );
     };
@@ -1476,7 +1485,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 }}
               />
             </div>
-            <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.15, marginBottom:18, letterSpacing:'-0.02em' }}>{insight.label}</h2>
+            <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.15, marginBottom:18, letterSpacing:'-0.02em', textAlign:'center' }}>{insight.label}</h2>
             <p style={{ fontSize:17, lineHeight:1.85, color:'rgba(255,255,255,0.82)', fontWeight:400, textWrap:'pretty', maxWidth:340, fontFamily:'Questrial, sans-serif' }}>
               {renderAISummary(insight.summary)}
             </p>
@@ -1662,7 +1671,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 }}
               />
             </div>
-            <h3 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.08, marginBottom:14, maxWidth:320, textWrap:'pretty', letterSpacing:'-0.02em' }}>{item.name}</h3>
+            <h3 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:30, color:'rgba(255,255,255,0.96)', fontWeight:600, lineHeight:1.08, marginBottom:14, maxWidth:320, textWrap:'pretty', letterSpacing:'-0.02em', textAlign:'center' }}>{item.name}</h3>
             <p style={{ fontFamily:'Questrial, sans-serif', fontSize:16, lineHeight:1.8, color:'rgba(255,255,255,0.84)', textWrap:'pretty', marginBottom:22, maxWidth:340 }}>
               {item.desc} Elle s&apos;inscrit dans une démarche progressive, adaptée à ton rythme, avec un cadre clair et rassurant.
             </p>
