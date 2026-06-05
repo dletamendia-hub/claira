@@ -1049,59 +1049,54 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
               </button>
             </div>
           )}
-          <div style={{ padding:'18px 18px 20px', borderRadius:24, background:'rgb(200 221 255 / 6%)', border:'none', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)', boxShadow:'0 18px 40px rgba(0,0,0,0.18)', marginBottom:22 }}>
+          <div style={{ padding:'18px 18px 20px', borderRadius:24, background:'rgb(200 221 255 / 6%)', border:'none', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)', boxShadow:'0 18px 40px rgba(0,0,0,0.18)', marginBottom:22, position:'relative', overflow:'hidden' }}>
+            <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none' }}/>
             <img
               src="assets/seul.png"
               alt="Illustration d'accompagnement"
-              width="92"
-              height="101"
+              width="92" height="101"
               ref={el => { if (el && el.complete) el.style.opacity = '1'; }} onLoad={e => e.currentTarget.style.opacity = '1'}
-              style={{
-                width:92,
-                height:101,
-                display:'block',
-                marginBottom:10,
-                filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.22))',
-                opacity:0,
-                transition:'opacity 0.45s ease',
-              }}
+              style={{ position:'absolute', top:18, left:18, width:92, height:101, filter:'drop-shadow(0 2px 10px rgba(0,0,0,0.32))', opacity:0, transition:'opacity 0.45s ease' }}
             />
-            <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, lineHeight:1.25, color:'rgba(255,255,255,0.95)', fontWeight:400, letterSpacing:'-0.02em', marginBottom:10 }}>
-              {hasProgress ? insight.label : "Une minute pour mieux vous orienter"}
-            </div>
-            {hasProgress && recommendedTherapy ? (
-              <div style={{ marginBottom:14 }}>
-                <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:600, color:'#49caa6', letterSpacing:'0.01em', marginBottom:10, marginTop:14 }}>Recommandé pour vous :</div>
-                <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.92)', marginBottom:6 }}>
-                  {recommendedTherapy.short}
-                  {recommendedTherapy.name.replace(/\n/g,' ').toLowerCase() !== recommendedTherapy.short.toLowerCase() && (
-                    <span style={{ fontWeight:400, color:'rgba(255,255,255,0.60)' }}> ({recommendedTherapy.name.replace(/\n/g,' ')})</span>
-                  )}
-                </div>
-                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.75)', textWrap:'pretty' }}>{recommendationSummary}</p>
+            <div style={{ paddingTop:116 }}>
+              <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, lineHeight:1.25, color:'rgba(255,255,255,0.95)', fontWeight:400, letterSpacing:'-0.02em', marginBottom:10 }}>
+                {hasProgress ? insight.label : "Une minute pour mieux vous orienter"}
               </div>
-            ) : (
-              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.75)', textWrap:'pretty', marginBottom:14 }}>
-                Claira vous aide à poser des mots sur ce que vous vivez, puis à repérer une approche thérapeutique et un rendez-vous adapté.
-              </p>
-            )}
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              {!hasProgress && (
-                <button onClick={onStartAssessment} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
-                  Faire le point maintenant
-                </button>
+              {hasProgress && recommendedTherapy ? (
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:600, color:'#49caa6', letterSpacing:'0.01em', marginBottom:10, marginTop:14 }}>Recommandé pour vous :</div>
+                  <div style={{ fontFamily:'Questrial, sans-serif', fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.92)', marginBottom:6 }}>
+                    {recommendedTherapy.short}
+                    {recommendedTherapy.name.replace(/\n/g,' ').toLowerCase() !== recommendedTherapy.short.toLowerCase() && (
+                      <span style={{ fontWeight:400, color:'rgba(255,255,255,0.60)' }}> ({recommendedTherapy.name.replace(/\n/g,' ')})</span>
+                    )}
+                  </div>
+                  <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.75)', textWrap:'pretty' }}>{recommendationSummary}</p>
+                </div>
+              ) : (
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.75)', textWrap:'pretty', marginBottom:14 }}>
+                  Claira vous aide à poser des mots sur ce que vous vivez, puis à repérer une approche thérapeutique et un rendez-vous adapté.
+                </p>
               )}
-              {hasProgress && (
-                <button onClick={onOpenSummary} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
-                  Voir mon résumé
-                </button>
-              )}
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {!hasProgress && (
+                  <button onClick={onStartAssessment} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,1)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
+                    Faire le point maintenant
+                  </button>
+                )}
+                {hasProgress && (
+                  <button onClick={onOpenSummary} style={{ width:'100%', minHeight:56, padding:'15px 20px', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,1)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
+                    Voir mon résumé
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
           <div>
-            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none', marginBottom:22 }}>
-              <div style={{ position:'relative', height:72, width:148, marginBottom:18 }}>
+            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none', marginBottom:22, position:'relative', overflow:'hidden' }}>
+              <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none' }}/>
+              <div style={{ position:'absolute', top:18, left:18, height:72, width:148 }}>
                 {featuredTherapists.map((th, idx) => {
                   const positions = [
                     { left:0, top:6, z:1, rotate:'-6deg' },
@@ -1116,37 +1111,34 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                   );
                 })}
               </div>
-              <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, lineHeight:1.25, fontWeight:400, letterSpacing:'-0.02em', color:'rgba(255,255,255,0.90)', marginBottom:10 }}>Nos thérapeutes disponibles en visio</div>
-              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.75)', margin:'0 0 14px', textWrap:'pretty' }}>
-                Des professionnels disponibles en ligne, pour échanger plus facilement depuis chez vous.
-              </p>
-              <button onClick={onGoBooking} style={{ width:'100%', minHeight:56, padding:'15px 18px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
-                Prendre un RDV
-              </button>
+              <div style={{ paddingTop:100 }}>
+                <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, lineHeight:1.25, fontWeight:400, letterSpacing:'-0.02em', color:'rgba(255,255,255,0.90)', marginBottom:10 }}>Nos thérapeutes disponibles en visio</div>
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.72, color:'rgba(255,255,255,0.75)', margin:'0 0 14px', textWrap:'pretty' }}>
+                  Des professionnels disponibles en ligne, pour échanger plus facilement depuis chez vous.
+                </p>
+                <button onClick={onGoBooking} style={{ width:'100%', minHeight:56, padding:'15px 18px', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,1)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
+                  Prendre un RDV
+                </button>
+              </div>
             </div>
 
-            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none', marginBottom:22 }}>
+            <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none', marginBottom:22, position:'relative', overflow:'hidden' }}>
+              <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none' }}/>
               <img
                 src="assets/Therapie.png"
                 alt="Illustration des thérapies"
                 ref={el => { if (el && el.complete) el.style.opacity = '1'; }} onLoad={e => e.currentTarget.style.opacity = '1'}
-                style={{
-                  width:94,
-                  height:'auto',
-                  display:'block',
-                  marginBottom:10,
-                  filter:'drop-shadow(0 12px 24px rgba(0,0,0,0.20))',
-                  opacity:0,
-                  transition:'opacity 0.45s ease',
-                }}
+                style={{ position:'absolute', top:18, left:18, width:94, height:'auto', filter:'drop-shadow(0 2px 10px rgba(0,0,0,0.32))', opacity:0, transition:'opacity 0.45s ease' }}
               />
-              <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, lineHeight:1.25, fontWeight:400, letterSpacing:'-0.02em', color:'rgba(255,255,255,0.90)', marginBottom:10 }}>Des thérapies adaptées</div>
-              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.66)', margin:'0 0 16px', textWrap:'pretty' }}>
-                Chaque approche répond à des besoins différents. Les découvrir aide à choisir un cadre plus juste pour avancer.
-              </p>
-              <button onClick={onGoTherapies} style={{ width:'100%', minHeight:56, padding:'15px 18px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
-                Découvrir toutes les thérapies
-              </button>
+              <div style={{ paddingTop:116 }}>
+                <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, lineHeight:1.25, fontWeight:400, letterSpacing:'-0.02em', color:'rgba(255,255,255,0.90)', marginBottom:10 }}>Des thérapies adaptées</div>
+                <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.7, color:'rgba(255,255,255,0.66)', margin:'0 0 16px', textWrap:'pretty' }}>
+                  Chaque approche répond à des besoins différents. Les découvrir aide à choisir un cadre plus juste pour avancer.
+                </p>
+                <button onClick={onGoTherapies} style={{ width:'100%', minHeight:56, padding:'15px 18px', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,1)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:100, fontSize:15, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>
+                  Découvrir toutes les thérapies
+                </button>
+              </div>
             </div>
 
             <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none' }}>
