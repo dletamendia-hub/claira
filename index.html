@@ -1050,7 +1050,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </div>
           )}
           <div style={{ padding:'18px 18px 20px', borderRadius:24, background:'rgb(200 221 255 / 6%)', border:'none', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)', boxShadow:'0 18px 40px rgba(0,0,0,0.18)', marginBottom:22, position:'relative', overflow:'hidden' }}>
-            <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none' }}/>
+            <img src="assets/lights2.png" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none', opacity:0.85 }}/>
             <img
               src="assets/seul.png"
               alt="Illustration d'accompagnement"
@@ -1095,7 +1095,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
           <div>
             <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none', marginBottom:22, position:'relative', overflow:'hidden' }}>
-              <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none' }}/>
+              <img src="assets/lights2.png" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none', opacity:0.85 }}/>
               <div style={{ position:'absolute', top:18, left:18, height:72, width:148 }}>
                 {featuredTherapists.map((th, idx) => {
                   const positions = [
@@ -1123,7 +1123,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </div>
 
             <div style={{ padding:'18px 18px 20px', borderRadius:22, background:'rgb(200 221 255 / 6%)', border:'none', marginBottom:22, position:'relative', overflow:'hidden' }}>
-              <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none' }}/>
+              <img src="assets/Lights.svg" aria-hidden="true" style={{ position:'absolute', top:0, left:0, width:256, height:214, pointerEvents:'none', userSelect:'none', opacity:0.85 }}/>
               <img
                 src="assets/Therapie.png"
                 alt="Illustration des thérapies"
@@ -2245,7 +2245,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         {messages.length === 0 && (
           <div className="fade-up" style={{ padding:'0 16px 10px', display:'flex', flexDirection:'column', gap:7, flexShrink:0 }}>
             {INITIAL_SUGGESTIONS.map((s, i) => (
-              <button key={i} onClick={() => send(s)} style={{ width:'100%', textAlign:'left', padding:'11px 16px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.75)', border:'none', borderRadius:16, fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
+              <button key={i} onClick={() => send(s)} style={{ width:'fit-content', textAlign:'left', padding:'11px 16px', background:'rgba(255,255,255,0.055)', color:'rgba(255,255,255,0.75)', border:'none', borderRadius:16, fontSize:14, fontFamily:'Questrial, sans-serif', cursor:'pointer', transition:'background 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.09)'}
                 onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.055)'}
               >{s}</button>
