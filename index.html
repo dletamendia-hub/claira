@@ -764,7 +764,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           }
         </div>
         {rightAction ? rightAction : (
-          <button onClick={onHelp || undefined} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor: onHelp ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <button type="button" onClick={onHelp || undefined} style={{ width:36, height:36, borderRadius:'50%', background:'rgba(255,255,255,0.08)', border:'none', cursor: onHelp ? 'pointer' : 'default', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <span style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.55)' }}>?</span>
           </button>
         )}
@@ -1036,7 +1036,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                   </svg>
                 </div>
                 <div>
-                  <div style={{ fontFamily:'Questrial, sans-serif', fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.92)', marginBottom:4 }}>
+                  <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:16, fontWeight:500, color:'rgba(255,255,255,0.92)', marginBottom:4 }}>
                     Votre rendez-vous est confirmé
                   </div>
                   <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.6, color:'rgba(255,255,255,0.72)', margin:0, textWrap:'pretty' }}>
@@ -1327,7 +1327,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  function InsightScreen({ answers, insight, onContinue, onRestart, onBack, extraNote, setExtraNote, extraChips, setExtraChips }) {
+  function InsightScreen({ answers, insight, onContinue, continueLabel, onRestart, onBack, extraNote, setExtraNote, extraChips, setExtraChips }) {
     const [showExtraNote, setShowExtraNote] = useState(!!(extraNote || extraChips.length));
     const EXTRA_CHIPS = ['Insomnies','Manque d\'appétit','Agitation','Concentration difficile','Auto-dévaluation','Peurs intenses','Pensées suicidaires','Médicaments en cours'];
     const toggleChip = (c) => setExtraChips(prev => prev.includes(c) ? prev.filter(x=>x!==c) : [...prev, c]);
@@ -1570,7 +1570,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
 
           <div className="fade-up" style={{ animationDelay:'0.4s', paddingTop:8 }}>
-            <button onClick={onContinue} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'-0.01em' }} onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>Voir les approches adaptées</button>
+            <button onClick={onContinue} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'-0.01em' }} onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>{continueLabel || 'Voir les approches adaptées'}</button>
             <button onClick={onRestart} style={{ width:'100%', minHeight:64, marginTop:10, padding:'17px 24px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,1)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'-0.01em' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>Refaire le diagnostic</button>
           </div>
         </div>
@@ -2489,7 +2489,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     );
   }
 
-  function BookingScreen({ therapist:th, onBack, onRestart, onConfirmBooking }) {
+  function BookingScreen({ therapist:th, onBack, onRestart, onConfirmBooking, insight, onGoAssessment, initialSubScreen }) {
     const schedule = (() => {
       const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
       const months = ['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
@@ -2518,12 +2518,39 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     })();
     const [selectedDay, setSelectedDay] = useState(schedule[0].id);
     const [selectedTime, setSelectedTime] = useState(null);
-    const [done, setDone] = useState(false);
+    const [subScreen, setSubScreen] = useState(initialSubScreen || 'calendar');
+    useEffect(() => { if (initialSubScreen) { /* consumed on mount */ } }, []);
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [phoneError, setPhoneError] = useState('');
+    const [shareResume, setShareResume] = useState(true);
+    const [message, setMessage] = useState('');
+    const [accountChoice, setAccountChoice] = useState('account');
+    const [showEmailSheet, setShowEmailSheet] = useState(false);
+    const [emailSheetClosing, setEmailSheetClosing] = useState(false);
+    const closeEmailSheet = (cb) => { setEmailSheetClosing(true); setTimeout(() => { setShowEmailSheet(false); setEmailSheetClosing(false); if (cb) cb(); }, 320); };
     const currentDay = schedule.find(day => day.id === selectedDay) || schedule[0];
     const sel = selectedTime ? `${currentDay.label} - ${selectedTime}` : null;
-    useEffect(() => {
-      setSelectedTime(null);
-    }, [selectedDay]);
+    useEffect(() => { setSelectedTime(null); }, [selectedDay]);
+
+    const handleValidateContact = () => {
+      let valid = true;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setEmailError('Adresse email invalide'); valid = false; } else setEmailError('');
+      if (!/^\+?[\d\s\-\.]{8,}$/.test(phone.trim())) { setPhoneError('Numéro de téléphone invalide'); valid = false; } else setPhoneError('');
+      if (valid) setSubScreen('summary');
+    };
+    const handleConfirmAll = () => {
+      if (accountChoice === 'account') { setShowEmailSheet(true); return; }
+      onConfirmBooking && onConfirmBooking({ therapistId:th.id, name:th.name, when:sel, type: th.online ? 'video' : 'cabinet', initials:th.initials, hue:th.hue });
+      setSubScreen('done');
+    };
+    const handleEmailSheetConfirm = () => {
+      closeEmailSheet(() => {
+        onConfirmBooking && onConfirmBooking({ therapistId:th.id, name:th.name, when:sel, type: th.online ? 'video' : 'cabinet', initials:th.initials, hue:th.hue });
+        setSubScreen('done');
+      });
+    };
     const handleAddToCalendar = () => {
       if (!sel) return;
       const datePart = selectedDay.replace(/-/g, '');
@@ -2565,7 +2592,159 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     };
-    if (done) return (<div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', padding:'40px 32px', textAlign:'center', position:'relative', zIndex:1 }}><div className="fade-up" style={{ width:68, height:68, borderRadius:'50%', background:'rgba(116,227,234,0.12)', border:'none', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:22 }}><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14.5l5 5L22 9" stroke="rgba(116,227,234,0.92)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg></div><h2 className="fade-up" style={{ fontFamily:'Albert Sans, sans-serif', fontSize:32, color:'rgba(255,255,255,0.92)', fontWeight:400, marginBottom:10, animationDelay:'0.1s', letterSpacing:'-0.02em' }}>C&apos;est confirmé !</h2><p className="fade-up" style={{ fontSize:15, color:'rgba(255,255,255,0.52)', lineHeight:1.65, marginBottom:6, animationDelay:'0.18s', fontFamily:'Questrial, sans-serif' }}>avec {th.name}</p><p className="fade-up" style={{ fontSize:15, color:'rgba(116,227,234,0.92)', fontWeight:700, marginBottom:22, animationDelay:'0.22s', fontFamily:'Questrial, sans-serif' }}>{sel}</p><div className="fade-up" style={{ background:'rgba(255,255,255,0.05)', borderRadius:14, padding:'16px 18px', marginBottom:14, width:'100%', border:'none', animationDelay:'0.3s' }}><p style={{ fontSize:14, color:'rgba(255,255,255,0.72)', lineHeight:1.75, margin:0, fontFamily:'Questrial, sans-serif' }}>Un email de confirmation vous a été envoyé. Annulation possible jusqu&apos;à 24h avant.</p></div><div style={{ height:24 }}/><button onClick={handleAddToCalendar} className="fade-up" style={{ minHeight:58, width:'100%', background:'rgba(255,255,255,0.92)', border:'1px solid rgba(255,255,255,0.16)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'#0b0b14', fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', animationDelay:'0.34s', letterSpacing:'-0.01em', marginBottom:12 }}>Ajouter à mon calendrier</button><button onClick={onRestart} className="fade-up" style={{ minHeight:58, width:'100%', background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'rgba(255,255,255,1)', fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', animationDelay:'0.38s', letterSpacing:'-0.01em' }}>Retour à l&apos;accueil</button></div>);
+    // ── ÉCRAN 4 : Confirmation ──────────────────────────────────────────────
+    if (subScreen === 'done') return (
+      <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'40px 24px 36px', position:'relative', zIndex:1 }}>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:26 }}>
+          <div className="fade-up" style={{ width:80, height:80, borderRadius:'50%', background:'rgba(116,227,234,0.10)', border:'1px solid rgba(116,227,234,0.20)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M7 16.5l6 6L25 9" stroke="rgba(116,227,234,0.92)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+          <div className="fade-up" style={{ animationDelay:'0.08s', textAlign:'center', display:'flex', flexDirection:'column', gap:6 }}>
+            <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:34, color:'rgba(255,255,255,0.95)', fontWeight:400, letterSpacing:'-0.02em', margin:0 }}>C&apos;est confirmé !</h2>
+            <p style={{ fontSize:15, color:'rgba(255,255,255,0.72)', fontFamily:'Questrial, sans-serif', margin:0 }}>avec {th.name}</p>
+            <p style={{ fontSize:17, color:'rgba(255,255,255,0.90)', fontFamily:'Albert Sans, sans-serif', fontWeight:500, margin:'6px 0 0', letterSpacing:'-0.01em' }}>{sel}</p>
+          </div>
+          <div className="fade-up" style={{ animationDelay:'0.16s', background:'rgba(255,255,255,0.05)', borderRadius:18, padding:'18px 20px', width:'100%', border:'1px solid rgba(255,255,255,0.07)' }}>
+            <p style={{ fontSize:14, color:'rgba(255,255,255,0.75)', lineHeight:1.6, margin:0, fontFamily:'Questrial, sans-serif' }}>
+              Annulation possible jusqu&apos;à 24h avant.<br/>
+              Un email de confirmation a été envoyé à :<br/>
+              <span style={{ color:'rgba(116,227,234,0.85)', fontWeight:500 }}>{email || 'votre@email.com'}</span>
+            </p>
+          </div>
+        </div>
+        <div className="fade-up" style={{ animationDelay:'0.24s', display:'flex', flexDirection:'column', gap:12 }}>
+          <button onClick={handleAddToCalendar} style={{ minHeight:56, width:'100%', background:'rgba(255,255,255,0.92)', border:'none', borderRadius:100, padding:'15px 22px', fontSize:16, color:'#0b0b14', fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>Ajouter à mon calendrier</button>
+          <button onClick={onRestart} style={{ minHeight:56, width:'100%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, padding:'15px 22px', fontSize:16, color:'rgba(255,255,255,0.85)', fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>Retour à l&apos;accueil</button>
+        </div>
+      </div>
+    );
+
+    // ── ÉCRAN 3 : Sauvegarde du compte ─────────────────────────────────────
+    if (subScreen === 'account') return (
+      <React.Fragment>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
+        <AppHeader onBack={()=>setSubScreen('summary')} title="Votre espace" onHelp={()=>setSubScreen('done')} />
+        <div style={{ flex:1, overflowY:'auto', padding:'0 24px' }}>
+          <div style={{ paddingTop:20, paddingBottom:40 }}>
+            <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:24, color:'rgba(255,255,255,0.95)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:1.15, marginBottom:10 }}>Retrouvez votre parcours</h2>
+            <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.72)', lineHeight:1.6, marginBottom:28 }}>Créez un espace pour accéder à vos rendez-vous, votre résumé et vos thérapeutes depuis n&apos;importe quel appareil.</p>
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              {[
+                { id:'account', label:'Créer mon espace', sub:'Accédez à tout votre parcours', icon: <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 11a4 4 0 100-8 4 4 0 000 8zm0 2c-4.42 0-8 1.8-8 4v1h16v-1c0-2.2-3.58-4-8-4z" fill="currentColor"/></svg> },
+                { id:'no-account', label:'Continuer sans compte', sub:'Vos données restent sur cet appareil', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+              ].map(opt => {
+                const active = accountChoice === opt.id;
+                return (
+                  <button key={opt.id} onClick={()=>setAccountChoice(opt.id)} style={{ display:'flex', gap:14, alignItems:'center', padding:18, background:active?'rgba(255,255,255,0.09)':'rgba(255,255,255,0.04)', border:active?'1px solid rgba(255,255,255,0.20)':'1px solid rgba(255,255,255,0.07)', borderRadius:20, cursor:'pointer', textAlign:'left', width:'100%', transition:'all 0.2s', fontFamily:'inherit' }}>
+                    <div style={{ width:48, height:48, borderRadius:'50%', background:active?'rgba(116,227,234,0.12)':'rgba(255,255,255,0.06)', color:active?'rgba(116,227,234,0.85)':'rgba(255,255,255,0.50)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, border:active?'1px solid rgba(116,227,234,0.20)':'1px solid rgba(255,255,255,0.06)', transition:'all 0.2s' }}>{opt.icon}</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:16, color:'rgba(255,255,255,0.92)', fontWeight:500, letterSpacing:'-0.01em', marginBottom:3 }}>{opt.label}</div>
+                      <div style={{ fontFamily:'Questrial, sans-serif', fontSize:13, color:'rgba(255,255,255,0.50)' }}>{opt.sub}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        <div style={{ padding:'16px 24px 32px', flexShrink:0 }}>
+          <button onClick={handleConfirmAll} style={{ width:'100%', minHeight:56, background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'none', borderRadius:100, fontSize:16, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>Confirmer mon choix</button>
+        </div>
+      </div>
+      {showEmailSheet && ReactDOM.createPortal(<>
+        <div onClick={()=>closeEmailSheet()} style={{ position:'absolute', inset:0, background:'rgba(255,255,255,0.10)', zIndex:200, transition:'opacity 0.30s ease', opacity: emailSheetClosing ? 0 : 1 }} />
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'#13131f', borderRadius:'28px 28px 0 0', padding:'32px 24px 40px', zIndex:201, animation: emailSheetClosing ? 'sheetDown 0.32s cubic-bezier(.22,1,.36,1) both' : 'sheetUp 0.35s cubic-bezier(.22,1,.36,1) both' }}>
+          <div style={{ width:36, height:4, borderRadius:2, background:'rgba(255,255,255,0.18)', margin:'0 auto 28px' }} />
+          <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(116,227,234,0.12)', border:'1px solid rgba(116,227,234,0.25)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 20px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z" fill="rgba(116,227,234,0.85)"/></svg>
+          </div>
+          <h3 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, fontWeight:500, color:'rgba(255,255,255,0.95)', letterSpacing:'-0.02em', lineHeight:1.2, textAlign:'center', marginBottom:12 }}>Un email vous a été envoyé</h3>
+          <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.65)', lineHeight:1.6, textAlign:'center', marginBottom:32 }}>Cliquez sur le lien dans votre boîte mail pour finaliser la création de votre espace. Votre rendez-vous est bien enregistré.</p>
+          <button type="button" onClick={handleEmailSheetConfirm} style={{ width:'100%', minHeight:56, background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'none', borderRadius:100, fontSize:16, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>J'ai compris</button>
+        </div>
+      </>, document.getElementById('root'))}
+      </React.Fragment>
+    );
+
+    // ── ÉCRAN 2 : Transmission du bilan ────────────────────────────────────
+    if (subScreen === 'summary') {
+      const hasInsight = !!(insight && insight.label);
+      return (
+        <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
+          <AppHeader onBack={()=>setSubScreen('contact')} title="Avant le rendez-vous" onHelp={()=>setSubScreen('account')} />
+          <div style={{ flex:1, overflowY:'auto', padding:'0 24px' }}>
+            <div style={{ paddingTop:20, paddingBottom:40 }}>
+              <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:24, color:'rgba(255,255,255,0.95)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:1.15, marginBottom:24 }}>Transmettre mon résumé à mon thérapeute</h2>
+              {hasInsight ? (
+                <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:20, padding:20, border:'1px solid rgba(255,255,255,0.08)', marginBottom:22 }}>
+                  <div style={{ fontSize:11, fontFamily:'Albert Sans, sans-serif', fontWeight:600, color:'rgba(116,227,234,0.85)', marginBottom:8 }}>Votre résumé</div>
+                  <p style={{ fontFamily:'Albert Sans, sans-serif', fontSize:17, color:'rgba(255,255,255,0.90)', fontWeight:400, margin:'0 0 14px', lineHeight:1.3 }}>{insight.label}</p>
+                  <div style={{ height:1, background:'rgba(255,255,255,0.08)', marginBottom:14 }}></div>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16 }}>
+                    <p style={{ fontFamily:'Questrial, sans-serif', fontSize:13, color:'rgba(255,255,255,0.75)', lineHeight:1.5, margin:0, flex:1 }}>Partager ce résumé avec {th.name}</p>
+                    <button onClick={()=>setShareResume(v=>!v)} aria-label="Partager le résumé" style={{ flexShrink:0, width:48, height:28, borderRadius:14, background:shareResume?'rgba(116,227,234,0.65)':'rgba(255,255,255,0.15)', border:'none', position:'relative', cursor:'pointer', transition:'background 0.25s' }}>
+                      <span style={{ position:'absolute', top:3, left:shareResume?23:3, width:22, height:22, borderRadius:'50%', background:'white', transition:'left 0.25s', display:'block', boxShadow:'0 1px 4px rgba(0,0,0,0.30)' }}></span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:20, padding:20, border:'1px solid rgba(255,255,255,0.08)', marginBottom:22 }}>
+                  <div style={{ fontSize:11, fontFamily:'Albert Sans, sans-serif', fontWeight:600, color:'rgba(116,227,234,0.85)', marginBottom:8 }}>Pas encore de résumé</div>
+                  <p style={{ fontFamily:'Albert Sans, sans-serif', fontSize:18, color:'rgba(255,255,255,0.90)', fontWeight:400, margin:'0 0 8px', lineHeight:1.2 }}>Faire le point maintenant</p>
+                  <p style={{ fontFamily:'Questrial, sans-serif', fontSize:13, color:'rgba(255,255,255,0.75)', lineHeight:1.6, margin:'0 0 16px' }}>Prenez 1 minute pour répondre à quelques questions pour que {th.name} comprenne ce que vous traversez.</p>
+                  <button type="button" onClick={onGoAssessment} style={{ width:'100%', minHeight:52, background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'none', borderRadius:100, fontSize:15, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', fontWeight:500, letterSpacing:'-0.01em' }}>Faire le point en 1 minute</button>
+                </div>
+              )}
+              <div>
+                <div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:14, fontWeight:500, color:'rgba(255,255,255,0.75)', letterSpacing:'-0.01em', marginBottom:10, marginTop:32 }}>Un message pour {th.name} ?</div>
+                <div className="textarea-wrap" style={{ borderRadius:18, background:'rgba(255,255,255,0.06)' }}>
+                  <textarea value={message} onChange={e=>setMessage(e.target.value)} placeholder={`Ce que vous souhaitez lui préciser avant le rendez-vous...`} rows={4}
+                    style={{ width:'100%', resize:'none', background:'transparent', border:'none', borderRadius:18, color:'rgba(255,255,255,0.85)', fontFamily:'Questrial, sans-serif', fontSize:14, lineHeight:1.6, padding:'14px 16px', outline:'none', display:'block', boxSizing:'border-box' }} />
+                </div>
+                <div style={{ fontSize:12, fontFamily:'Questrial, sans-serif', color:'rgba(255,255,255,0.40)', marginTop:6, paddingLeft:4 }}>Optionnel</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ padding:'16px 24px 32px', flexShrink:0, display:'flex', flexDirection:'column', gap:16 }}>
+            <button type="button" onClick={()=>setSubScreen('account')} style={{ width:'100%', minHeight:56, background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'none', borderRadius:100, fontSize:16, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em' }}>{hasInsight ? 'Terminer ma prise de RDV' : 'Confirmer mon choix'}</button>
+            {hasInsight && <button type="button" onClick={onGoAssessment} style={{ width:'100%', minHeight:56, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:16, fontWeight:500, color:'rgba(255,255,255,1)', fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em', transition:'all 0.2s' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>Refaire le diagnostic</button>}
+          </div>
+        </div>
+      );
+    }
+
+    // ── ÉCRAN 1 : Coordonnées ───────────────────────────────────────────────
+    if (subScreen === 'contact') {
+      const contactValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && /^\+?[\d\s\-\.]{8,}$/.test(phone.trim());
+      return (
+        <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
+          <AppHeader onBack={()=>setSubScreen('calendar')} title="Rendez-vous" onHelp={()=>setSubScreen('summary')} />
+          <div style={{ flex:1, overflowY:'auto', padding:'0 24px' }}>
+            <div style={{ paddingTop:20, paddingBottom:40 }}>
+              <h2 style={{ fontFamily:'Albert Sans, sans-serif', fontSize:24, color:'rgba(255,255,255,0.95)', fontWeight:400, letterSpacing:'-0.02em', lineHeight:1.15, marginBottom:8 }}>Recevoir ma confirmation</h2>
+              <p style={{ fontFamily:'Questrial, sans-serif', fontSize:14, color:'rgba(255,255,255,0.72)', lineHeight:1.6, marginBottom:28 }}>Ces informations restent confidentielles et ne seront pas partagées sans votre accord.</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+                <div>
+                  <label style={{ display:'block', fontFamily:'Albert Sans, sans-serif', fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.75)', letterSpacing:'0.01em', marginBottom:8 }}>Email *</label>
+                  <input type="email" value={email} onChange={e=>{ setEmail(e.target.value); if(emailError) setEmailError(''); }} placeholder="votre@email.com" className={emailError?'input-error':''}
+                    style={{ width:'100%', height:52, padding:'0 18px', background:'rgba(255,255,255,0.06)', borderRadius:100, fontSize:15, color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', outline:'none', boxSizing:'border-box' }} />
+                  {emailError && <p style={{ fontSize:12, color:'rgba(255,100,100,0.80)', fontFamily:'Questrial, sans-serif', margin:'6px 0 0 16px' }}>{emailError}</p>}
+                </div>
+                <div>
+                  <label style={{ display:'block', fontFamily:'Albert Sans, sans-serif', fontSize:13, fontWeight:500, color:'rgba(255,255,255,0.75)', letterSpacing:'0.01em', marginBottom:8 }}>Téléphone *</label>
+                  <input type="tel" value={phone} onChange={e=>{ setPhone(e.target.value); if(phoneError) setPhoneError(''); }} placeholder="+33 6 ..." className={phoneError?'input-error':''}
+                    style={{ width:'100%', height:52, padding:'0 18px', background:'rgba(255,255,255,0.06)', borderRadius:100, fontSize:15, color:'rgba(255,255,255,0.88)', fontFamily:'Questrial, sans-serif', outline:'none', boxSizing:'border-box' }} />
+                  {phoneError && <p style={{ fontSize:12, color:'rgba(255,100,100,0.80)', fontFamily:'Questrial, sans-serif', margin:'6px 0 0 16px' }}>{phoneError}</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ padding:'16px 24px 32px', flexShrink:0 }}>
+            <button onClick={handleValidateContact} style={{ width:'100%', minHeight:56, background:contactValid?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.07)', color:contactValid?'#0b0b14':'rgba(255,255,255,0.35)', border:'none', borderRadius:100, fontSize:16, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:contactValid?'pointer':'default', letterSpacing:'-0.01em', transition:'all 0.2s' }}>Valider mes informations</button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div style={{ flex:1, display:'flex', flexDirection:'column', position:'relative', zIndex:1, overflowY:'hidden', overflowX:'visible' }}>
         <AppHeader onBack={onBack} title="Rendez-vous" />
@@ -2641,7 +2820,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           </div>
         </div>
         <div style={{ padding:'16px 24px 32px', flexShrink:0 }}>
-          <button onClick={()=>{ if(!sel) return; onConfirmBooking && onConfirmBooking({ therapistId:th.id, name:th.name, when:sel, type: th.online ? 'video' : 'cabinet', initials:th.initials, hue:th.hue }); setDone(true); }} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:sel?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.07)', color:sel?'#0b0b14':'rgba(255,255,255,0.40)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:sel?'pointer':'default', transition:'all 0.3s', letterSpacing:'-0.01em' }}>Confirmer le rendez-vous</button>
+          <button onClick={()=>{ if(!sel) return; setSubScreen('contact'); }} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:sel?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.07)', color:sel?'#0b0b14':'rgba(255,255,255,0.40)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:sel?'pointer':'default', transition:'all 0.3s', letterSpacing:'-0.01em' }}>Confirmer le rendez-vous</button>
         </div>
       </div>
     );
@@ -2735,15 +2914,19 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                     </div>
                     {/* Footer : CTA secondaire (upcoming) ou lien "Reprendre RDV" (past) */}
                     {!isPast ? (
-                      <div style={{ padding:'12px 16px 14px' }}>
-                        <button style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.10)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.92)', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:9, transition:'all 0.18s', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.16)'; }} onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.10)'; }}>
+                      <div style={{ padding:'12px 16px 20px', display:'flex', flexDirection:'column', gap:16 }}>
+                        <button style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.10)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Albert Sans, sans-serif', fontSize:15, fontWeight:500, color:'rgba(255,255,255,0.92)', cursor:'pointer', letterSpacing:'-0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:9, transition:'all 0.18s', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.16)'; }} onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.10)'; }}>
                           <span style={{ display:'flex', alignItems:'center', lineHeight:0 }}>{cfg.icon}</span>
                           {cfg.action}
                         </button>
+                        <button style={{ background:'none', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'4px 0', fontFamily:'Questrial, sans-serif', fontSize:13, color:'rgba(255,100,100,0.85)', letterSpacing:'0.01em', transition:'color 0.15s' }} onMouseEnter={function(e){ e.currentTarget.style.color='rgba(255,120,120,1)'; }} onMouseLeave={function(e){ e.currentTarget.style.color='rgba(255,100,100,0.85)'; }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Annuler ce rendez-vous
+                        </button>
                       </div>
                     ) : (
-                      <div style={{ padding:'0 16px 14px' }}>
-                        <button onClick={function(){ if(th2 && onBookTherapist) onBookTherapist(th2); else onGoMatching && onGoMatching(); }} style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.10)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Questrial, sans-serif', fontSize:15, fontWeight:700, color:'rgba(255,255,255,0.92)', cursor:'pointer', letterSpacing:'0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:9, transition:'all 0.18s', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.16)'; }} onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.10)'; }}>
+                      <div style={{ padding:'12px 16px 20px' }}>
+                        <button onClick={function(){ if(th2 && onBookTherapist) onBookTherapist(th2); else onGoMatching && onGoMatching(); }} style={{ width:'100%', minHeight:50, padding:'13px 18px', background:'rgba(255,255,255,0.10)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:100, fontFamily:'Albert Sans, sans-serif', fontSize:15, fontWeight:500, color:'rgba(255,255,255,0.92)', cursor:'pointer', letterSpacing:'-0.01em', display:'flex', alignItems:'center', justifyContent:'center', gap:9, transition:'all 0.18s', backdropFilter:'blur(14px)', WebkitBackdropFilter:'blur(14px)' }} onMouseEnter={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.16)'; }} onMouseLeave={function(e){ e.currentTarget.style.background='rgba(255,255,255,0.10)'; }}>
                           Prendre un nouveau RDV
                         </button>
                       </div>
@@ -2799,6 +2982,8 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [shaderWaveOffset, setShaderWaveOffset] = useState(HOME_WAVE_OFFSET);
     const [shaderTransitionEase, setShaderTransitionEase] = useState(0.055);
     const [blurPreload, setBlurPreload] = useState(false);
+    const [assessmentReturnTarget, setAssessmentReturnTarget] = useState(null); // null | 'booking'
+    const [bookingInitSubScreen, setBookingInitSubScreen] = useState(null);
     const shaderMoveTimer = useRef(null);
     const answersKey = JSON.stringify(answers);
     const pointIsComplete = QUESTIONS.every(q => answers[q.id]);
@@ -2889,7 +3074,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const handleEdit = useCallback((idx) => { const trimmed = {}; QUESTIONS.slice(0, idx).forEach(q => { if (answers[q.id]) trimmed[q.id] = answers[q.id]; }); setAnswers(trimmed); setStep(idx); setBlurPreload(false); setScreen('chat'); }, [answers]);
     const restart = () => { clearShaderMoveTimer(); setShaderTransitionEase(0.055); setShaderWaveOffset(HOME_WAVE_OFFSET); setScreen('home'); setStep(0); setAnswers({}); setBlurPreload(false); setGeneratedInsight(null); setGeneratedInsightKey(''); setTh(null); setExtraNote(''); setExtraChips([]); setAppointments(function(prev){ return prev.filter(function(a){ return a.status === 'past'; }); }); };
     const showTabbar = screen === 'hub' || screen === 'matching' || screen === 'appointments' || (screen === 'therapies' && !therapyDetailOpen);
-    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 0.72} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{(softenBackground || blurPreload) && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(88px) saturate(0.80)', WebkitBackdropFilter:'blur(88px) saturate(0.80)', background:'rgba(7,22,48,0.36)', animation: blurPreload && !softenBackground ? 'fadeIn 0.45s ease both' : 'none' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} onViewAppointment={bookedAppointment ? goToAppointments : undefined} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} onCancel={goToHub} onExiting={() => { if (step === QUESTIONS.length - 1) setBlurPreload(true); }} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} extraNote={extraNote} setExtraNote={setExtraNote} extraChips={extraChips} setExtraChips={setExtraChips} onContinue={()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} onSOS={()=>setSosOpen(true)} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);setTherapistFromScreen('matching');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'appointments' && <AppointmentsScreen appointments={appointments} onGoMatching={goToBookingHub} onBookTherapist={function(t){ setShaderForInnerPage(); setTh(t); setMainTab('booking'); setScreen('booking'); setTherapistFromScreen('appointments'); }} onViewTherapist={handleViewTherapistFromAppt} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen(therapistFromScreen === 'appointments' ? 'appointments' : 'matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={addAppointment} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToAppointments} onSOS={() => setSosOpen(true)} />}
+    return (<div style={{ display:'flex', flexDirection:'column', height:'100%', position:'relative', background:'#0b0b14' }}><ShaderCanvas opacity={screen === 'home' ? 0.6 : 0.72} waveYOffset={shaderWaveOffset} waveTransitionEase={shaderTransitionEase} />{(softenBackground || blurPreload) && <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0, backdropFilter:'blur(88px) saturate(0.80)', WebkitBackdropFilter:'blur(88px) saturate(0.80)', background:'rgba(7,22,48,0.36)', animation: blurPreload && !softenBackground ? 'fadeIn 0.45s ease both' : 'none' }}></div>}<StatusBar /><div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, position:'relative', zIndex:1 }}>{screen === 'home' && <HomeScreen onStart={startAssessmentFromHome} onLater={goToHubFromHome} />}{screen === 'hub' && <DashboardScreen answers={answers} bookedAppointment={bookedAppointment} hasViewedTherapist={hasViewedTherapist} onStartAssessment={openAssessment} onOpenSummary={()=>insight && setScreen('insight')} onGoTherapies={goToTherapies} onGoBooking={goToBookingHub} onViewAppointment={bookedAppointment ? goToAppointments : undefined} />}{screen === 'chat' && <ChatScreen step={step} answers={answers} onAnswer={handleAnswer} onEditStep={handleEdit} onCancel={assessmentReturnTarget === 'booking' ? ()=>{ setAssessmentReturnTarget(null); setScreen('booking'); } : goToHub} onExiting={() => { if (step === QUESTIONS.length - 1) setBlurPreload(true); }} />}{screen === 'insight' && insight && <InsightScreen answers={answers} insight={pointIsComplete ? generatedInsight : insight} extraNote={extraNote} setExtraNote={setExtraNote} extraChips={extraChips} setExtraChips={setExtraChips} onContinue={assessmentReturnTarget === 'booking' ? ()=>{ setAssessmentReturnTarget(null); setScreen('booking'); } : ()=>{ setShaderForInnerPage(); setMainTab('therapies'); setScreen('therapies'); }} continueLabel={assessmentReturnTarget === 'booking' ? 'Terminer ma prise de RDV' : undefined} onRestart={()=>{ setShaderForInnerPage(); setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setScreen('chat'); }} onBack={goToHub} />}{screen === 'therapies' && <TherapiesScreen insight={recommendationInsight} onContinue={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen('matching'); }} onBack={mainTab === 'therapies' ? undefined : (insight ? ()=>{ setShaderForInnerPage(); setScreen('insight'); } : undefined)} onAskQuestions={()=>{ setShaderForInnerPage(); setScreen('therapy-questions'); }} bottomInset={showTabbar ? 94 : 0} onDetailStateChange={setTherapyDetailOpen} />}{screen === 'therapy-questions' && <TherapyQuestionsScreen onBack={()=>setScreen('therapies')} onSOS={()=>setSosOpen(true)} />}{screen === 'matching' && <MatchingScreen insight={recommendationInsight} titleOverride={mainTab === 'booking' ? 'Prendre un RDV' : undefined} onSelect={t=>{setShaderForInnerPage();setTh(t);setScreen('therapist');setHasViewedTherapist(true);setTherapistFromScreen('matching');}} onBack={recommendationInsight && mainTab !== 'booking' ? ()=>setScreen('therapies') : undefined} bottomInset={showTabbar ? 94 : 0} />}{screen === 'appointments' && <AppointmentsScreen appointments={appointments} onGoMatching={goToBookingHub} onBookTherapist={function(t){ setShaderForInnerPage(); setTh(t); setMainTab('booking'); setBookingInitSubScreen(null); setAssessmentReturnTarget(null); setScreen('booking'); setTherapistFromScreen('appointments'); }} onViewTherapist={handleViewTherapistFromAppt} bottomInset={showTabbar ? 94 : 0} />}{screen === 'therapist' && therapist && <TherapistScreen therapist={therapist} onBook={()=>{ setShaderForInnerPage(); setBookingInitSubScreen(null); setAssessmentReturnTarget(null); setScreen('booking'); }} onBack={()=>{ setShaderForInnerPage(); setMainTab('booking'); setScreen(therapistFromScreen === 'appointments' ? 'appointments' : 'matching'); }} />}{screen === 'booking' && therapist && <BookingScreen therapist={therapist} onBack={()=>setScreen('therapist')} onRestart={goToHub} onConfirmBooking={addAppointment} insight={generatedInsight || insight} initialSubScreen={bookingInitSubScreen} onGoAssessment={()=>{ setStep(0); setAnswers({}); setGeneratedInsight(null); setGeneratedInsightKey(''); setAssessmentReturnTarget('booking'); setBookingInitSubScreen('summary'); setScreen('chat'); }} />}</div>{showTabbar && <MainTabBar active={mainTab} onHome={goToHub} onTherapies={goToTherapies} onBooking={goToAppointments} onSOS={() => setSosOpen(true)} />}
 {sosOpen && <SOSModal onClose={() => setSosOpen(false)} />}{menuOpen && (<div className="fade-in" onClick={()=>setMenu(false)} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.6)', zIndex:100, display:'flex' }}><div onClick={e=>e.stopPropagation()} style={{ width:260, height:'100%', background:'#13131e', padding:'60px 28px 40px', display:'flex', flexDirection:'column', gap:8, borderRight:'1px solid rgba(255,255,255,0.07)' }}><div style={{ fontFamily:'Albert Sans, sans-serif', fontSize:22, color:'rgba(255,255,255,0.85)', fontStyle:'italic', marginBottom:24, letterSpacing:'-0.02em' }}>claira</div>{['À propos','Confidentialité','Aide','Ressources d\'urgence'].map(l=>(<button key={l} style={{ background:'none', border:'none', textAlign:'left', padding:'12px 0', fontSize:14, color:'rgba(255,255,255,0.50)', fontFamily:'inherit', cursor:'pointer', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>{l}</button>))}<div style={{ marginTop:'auto', fontSize:11, color:'rgba(255,255,255,0.20)', lineHeight:1.6 }}>Claira n'est pas un service médical. En cas de détresse, contacte le 3114.</div></div></div>)}</div>);
   }
   window.Claira.App = App;
