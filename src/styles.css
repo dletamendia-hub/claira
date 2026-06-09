@@ -7,7 +7,7 @@ body { display: flex; align-items: center; justify-content: center; min-height: 
   border-radius: 44px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.7);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
   display: flex; flex-direction: column;
 }
 @media (max-height: 900px) { #root { height: 100vh; border-radius: 0; } body { background: #0b0b14; } }
