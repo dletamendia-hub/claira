@@ -2098,7 +2098,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
   // Mots-clés incontestables — déclenchement immédiat sans appel IA
   const CRISIS_KEYWORDS = [
-    'me tuer','me suicider','mettre fin à ma vie','en finir avec ma vie',
+    'me tuer','me suicider','me buter','mettre fin à ma vie','en finir avec ma vie',
     'me pendre','me jeter dans le vide','avaler des médicaments pour mourir',
     'me tirer une balle','mourir ce soir','mourir cette nuit','mourir aujourd\'hui',
     'go la mort','je veux mourir maintenant','j\'ai envie de mourir maintenant',
@@ -2122,7 +2122,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${window.__GROQ_KEY}` },
         body: JSON.stringify({
-          model:'llama-3.1-8b-instant',
+          model:'llama-3.3-70b-versatile',
           messages:[
             { role:'system', content:'Tu analyses si un message exprime une crise réelle et immédiate. Réponds uniquement avec {"crisis":true} ou {"crisis":false}.\n\nDéclenche {"crisis":true} si :\n- Pensées suicidaires actuelles ou intention de se blesser maintenant\n- Violence envers autrui avec une cible précise ET une temporalité concrète (ex: "je vais tuer Bernard ce soir")\n\nNe déclenche PAS pour :\n- Expressions de frustration sans cible+temps précis ("je vais le tuer", "je vais tuer ma tante")\n- Métaphores ("je veux mourir de honte", "je suis mort de rire")\n- Mentions au passé ou souffrance générale\n\nLa combinaison cible nommée + moment précis = intention sérieuse.' },
             { role:'user', content:text },
