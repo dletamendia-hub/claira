@@ -1634,7 +1634,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         </div>
         <p style={{ fontSize:14, lineHeight:1.6, color:'rgba(255,255,255,0.75)', marginBottom:14, textWrap:'pretty' }}>{item.desc}</p>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10 }}>
-          <span style={{ fontSize:12, fontWeight:700, color:'rgba(116,227,234,0.90)', background:'rgba(116,227,234,0.10)', border:'1px solid rgba(116,227,234,0.25)', borderRadius:999, padding:'7px 11px', fontFamily:'Questrial, sans-serif' }}>{item.duration}</span>
+          <span style={{ fontSize:12, fontWeight:500, color:'rgb(190,251,255,0.90)', background:'rgba(116,227,234,0.10)', border:'1px solid rgba(116,227,234,0.25)', borderRadius:999, padding:'7px 11px', fontFamily:'Questrial, sans-serif' }}>{item.duration}</span>
           <div style={{ display:'inline-flex', alignItems:'center', gap:8, fontSize:13, color:'rgba(255,255,255,0.86)', fontWeight:700, fontFamily:'Questrial, sans-serif' }}>
             En savoir plus
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -1673,7 +1673,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
 
             <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:28 }}>
               {[item.short, item.duration, ...item.tagline.split('·').map(s => s.trim())].filter(Boolean).slice(0, 4).map((chip, i) => (
-                <div key={i} style={{ padding:'7px 11px', borderRadius:999, background:'rgba(116,227,234,0.10)', border:'1px solid rgba(116,227,234,0.25)', color:'rgba(116,227,234,0.90)', fontSize:12, fontWeight:700, fontFamily:'Questrial, sans-serif', letterSpacing:'0.01em', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
+                <div key={i} style={{ padding:'7px 11px', borderRadius:999, background:'rgba(116,227,234,0.10)', border:'1px solid rgba(116,227,234,0.25)', color:'rgb(190,251,255,0.90)', fontSize:12, fontWeight:500, fontFamily:'Questrial, sans-serif', letterSpacing:'0.01em', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }}>
                   {chip}
                 </div>
               ))}
@@ -2082,7 +2082,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                       </div>
                       <div style={{ gridColumn:'2 / -1', display:'flex', flexWrap:'nowrap', gap:6, marginTop:2 }}>
                         {th.specialty.split(' · ').slice(0,3).map(function(tag){ return (
-                          <span key={tag} style={{ fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.82)', background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:999, padding:'5px 9px', letterSpacing:'0.01em', fontFamily:'Questrial, sans-serif', whiteSpace:'nowrap' }}>{tag}</span>
+                          <span key={tag} style={{ fontSize:11, fontWeight:500, color:'rgba(255,255,255,0.82)', background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:999, padding:'5px 9px', letterSpacing:'0.01em', fontFamily:'Questrial, sans-serif', whiteSpace:'nowrap' }}>{tag}</span>
                         ); })}
                       </div>
                     </div>
