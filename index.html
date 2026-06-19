@@ -2149,12 +2149,30 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
     const [voiceMode, setVoiceMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [crisisDetected, setCrisisDetected] = useState(false);
+    const [streamingMsg, setStreamingMsg] = useState('');
+    const [isStreaming, setIsStreaming] = useState(false);
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
 
     useEffect(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }, [messages, loading]);
+    }, [messages, loading, streamingMsg]);
+
+    const streamAnswer = (answer, next) => {
+      setIsStreaming(true);
+      setStreamingMsg('');
+      let i = 0;
+      const interval = setInterval(() => {
+        i += 3;
+        setStreamingMsg(answer.slice(0, i));
+        if (i >= answer.length) {
+          clearInterval(interval);
+          setIsStreaming(false);
+          setStreamingMsg('');
+          setMessages([...next, { role:'assistant', content:answer }]);
+        }
+      }, 16);
+    };
 
 
     const send = async (text) => {
@@ -2174,7 +2192,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           body: JSON.stringify({
             model:'llama-3.3-70b-versatile',
             messages:[
-              { role:'system', content:"Tu es Claira, un compagnon bienveillant intégré dans une application d'orientation thérapeutique. La personne qui te parle est en train de réfléchir à entamer une thérapie — c'est souvent un moment de vulnérabilité et de courage. Ton rôle est de l'accompagner avec chaleur, sans la brusquer.\n\nTon et posture :\n- Empathique et chaleureux, comme un ami bien informé qui prend le temps d'écouter\n- Accessible : pas de jargon, des mots simples, des phrases courtes\n- Rassurant sans être condescendant — tu valides ce que la personne ressent\n- Tu tutois l'utilisateur naturellement\n- Tu n'es pas un thérapeute, tu ne poses pas de diagnostic\n\nComportement clé — poser des questions de suivi :\n- Si tu manques d'informations pour répondre précisément, pose UNE question simple pour mieux aider. Exemples :\n  · Pour les tarifs : demande la ville ou région\n  · Pour la fréquence : demande ce que la personne cherche (soutien régulier ou ponctuel)\n  · Pour le choix d'un thérapeute : demande si elle a déjà essayé ou ce qui l'a freiné avant\n- Ne pose qu'une seule question à la fois, à la fin de ta réponse\n- Si tu as assez d'info, réponds directement sans poser de question\n\nRègles de format :\n- Maximum 3 phrases au total, jamais plus\n- Pas de listes, pas de titres, pas de markdown\n- Saute une ligne avant ta question de relance pour aérer la réponse\n- Sois direct et chaleureux — va à l'essentiel\n- La réponse doit donner envie de continuer la conversation\n\nEmojis :\n- Tu peux utiliser UN seul emoji pertinent par réponse, quand le ton est léger ou informatif\n- N'utilise JAMAIS d'emoji quand la personne se livre, exprime une douleur, parle d'un sujet difficile (anxiété, deuil, relation toxique, burn-out, solitude, souffrance…) ou quand le ton est sérieux — dans ces cas, zéro emoji" },
+              { role:'system', content:"Tu es Claira, un compagnon bienveillant intégré dans une application d'orientation thérapeutique. La personne qui te parle est en train de réfléchir à entamer une thérapie — c'est souvent un moment de vulnérabilité et de courage. Ton rôle est de l'accompagner avec chaleur, sans la brusquer.\n\nTon et posture :\n- Empathique et chaleureux, comme un ami bien informé qui prend le temps d'écouter\n- Accessible : pas de jargon, des mots simples, des phrases courtes\n- Rassurant sans être condescendant — tu valides ce que la personne ressent\n- Tu tutois l'utilisateur naturellement\n- Tu n'es pas un thérapeute, tu ne poses pas de diagnostic\n\nComportement clé — poser des questions de suivi :\n- Si tu manques d'informations pour répondre précisément, pose UNE question simple pour mieux aider. Exemples :\n  · Pour les tarifs : demande la ville ou région\n  · Pour la fréquence : demande ce que la personne cherche (soutien régulier ou ponctuel)\n  · Pour le choix d'un thérapeute : demande si elle a déjà essayé ou ce qui l'a freiné avant\n- Ne pose qu'une seule question à la fois, à la fin de ta réponse\n- Si tu as assez d'info, réponds directement sans poser de question\n\nRègles de format :\n- Maximum 3 phrases au total, jamais plus\n- Pas de titres. Tu peux utiliser une liste à puces si la réponse s'y prête (plusieurs options, étapes, tarifs…)\n- Mets les informations clés en **gras**\n- Saute une ligne avant ta question de relance pour aérer la réponse\n- Sois direct et chaleureux — va à l'essentiel\n- La réponse doit donner envie de continuer la conversation\n\nEmojis :\n- Tu peux utiliser UN seul emoji pertinent par réponse, quand le ton est léger ou informatif\n- N'utilise JAMAIS d'emoji quand la personne se livre, exprime une douleur, parle d'un sujet difficile (anxiété, deuil, relation toxique, burn-out, solitude, souffrance…) ou quand le ton est sérieux — dans ces cas, zéro emoji" },
               ...next,
             ],
             max_tokens:320,
@@ -2183,11 +2201,11 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
         });
         const data = await res.json();
         const answer = data.choices?.[0]?.message?.content || "Je n'ai pas pu répondre, réessaie dans un instant.";
-        setMessages([...next, { role:'assistant', content:answer }]);
-      } catch(e) {
-        setMessages(prev => [...prev, { role:'assistant', content:"Une erreur s'est produite. Vérifie ta connexion et réessaie." }]);
-      } finally {
         setLoading(false);
+        streamAnswer(answer, next);
+      } catch(e) {
+        setLoading(false);
+        setMessages(prev => [...prev, { role:'assistant', content:"Une erreur s'est produite. Vérifie ta connexion et réessaie." }]);
       }
     };
 
@@ -2212,7 +2230,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
           )}
 
           {messages.map((m, i) => (
-            <div key={i} style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start', animation:'msgIn 0.38s cubic-bezier(.22,1,.36,1) both' }}>
+            <div key={i} style={{ display:'flex', justifyContent: m.role==='user' ? 'flex-end' : 'flex-start', animation: m.role==='user' ? 'msgIn 0.38s cubic-bezier(.22,1,.36,1) both' : 'none' }}>
               {m.role === 'user' ? (
                 <div style={{ maxWidth:'84%', background:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,0.92)', borderRadius:24, padding:'12px 15px', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.65 }}>
                   {m.content.split('\n').map((line, li) => (
@@ -2221,13 +2239,35 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
                 </div>
               ) : (
                 <div style={{ maxWidth:'90%', color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.75, padding:'4px 0' }}>
-                  {m.content.split('\n').map((line, li) => (
-                    <React.Fragment key={li}>{line}{li < m.content.split('\n').length - 1 && <br/>}</React.Fragment>
-                  ))}
+                  {m.content.split('\n').map((line, li) => {
+                    const parts = line.split(/\*\*(.+?)\*\*/g);
+                    return (
+                      <React.Fragment key={li}>
+                        {parts.map((p, pi) => pi % 2 === 1 ? <strong key={pi} style={{ fontWeight:700, color:'#49caa6fa' }}>{p}</strong> : p)}
+                        {li < m.content.split('\n').length - 1 && <br/>}
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
               )}
             </div>
           ))}
+
+          {isStreaming && (
+            <div style={{ display:'flex', justifyContent:'flex-start' }}>
+              <div style={{ maxWidth:'90%', color:'rgba(255,255,255,0.82)', fontFamily:'Questrial, sans-serif', fontSize:15, lineHeight:1.75, padding:'4px 0' }}>
+                {streamingMsg.split('\n').map((line, li) => {
+                  const parts = line.split(/\*\*(.+?)\*\*/g);
+                  return (
+                    <React.Fragment key={li}>
+                      {parts.map((p, pi) => pi % 2 === 1 ? <strong key={pi} style={{ fontWeight:700, color:'#49caa6fa' }}>{p}</strong> : p)}
+                      {li < streamingMsg.split('\n').length - 1 && <br/>}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {loading && (
             <div className="fade-in" style={{ display:'flex', justifyContent:'flex-start' }}>
@@ -2479,7 +2519,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             <div style={{ height:190 }}></div>
           </div>
         </div>
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'14px 24px 28px', background:'linear-gradient(to top, #0b0b14 65%, transparent)' }}>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'14px 24px 28px', background:'transparent' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
             <button onClick={onBook} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.18)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'-0.01em' }} onMouseEnter={e=>{ e.currentTarget.style.background='white'; e.currentTarget.style.transform='translateY(-1px)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.92)'; e.currentTarget.style.transform='translateY(0)'; }}>Programmer une visio</button>
             <button onClick={onBook} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,1)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', transition:'all 0.2s', letterSpacing:'-0.01em' }} onMouseEnter={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.16)'; }} onMouseLeave={e=>{ e.currentTarget.style.background='rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.10)'; }}>Prendre un rendez-vous en cabinet</button>
@@ -2937,7 +2977,7 @@ window.Claira.generateAIInsight = async function generateAIInsight(answers) {
             </div>
           )}
         </div>
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:`16px 24px ${(bottomInset||0)+16}px`, background:'linear-gradient(to top, rgba(11,11,20,0.98) 55%, rgba(11,11,20,0))', pointerEvents:'none' }}>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:`16px 24px ${(bottomInset||0)+16}px`, background:'transparent', pointerEvents:'none' }}>
           <button onClick={onGoMatching} style={{ width:'100%', minHeight:64, padding:'17px 24px', background:'rgba(255,255,255,0.92)', color:'#0b0b14', border:'1px solid rgba(255,255,255,0.10)', borderRadius:100, fontSize:17, fontWeight:500, fontFamily:'Albert Sans, sans-serif', cursor:'pointer', letterSpacing:'-0.01em', pointerEvents:'all', transition:'all 0.2s' }}>
             Prendre un rendez-vous
           </button>
